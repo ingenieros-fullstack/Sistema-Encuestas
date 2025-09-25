@@ -61,7 +61,7 @@ router.get("/me", authMiddleware(), (req, res) => {
 // ======================================
 router.get("/admin-only", authMiddleware(["admin"]), (req, res) => {
   res.json({
-    message: "Bienvenido administrador 🚀",
+    message: "Bienvenido admin 🚀",
     usuario: req.user,
   });
 });
