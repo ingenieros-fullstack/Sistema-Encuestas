@@ -7,42 +7,40 @@ export default function AdminDashboard() {
   const rol = localStorage.getItem("rol") || "admin";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navbar arriba */}
+    <div className="bg-light min-vh-100 d-flex flex-column">
       <Navbar rol={rol} nombre={nombre} />
 
-      {/* Contenido */}
-      <main className="flex-1 p-6 bg-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">
-            Bienvenido {nombre}, este es tu Dashboard de {rol.toUpperCase()}
-          </h1>
-        </div>
+      <main className="admin-dashboard-wrapper">
+  {/* Título centrado */}
+  <h1 className="admin-title mb-5">
+    Bienvenido <span style={{ color: '#4f46e5' }}>{nombre}</span>, este es tu Dashboard de <span className="text-uppercase">{rol}</span>
+  </h1>
 
-        {/* Tarjetas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <CardModule
-            icon={<FaUsers size={40} className="text-blue-600" />}
-            title="Gestión de Usuarios"
-            link="/admin/usuarios"
-          />
-          <CardModule
-            icon={<FaFileAlt size={40} className="text-green-600" />}
-            title="Crear Formulario"
-            link="/admin/formulario/crear"
-          />
-          <CardModule
-            icon={<FaFolderOpen size={40} className="text-yellow-600" />}
-            title="Gestionar Formularios"
-            link="/admin/formularios"
-          />
-          <CardModule
-            icon={<FaChartBar size={40} className="text-purple-600" />}
-            title="Reportes"
-            link="/admin/reportes"
-          />
-        </div>
-      </main>
+  {/* Tarjetas en grilla */}
+  <div className="dashboard-cards-container">
+    <CardModule
+      icon={<FaUsers className="dashboard-card-icon text-primary" />}
+      title="Gestión de Usuarios"
+      link="/admin/usuarios"
+    />
+    <CardModule
+      icon={<FaFileAlt className="dashboard-card-icon text-success" />}
+      title="Crear Formulario"
+      link="/admin/formulario/crear"
+    />
+    <CardModule
+      icon={<FaFolderOpen className="dashboard-card-icon text-warning" />}
+      title="Gestionar Formularios"
+      link="/admin/formularios"
+    />
+    <CardModule
+      icon={<FaChartBar className="dashboard-card-icon text-info" />}
+      title="Reportes"
+      link="/admin/reportes"
+    />
+  </div>
+</main>
+
     </div>
   );
 }

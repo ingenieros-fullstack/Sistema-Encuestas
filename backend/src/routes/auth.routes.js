@@ -63,4 +63,12 @@ router.get("/me", authMiddleware(), (req, res) => {
   });
 });
 
+// ======================================
+// LOGOUT
+// ======================================
+router.post("/logout", (req, res) => {
+  // En un futuro podrías llevar un control de tokens inválidos en BD si quieres
+  res.json({ message: "Sesión cerrada correctamente" });
+});
+
 export default router;
