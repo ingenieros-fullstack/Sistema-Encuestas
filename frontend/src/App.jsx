@@ -1,25 +1,26 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login.jsx";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
+import EmpleadoDashboard from "./pages/EmpleadoDashboard";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
 
-// Dashboards mínimos de prueba
-function AdminDashboard() {
-  return <h1>Bienvenido al Dashboard Admin 🚀</h1>;
-}
-function UsuarioDashboard() {
-  return <h1>Bienvenido al Dashboard Usuario 👤</h1>;
-}
-
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        {/* Página inicial = login */}
+        {/* Página de login */}
         <Route path="/" element={<Login />} />
 
         {/* Dashboards */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/usuario/dashboard" element={<UsuarioDashboard />} />
+        <Route path="/empleado/dashboard" element={<EmpleadoDashboard />} />
+        <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
+
+        {/* Redirección default */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
+
+export default App;

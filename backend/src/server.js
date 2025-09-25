@@ -3,10 +3,14 @@ import dotenv from "dotenv";
 import cors from "cors";
 import sequelize from "./config/db.js";
 
+// Rutas
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
-import usuarioRoutes from "./routes/usuario.routes.js";
-import { seedAdmin } from "./controllers/seeder.js";
+import empleadoRoutes from "./routes/empleado.routes.js";
+import supervisorRoutes from "./routes/supervisor.routes.js";
+
+// Seeder
+import { seedAdminYUsuario } from "./controllers/seeder.js";
 
 dotenv.config();
 
@@ -42,8 +46,9 @@ app.get("/health", (_req, res) => {
 // Rutas principales
 // ==========================
 app.use("/auth", authRoutes);
-app.use(adminRoutes);
-app.use(usuarioRoutes);
+app.use("/admin", adminRoutes);
+app.use("/empleado", empleadoRoutes);
+app.use("/supervisor", supervisorRoutes);
 
 // ==========================
 // 404 handler
@@ -62,8 +67,8 @@ const connectWithRetry = async () => {
     await sequelize.authenticate();
     console.log("✅ Conexión a BD exitosa");
 
-    // Ejecuta seeder para asegurar admin
-    await seedAdmin();
+    // Ejecuta seeder para asegurar admin, empleado y supervisor
+    await seedAdminYUsuario();
   } catch (error) {
     console.error("❌ Error de conexión a BD:", error.message);
     console.log("⏳ Reintentando en 5 segundos...");

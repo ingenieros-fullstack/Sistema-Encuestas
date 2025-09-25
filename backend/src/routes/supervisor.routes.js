@@ -3,10 +3,10 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// Dashboard Admin
-router.get("/dashboard", authMiddleware(["admin"]), (req, res) => {
+// Dashboard Supervisor
+router.get("/dashboard", authMiddleware(["supervisor"]), (req, res) => {
   res.json({
-    message: "Bienvenido al dashboard de ADMIN 🚀",
+    message: "Bienvenido al dashboard de SUPERVISOR 🛠️",
     usuario: req.user,
   });
 });
