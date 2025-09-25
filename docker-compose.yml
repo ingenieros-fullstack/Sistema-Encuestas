@@ -1,0 +1,57 @@
+services:
+  # ------------------------------
+  # Base de Datos (MySQL)
+  # ------------------------------
+  db:
+    image: mysql:8.0
+    container_name: encuesta_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql_init:/docker-entrypoint-initdb.d
+
+  # ------------------------------
+  # Backend
+  # ------------------------------
+  backend:
+    build: ./backend
+    container_name: encuesta_backend
+    restart: always
+    command: npm run dev
+    ports:
+      - "4000:4000"
+    environment:
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_PORT: 3306
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules   # evita conflictos con node_modules
+    depends_on:
+      - db
+
+  # ------------------------------
+  # Frontend
+  # ------------------------------
+  frontend:
+    build: ./frontend
+    container_name: encuesta_frontend
+    restart: always
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules   # evita conflictos con node_modules
+    depends_on:
+      - backend
