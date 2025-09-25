@@ -1,6 +1,3 @@
-¡Perfecto 🚀! Ahora que ya tienes el `docker-compose.yml`, el `.env`, y las carpetas (`mysql_data`, `mysql_init`, `backend`, `frontend`), te explico **paso a paso cómo levantar los contenedores**.
-
----
 
 # 🐳 Levantar los contenedores con Docker Compose
 
