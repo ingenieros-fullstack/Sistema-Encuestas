@@ -54,7 +54,7 @@ export default function Login() {
         onSubmit={handleLogin}
         style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "300px" }}
       >
-        <h2>Login</h2>
+        <h2>Logon</h2>
         <input
           type="email"
           placeholder="Correo"
