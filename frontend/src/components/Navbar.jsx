@@ -11,39 +11,43 @@ export default function Navbar({ rol, nombre }) {
   };
 
   return (
-    <nav
-      style={{
-        background: "#1e293b", // slate-800
-        padding: "1rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        color: "white",
-      }}
-    >
-      <div>
-        <h2>Panel {rol.toUpperCase()}</h2>
-      </div>
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        <span>👤 {nombre}</span>
-        {rol === "admin" && <Link to="/admin/dashboard">Dashboard</Link>}
-        {rol === "empleado" && <Link to="/empleado/dashboard">Dashboard</Link>}
-        {rol === "supervisor" && (
-          <Link to="/supervisor/dashboard">Dashboard</Link>
-        )}
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "#ef4444", // red-500
-            color: "white",
-            border: "none",
-            padding: "0.5rem 1rem",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Logout
-        </button>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+      <div className="container-fluid">
+        {/* Left: Título */}
+        <span className="navbar-brand fw-bold">Panel {rol.toUpperCase()}</span>
+
+        {/* Right: contenido del navbar */}
+        <div className="d-flex align-items-center ms-auto gap-3">
+          {/* Nombre de usuario */}
+          <span className="text-white">
+            👤 <strong>{nombre}</strong>
+          </span>
+
+          {/* Link al Dashboard */}
+          {rol === "admin" && (
+            <Link to="/admin/dashboard" className="nav-link text-info">
+              Dashboard
+            </Link>
+          )}
+          {rol === "empleado" && (
+            <Link to="/empleado/dashboard" className="nav-link text-info">
+              Dashboard
+            </Link>
+          )}
+          {rol === "supervisor" && (
+            <Link to="/supervisor/dashboard" className="nav-link text-info">
+              Dashboard
+            </Link>
+          )}
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="btn btn-outline-danger btn-sm"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </nav>
   );

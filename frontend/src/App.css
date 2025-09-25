@@ -1,14 +1,22 @@
-/* Fondo con gradiente moderno */
+/* === RESET + GLOBAL === */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+}
+
+/* === LOGIN STYLES === */
 .login-background {
   background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Tarjeta de login con efecto glass */
 .login-card {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
@@ -21,20 +29,17 @@
   color: #fff;
 }
 
-/* Logo centrado */
 .login-card img {
   width: 60px;
   margin-bottom: 1rem;
 }
 
-/* Título */
 .login-card h2 {
   font-size: 1.1rem;
   margin-bottom: 1.8rem;
   color: #ffffff;
 }
 
-/* Inputs */
 .login-card input[type="email"],
 .login-card input[type="password"] {
   width: 100%;
@@ -48,12 +53,10 @@
   outline: none;
 }
 
-/* Placeholder */
 .login-card input::placeholder {
   color: #f0f0f0;
 }
 
-/* Botón de login */
 .login-card button {
   width: 100%;
   padding: 12px;
@@ -70,9 +73,180 @@
   background: linear-gradient(to right, #00aaff, #0057e7);
 }
 
-/* Error message */
 .login-card p {
   color: #ffb3b3;
   font-size: 0.9rem;
   margin-top: 1rem;
+}
+
+/* === NAVBAR STYLES === */
+.navbar {
+  background-color: #1e293b !important;
+  padding: 1rem 2rem;
+}
+
+.navbar .navbar-brand {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.navbar .user-info {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.navbar .nav-link {
+  color: #60a5fa !important;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0 0.5rem;
+}
+
+.navbar .nav-link:hover {
+  color: #93c5fd !important;
+  text-decoration: underline;
+}
+
+/* Botón plano moderno (Logout) */
+.btn-logout {
+  background-color: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+/* === DASHBOARD STYLES === */
+.admin-dashboard-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.admin-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 40px;
+  color: #111827;
+}
+
+.admin-title span {
+  color: #6366f1; /* Indigo-500 */
+}
+
+/* Tarjetas Dashboard */
+.dashboard-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.dashboard-card {
+  width: 220px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  text-decoration: none;
+  color: #212529;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.dashboard-card-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+/* ==== MODAL POPUP FIXED CENTER ==== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-centered {
+  background-color: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Optional animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+
+.modal-header {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.usuarios-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.usuarios-grid-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
 }
