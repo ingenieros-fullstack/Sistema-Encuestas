@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "/src/App.css";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
@@ -23,21 +24,16 @@ export default function Login() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        console.error("Login error:", res.status, data);
         setMensaje(data.message || "Error en login");
         return;
       }
 
-      // Guardar datos en localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("rol", data.rol || "");
       localStorage.setItem("nombre", data.nombre || "");
 
-      // Redirigir según rol o nextPath enviado por el backend
-      let target = "/";
-      if (data.nextPath) {
-        target = data.nextPath;
-      } else {
+      let target = data.nextPath || "/";
+      if (!data.nextPath) {
         switch (data.rol) {
           case "admin":
             target = "/admin/dashboard";
@@ -53,10 +49,8 @@ export default function Login() {
         }
       }
 
-      setMensaje(`Bienvenido ${data.nombre} (${data.rol})`);
       navigate(target, { replace: true });
     } catch (err) {
-      console.error("Fetch falló:", err);
       setMensaje("Error de conexión con el backend");
     } finally {
       setLoading(false);
@@ -64,48 +58,42 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-800">
-          Inicio de sesión
-        </h2>
-
-        <input
-          type="email"
-          placeholder="Correo"
-          value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="login-background">
+      <div className="login-card">
+        <img
+          src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp"
+          alt="Logo"
+          className="logo-img"
         />
+        <h2 className="login-title">Bienvenido al Sistema de Encuestas</h2>
 
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            className="form-control"
+            placeholder="Correo electrónico"
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            className="form-control"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full bg-blue-600 text-white py-2 rounded font-semibold transition hover:bg-blue-700 ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {loading ? "Ingresando..." : "Ingresar"}
-        </button>
+          <button type="submit" className="btn btn-login mt-3" disabled={loading}>
+            {loading ? "Ingresando..." : "Ingresar"}
+          </button>
 
-        {mensaje && (
-          <p className="text-sm text-center text-red-500 mt-2">{mensaje}</p>
-        )}
-      </form>
-    </div>
-  );
-
+          {mensaje && (
+            <div className="alert alert-danger">{mensaje}</div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
 }
