@@ -35,14 +35,13 @@ CREATE TABLE empresas (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índice para búsquedas rápidas por nombre
 CREATE INDEX idx_empresas_nombre ON empresas (nombre);
 
 -- =========================================
--- Tabla: usuarios
+-- TABLA: data_empleados
 -- =========================================
-CREATE TABLE usuarios (
-  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE data_empleados (
+  id_data INT AUTO_INCREMENT PRIMARY KEY,
   id_empresa INT NOT NULL,
   numero_empleado VARCHAR(20) NOT NULL UNIQUE,
   nombre VARCHAR(100) NOT NULL,
@@ -51,25 +50,41 @@ CREATE TABLE usuarios (
   sexo ENUM('M','F','O'),
   fecha_nacimiento DATE,
   fecha_ingreso DATE,
-  correo_electronico VARCHAR(100) NOT NULL,
   centro_trabajo VARCHAR(100),
   departamento VARCHAR(100),
   grado_estudios VARCHAR(50),
   turno VARCHAR(20),
   supervisor VARCHAR(100),
-  password VARCHAR(255) NOT NULL,
-  rol ENUM('admin','supervisor','empleado') NOT NULL,
-  estatus TINYINT(1) DEFAULT 1,
   telefono VARCHAR(20),
   foto VARCHAR(200),
+  correo_electronico VARCHAR(100) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
 );
 
--- Índices
-CREATE INDEX idx_usuarios_empresa ON usuarios (id_empresa);
-CREATE INDEX idx_usuarios_numero ON usuarios (numero_empleado);
+CREATE INDEX idx_data_empleados_empresa ON data_empleados (id_empresa);
+CREATE INDEX idx_data_empleados_numero ON data_empleados (numero_empleado);
+CREATE INDEX idx_data_empleados_correo ON data_empleados (correo_electronico);
+
+-- =========================================
+-- TABLA: usuarios
+-- =========================================
+CREATE TABLE usuarios (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  id_data INT NOT NULL,
+  correo_electronico VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  rol ENUM('admin','supervisor','empleado') NOT NULL DEFAULT 'empleado',
+  estatus TINYINT(1) DEFAULT 1,
+  must_change_password TINYINT(1) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_data) REFERENCES data_empleados(id_data) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_usuarios_data ON usuarios (id_data);
 CREATE INDEX idx_usuarios_correo ON usuarios (correo_electronico);
+CREATE INDEX idx_usuarios_rol ON usuarios (rol);
+CREATE INDEX idx_usuarios_must_change ON usuarios (must_change_password);
 
 -- =========================================
 -- Tabla: formularios
@@ -185,12 +200,5 @@ CREATE TABLE qr_formularios (
 );
 
 CREATE INDEX idx_qr_formulario ON qr_formularios (id_formulario);
-
--- =========================================
--- Datos iniciales
--- =========================================
-
--- Empresa demo
-INSERT INTO empresas (nombre, direccion, contacto, telefono, correo_electronico)
-VALUES ('Empresa Demo', 'Direccion Demo', 'Contacto Demo', '123456789', 'empresa@demo.com');
-
+CREATE INDEX idx_asignaciones_usuario_formulario ON asignaciones (id_usuario, id_formulario);
+CREATE INDEX idx_respuestas_asignacion_pregunta ON respuestas (id_asignacion, id_pregunta);

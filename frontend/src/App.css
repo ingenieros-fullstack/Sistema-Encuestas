@@ -7,6 +7,13 @@ html, body, #root {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
 }
+/* 🔓 Elimina fondo negro del body */
+html,
+body {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 
 /* === LOGIN STYLES === */
 .login-background {
@@ -188,19 +195,6 @@ html, body, #root {
   font-size: 2rem;
   margin-bottom: 10px;
 }
-/* ==== MODAL POPUP FIXED CENTER ==== */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-}
 
 .modal-centered {
   background-color: #fff;
@@ -250,3 +244,183 @@ html, body, #root {
   justify-content: center;
   gap: 2rem;
 }
+
+.bg-custom {
+  background: linear-gradient(
+    90deg,
+    #000814 0%,
+    #001D3D 50%,
+    #003566 100%
+  ) !important;
+  color: white;
+}
+
+/* Color personalizado para íconos o texto secundarios */
+.text-custom {
+  color: #FFD60A !important; /* Amarillo claro */
+}
+
+/* Línea amarilla inferior */
+.navbar.bg-custom {
+  border-bottom: 4px solid #031924; /* Amarillo fuerte de tu paleta */
+}
+
+.custom-modal {
+  background: rgba(0, 8, 20, 0.7); /* Transparente con tono azul oscuro */
+  border-radius: 16px;
+  width: 90%;
+  max-width: 450px;
+  backdrop-filter: blur(12px); /* Desenfoque interior */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease;
+  border-bottom: 4px solid #FFC300;
+  color: #fff;
+}
+
+/* ===== BACKDROP: Fondo semi-transparente + desenfoque ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(255, 241, 241, 0.2); /* Solo un velo oscuro */
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fadeIn 0.3s ease;
+}
+
+
+
+/* ===== MODAL: Ventana principal estilo glassmorphism ===== */
+.custom-modal {
+  background: rgba(0, 8, 20, 0.7); /* Fondo translúcido azul oscuro */
+  backdrop-filter: blur(12px); /* Desenfoque interno */
+  border-radius: 16px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 4px solid #FFC300; /* Línea inferior amarilla */
+  color: #fff;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== HEADER ===== */
+.custom-modal-header {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Botón de cerrar personalizado */
+.btn-close-custom {
+  background: none;
+  border: none;
+  color: #ffc300;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.btn-close-custom:hover {
+  color: #FFD60A;
+}
+
+/* ===== BODY ===== */
+.custom-modal-body {
+  padding: 1.5rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.custom-modal-body strong {
+  color: #FFD60A;
+}
+
+/* ===== FOOTER ===== */
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== BOTONES ===== */
+
+/* Botón cancelar */
+.custom-modal-footer .btn-outline-light {
+  border-color: #ccc;
+  color: #fff;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.custom-modal-footer .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Botón subir archivo */
+.custom-modal-footer .btn-warning {
+  background-color: #FFC300;
+  color: #000814;
+  font-weight: bold;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.custom-modal-footer .btn-warning:hover {
+  background-color: #FFD60A;
+}
+.modal-centered {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 90%;   /* Aumenta el ancho de la modal */
+  width: 100%;      /* Ocupa todo el ancho disponible */
+  margin: auto;
+  padding: 0;
+  box-shadow: 0 0 25px rgba(0,0,0,0.3);
+}
+
+.modal-xl {
+  max-width: 1100px;  /* Ajusta el ancho máximo */
+}
+
+.modal-body {
+  max-height: 70vh;   /* Para que no sea demasiado alta */
+  overflow-y: auto;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+}
+
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
