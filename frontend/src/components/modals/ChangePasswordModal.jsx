@@ -1,116 +1,103 @@
-// src/components/modals/ChangePasswordModal.jsx
-import { useState } from "react";
-
-export default function ChangePasswordModal({ onClose, correo }) {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const handleSubmit = async () => {
-    if (!password || !confirmPassword) {
-      setError("Todos los campos son obligatorios");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
-    setError("");
-    setLoading(true);
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:4000/auth/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ correo, nuevaPassword: password }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setSuccess("Contraseña actualizada con éxito. Vuelva a iniciar sesión.");
-        setTimeout(() => {
-          onClose();
-          localStorage.removeItem("token");
-          window.location.href = "/login"; // forzar re-login
-        }, 2000);
-      } else {
-        setError(data.message || "Error al cambiar contraseña");
-      }
-    } catch (err) {
-      setError("Error de conexión: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      className="modal-backdrop"
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.3)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 2000,
-      }}
-    >
-      <div
-        className="modal-content p-4"
-        style={{
-          background: "#fff",
-          borderRadius: "12px",
-          width: "400px",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.3)",
-        }}
-      >
-        <h5 className="mb-3 text-center">Cambio de Contraseña</h5>
-        <p className="text-muted" style={{ fontSize: "0.9rem" }}>
-          Debe actualizar su contraseña para continuar.
-        </p>
-
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
-
-        <div className="mb-3">
-          <label className="form-label">Nueva contraseña</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Confirmar contraseña</label>
-          <input
-            type="password"
-            className="form-control"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-
-        <div className="d-flex justify-content-end gap-2">
-          <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
-            Cancelar
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "Guardando..." : "Actualizar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+import { useState } from "react";  
+import { useNavigate } from "react-router-dom";  
+import "/src/App.css";  
+  
+export default function ChangePassword() {  
+  const [currentPassword, setCurrentPassword] = useState("");  
+  const [newPassword, setNewPassword] = useState("");  
+  const [confirmPassword, setConfirmPassword] = useState("");  
+  const [mensaje, setMensaje] = useState("");  
+  const [loading, setLoading] = useState(false);  
+  const navigate = useNavigate();  
+  
+  const handleChangePassword = async (e) => {  
+    e.preventDefault();  
+    setMensaje("");  
+      
+    if (newPassword !== confirmPassword) {  
+      setMensaje("Las contraseñas no coinciden");  
+      return;  
+    }  
+  
+    if (newPassword.length < 6) {  
+      setMensaje("La nueva contraseña debe tener al menos 6 caracteres");  
+      return;  
+    }  
+  
+    setLoading(true);  
+    try {  
+      const token = localStorage.getItem("token");  
+      const res = await fetch("http://localhost:4000/auth/change-password", {  
+        method: "POST",  
+        headers: {  
+          "Content-Type": "application/json",  
+          "Authorization": `Bearer ${token}`  
+        },  
+        body: JSON.stringify({ currentPassword, newPassword }),  
+      });  
+  
+      const data = await res.json();  
+  
+      if (res.ok) {  
+        localStorage.setItem("mustChangePassword", "false");  
+        const rol = localStorage.getItem("rol");  
+        const nextPath = rol === "empleado" ? "/empleado/dashboard" : "/supervisor/dashboard";  
+        navigate(nextPath, { replace: true });  
+      } else {  
+        setMensaje(data.message || "Error al cambiar contraseña");  
+      }  
+    } catch (error) {  
+      setMensaje("Error de conexión con el servidor");  
+    } finally {  
+      setLoading(false);  
+    }  
+  };  
+  
+  return (  
+    <div className="login-background">  
+      <div className="login-card">  
+        <h2 className="login-title">🔒 Cambio de Contraseña Obligatorio</h2>  
+        <p style={{ color: "#f0f0f0", marginBottom: "1.5rem", textAlign: "center" }}>  
+          Por seguridad, debes cambiar tu contraseña antes de continuar.  
+        </p>  
+          
+        <form onSubmit={handleChangePassword}>  
+          <input  
+            type="password"  
+            className="form-control"  
+            placeholder="Contraseña actual"  
+            value={currentPassword}  
+            onChange={(e) => setCurrentPassword(e.target.value)}  
+            required  
+          />  
+          <input  
+            type="password"  
+            className="form-control"  
+            placeholder="Nueva contraseña (mín. 6 caracteres)"  
+            value={newPassword}  
+            onChange={(e) => setNewPassword(e.target.value)}  
+            required  
+          />  
+          <input  
+            type="password"  
+            className="form-control"  
+            placeholder="Confirmar nueva contraseña"  
+            value={confirmPassword}  
+            onChange={(e) => setConfirmPassword(e.target.value)}  
+            required  
+          />  
+            
+          <button type="submit" className="btn btn-login mt-3" disabled={loading}>  
+            {loading ? "Cambiando..." : "Cambiar Contraseña"}  
+          </button>  
+            
+          {mensaje && (  
+            <div className="alert alert-danger" style={{ marginTop: "1rem" }}>  
+              {mensaje}  
+            </div>  
+          )}  
+        </form>  
+      </div>  
+    </div>  
+  );  
 }

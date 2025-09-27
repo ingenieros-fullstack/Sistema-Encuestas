@@ -30,11 +30,11 @@ const Usuario = sequelize.define("Usuario", {
     type: DataTypes.TINYINT, 
     defaultValue: 1 
   },
-  must_change_password: {              // 🚀 Nuevo campo
-    type: DataTypes.TINYINT,
-    allowNull: false,
-    defaultValue: 1,                   // siempre al crear debe forzar cambio
-  },
+must_change_password: {   
+  type: DataTypes.BOOLEAN,   
+  defaultValue: true,   
+  allowNull: false   
+},
   created_at: { 
     type: DataTypes.DATE, 
     defaultValue: DataTypes.NOW 
@@ -43,6 +43,8 @@ const Usuario = sequelize.define("Usuario", {
   tableName: "usuarios",
   timestamps: false
 });
+
+
 
 // ✅ Relación con DataEmpleado usando alias "empleado"
 Usuario.belongsTo(DataEmpleado, { foreignKey: "id_data", as: "empleado" });

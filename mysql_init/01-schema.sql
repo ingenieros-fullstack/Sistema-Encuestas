@@ -76,7 +76,7 @@ CREATE TABLE usuarios (
   password VARCHAR(255) NOT NULL,
   rol ENUM('admin','supervisor','empleado') NOT NULL DEFAULT 'empleado',
   estatus TINYINT(1) DEFAULT 1,
-  must_change_password TINYINT(1) DEFAULT 1,
+  must_change_password TINYINT(1) NOT NULL DEFAULT 1,  -- 1 = debe cambiar contraseña
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_data) REFERENCES data_empleados(id_data) ON DELETE CASCADE
 );
