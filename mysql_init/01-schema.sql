@@ -76,7 +76,7 @@ CREATE TABLE usuarios (
   password VARCHAR(255) NOT NULL,
   rol ENUM('admin','supervisor','empleado') NOT NULL DEFAULT 'empleado',
   estatus TINYINT(1) DEFAULT 1,
-  must_change_password TINYINT(1) NOT NULL DEFAULT 1,  -- 1 = debe cambiar contraseña
+  must_change_password TINYINT(1) DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_data) REFERENCES data_empleados(id_data) ON DELETE CASCADE
 );
@@ -90,46 +90,52 @@ CREATE INDEX idx_usuarios_must_change ON usuarios (must_change_password);
 -- Tabla: formularios
 -- =========================================
 CREATE TABLE formularios (
-  id_formulario INT AUTO_INCREMENT PRIMARY KEY,
+  codigo VARCHAR(50) PRIMARY KEY,
   id_empresa INT NOT NULL,
-  codigo VARCHAR(50) UNIQUE,
-  tipo ENUM('nom035','general','cuestionario') NOT NULL,
+  tipo ENUM('Encuesta','Cuestionario') NOT NULL,
   titulo VARCHAR(150) NOT NULL,
   descripcion TEXT,
   introduccion TEXT,
   texto_final TEXT,
-  periodo YEAR,
   fecha_inicio DATE,
   fecha_fin DATE,
-  estatus ENUM('abierta','cerrada','en_proceso') DEFAULT 'en_proceso',
+  estatus ENUM('abierto','cerrado') DEFAULT 'abrierto',
   umbral_aprobacion INT,
-  total_empleados INT DEFAULT 0,
-  total_respuestas INT DEFAULT 0,
-  total_pendientes INT DEFAULT 0,
-  porcentaje_avance DECIMAL(5,2) DEFAULT 0.00,
-  dias_visibles INT DEFAULT 0,
-  obligatoria TINYINT(1) DEFAULT 0,
-  modificar_respuestas TINYINT(1) DEFAULT 0,
+  navegacion_preguntas TINYINT(1) DEFAULT 0,
+  mostrar_respuestas TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_formularios_empresa ON formularios (id_empresa);
 CREATE INDEX idx_formularios_tipo ON formularios (tipo);
+-- =========================================
+-- Tabla: totales_formulario
+-- =========================================
+CREATE TABLE totales_formulario (
+  id_total INT AUTO_INCREMENT PRIMARY KEY,
+  codigo_formulario VARCHAR(50) NOT NULL,
+  total_empleados INT DEFAULT 0,
+  total_respuestas INT DEFAULT 0,
+  total_pendientes INT DEFAULT 0,
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_totales_codigo ON totales_formulario (codigo_formulario);
 
 -- =========================================
 -- Tabla: secciones
 -- =========================================
 CREATE TABLE secciones (
   id_seccion INT AUTO_INCREMENT PRIMARY KEY,
-  id_formulario INT NOT NULL,
+  codigo_formulario VARCHAR(50) NOT NULL,
   tema VARCHAR(150),
   nombre_seccion VARCHAR(150),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_formulario) REFERENCES formularios(id_formulario) ON DELETE CASCADE
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_secciones_formulario ON secciones (id_formulario);
+CREATE INDEX idx_secciones_formulario ON secciones (codigo_formulario);
 
 -- =========================================
 -- Tabla: preguntas
@@ -156,18 +162,19 @@ CREATE INDEX idx_preguntas_tipo ON preguntas (tipo_pregunta);
 CREATE TABLE asignaciones (
   id_asignacion INT AUTO_INCREMENT PRIMARY KEY,
   id_usuario INT NOT NULL,
-  id_formulario INT NOT NULL,
-  estado ENUM('pendiente','en_progreso','completado') DEFAULT 'pendiente',
+  codigo_formulario VARCHAR(50) NOT NULL,
+  estado ENUM('pendiente','completado') DEFAULT 'pendiente',
   intentos_realizados INT DEFAULT 0,
   fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   fecha_respuesta TIMESTAMP NULL,
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-  FOREIGN KEY (id_formulario) REFERENCES formularios(id_formulario) ON DELETE CASCADE
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_asignaciones_usuario ON asignaciones (id_usuario);
-CREATE INDEX idx_asignaciones_formulario ON asignaciones (id_formulario);
+CREATE INDEX idx_asignaciones_formulario ON asignaciones (codigo_formulario);
 CREATE INDEX idx_asignaciones_estado ON asignaciones (estado);
+CREATE INDEX idx_asignaciones_usuario_formulario ON asignaciones (id_usuario, codigo_formulario);
 
 -- =========================================
 -- Tabla: respuestas
@@ -192,13 +199,13 @@ CREATE INDEX idx_respuestas_pregunta ON respuestas (id_pregunta);
 -- =========================================
 CREATE TABLE qr_formularios (
   id_qr INT AUTO_INCREMENT PRIMARY KEY,
-  id_formulario INT NOT NULL,
+  codigo_formulario VARCHAR(50) NOT NULL,
   url VARCHAR(255) NOT NULL,
   codigo_qr TEXT NOT NULL,
   fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_formulario) REFERENCES formularios(id_formulario) ON DELETE CASCADE
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_qr_formulario ON qr_formularios (id_formulario);
+CREATE INDEX idx_qr_formulario ON qr_formularios (codigo_formulario);
 CREATE INDEX idx_asignaciones_usuario_formulario ON asignaciones (id_usuario, id_formulario);
 CREATE INDEX idx_respuestas_asignacion_pregunta ON respuestas (id_asignacion, id_pregunta);
