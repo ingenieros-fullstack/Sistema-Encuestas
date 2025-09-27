@@ -48,9 +48,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
         "http://localhost:4000/admin/usuarios/import",
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         }
       );
@@ -75,11 +73,10 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
 
   const handleBackdropClick = (e) => {
     if (e.target.classList.contains("modal-backdrop")) {
-      onClose();
+      setTimeout(() => onClose(), 0); // 👈 evita desmontaje en medio de render
     }
   };
 
-  // 👉 Ahora la plantilla se descarga desde el backend
   const downloadTemplate = () => {
     const a = document.createElement("a");
     a.href = "http://localhost:4000/uploads/plantilla_usuarios.csv";
@@ -118,6 +115,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
           maxHeight: "90vh",
           overflowY: "auto",
         }}
+        onClick={(e) => e.stopPropagation()} // 👈 evita cierre por clic interno
       >
         {/* Header */}
         <div
@@ -154,7 +152,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
         {/* Body */}
         <div style={{ padding: "1.5rem", fontSize: "0.95rem" }}>
           {!result ? (
-            <>
+            <div key="form">
               <p className="mb-3">
                 Sube un archivo <strong>.Excel</strong> o{" "}
                 <strong>.CSV</strong> para importar usuarios:
@@ -194,47 +192,49 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                   </pre>
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="alert alert-success" role="alert">
+            <div key="success" className="alert alert-success" role="alert">
               <h6 className="alert-heading mb-2">
                 <i className="bi bi-check-circle me-1"></i> Importación exitosa
               </h6>
               <p className="mb-3">{result.message}</p>
 
               {/* Usuarios creados */}
-{result.users && result.users.length > 0 && (
-  <div className="mt-3">
-    <p className="fw-bold mb-2">
-      Usuarios creados con contraseña por defecto:
-    </p>
-    <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-      {result.users.map((user, index) => (
-        <div
-          key={index}
-          className="card mb-2"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-          }}
-        >
-          <div
-            className="card-body p-2"
-            style={{ fontSize: "0.9rem" }}
-          >
-            <strong>{user.numero_empleado}</strong> - {user.nombre}{" "}
-            ({user.correo_electronico})
-            <br />
-            <span className="text-danger">
-              Contraseña por defecto: Empleado2025
-            </span>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
+              {result.users && result.users.length > 0 && (
+                <div className="mt-3">
+                  <p className="fw-bold mb-2">
+                    Usuarios creados con contraseña por defecto:
+                  </p>
+                  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                    {result.users.map((user) => (
+                      <div
+                        key={user.correo_electronico}
+                        className="card mb-2"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.1)",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                        }}
+                      >
+                        <div
+                          className="card-body p-2"
+                          style={{ fontSize: "0.9rem" }}
+                        >
+                          <strong>{user.numero_empleado}</strong> - {user.nombre}{" "}
+                          ({user.correo_electronico})
+                          <br />
+                          {/* 👇 contenedor estable con key única */}
+                          <div key={`pass-${user.correo_electronico}`} className="mt-1">
+                            <span className="text-danger">
+                              Contraseña por defecto: Empleado2025
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Registros omitidos */}
               {result.skippedCount > 0 && (
@@ -259,7 +259,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                       }}
                     >
                       {result.skipped.map((err, idx) => (
-                        <div key={idx} className="mb-1">
+                        <div key={`${idx}-${err}`} className="mb-1">
                           <i className="bi bi-x-circle text-danger me-1"></i>{" "}
                           {err}
                         </div>

@@ -1,0 +1,180 @@
+/* === AdminPrincipal.css === */
+
+/* Fondo general del dashboard */
+.dashboard-wrapper {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+.dashboard-content {
+  padding: 3rem 1rem;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 3rem;
+  color: #111827;
+}
+
+.dashboard-title .highlight {
+  color: #4f46e5;
+}
+
+.dashboard-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* === Card estilo moderno === */
+.card-module {
+  background-color: #ffffff;
+  width: 260px;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  text-align: center;
+  text-decoration: none;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  /* === Animación al aparecer === */
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards, float 5s ease-in-out infinite;
+}
+
+
+.card-module:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.card-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card-icon {
+  background-color: #eef2f3;
+  padding: 1.2rem;
+  border-radius: 50%;
+  font-size: 2rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  /* === Movimiento sutil del ícono en hover === */
+  transition: transform 0.3s ease;
+}
+
+.card-module:hover .card-icon {
+  transform: translateY(-4px);
+}
+
+/* Estilo por tipo de card */
+.card-module.usuarios .card-icon {
+  background-color: #e0f2f1;
+  color: #00796b;
+  box-shadow: 0 4px 16px rgba(0, 121, 107, 0.3); /* sombra verde suave */
+}
+
+.card-module.crear .card-icon {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.3); /* sombra azul suave */
+}
+
+.card-module.gestionar .card-icon {
+  background-color: #ede7f6;
+  color: #5e35b1;
+  box-shadow: 0 4px 16px rgba(94, 53, 177, 0.3); /* sombra morada suave */
+}
+
+.card-module.reportes .card-icon {
+  background-color: #fce4ec;
+  color: #c2185b;
+  box-shadow: 0 4px 16px rgba(194, 24, 91, 0.3); /* sombra rosa suave */
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  color: #111827;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+/* === Responsivo === */
+@media (max-width: 1024px) {
+  .dashboard-cards {
+    justify-content: center;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-module {
+    width: 90%;
+  }
+
+  .dashboard-title {
+    font-size: 1.6rem;
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-icon {
+    font-size: 1.8rem;
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .card-description {
+    font-size: 0.85rem;
+
+    /* === Ocultar descripción en pantallas pequeñas === */
+    display: none;
+  }
+}
+
+/* === Animación de entrada === */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}

@@ -1,70 +1,75 @@
 // src/pages/admin/Usuarios.jsx
 import { useState } from "react";
-import Navbar from "../../components/Navbar"; // ✅ Importar navbar
+import Navbar from "../../components/Navbar";
 import ImportarUsuariosModal from "../../components/modals/ImportarUsuariosModal";
 import GestionUsuariosModal from "../../components/modals/GestionUsuariosModal";
 import AsignarFormulariosModal from "../../components/modals/AsignarFormulariosModal";
+import "../../Usuarios.css";
 
 export default function Usuarios() {
   const [modal, setModal] = useState(null);
   const abrirModal = (nombre) => setModal(nombre);
   const cerrarModal = () => setModal(null);
 
-  // Leer nombre y rol desde localStorage (como ya haces en otros componentes)
   const nombre = localStorage.getItem("nombre") || "Administrador";
   const rol = localStorage.getItem("rol") || "admin";
 
   return (
     <>
-      {/* ✅ Navbar arriba */}
       <Navbar rol={rol} nombre={nombre} />
 
-      {/* Contenido principal */}
-      <div className="container py-5">
-        <h1 className="fw-bold text-center text-primary mb-5">Gestión de Usuarios</h1>
+      <div className="usuarios-wrapper">
+        <h1 className="usuarios-title">Gestión de Usuarios</h1>
 
-        <div className="usuarios-grid">
-          {/* Fila 1 */}
-          <div className="usuarios-grid-row">
-            <div className="card dashboard-card" onClick={() => abrirModal("importar")}>
-              <div className="card-body text-center">
-                <div className="dashboard-card-icon">📥</div>
-                <h5 className="card-title">Importar Usuarios</h5>
-                <p className="text-muted small">
-                  Carga masiva de usuarios desde un archivo Excel o CSV.
-                </p>
-              </div>
+        <div className="user-card-container">
+          <div
+            className="user-card importar"
+            onClick={() => abrirModal("importar")}
+          >
+            <div className="icon-box">
+              <i className="bi bi-cloud-arrow-up icon"></i>
             </div>
-
-            <div className="card dashboard-card" onClick={() => abrirModal("gestion")}>
-              <div className="card-body text-center">
-                <div className="dashboard-card-icon">👥</div>
-                <h5 className="card-title">Gestión de Usuarios</h5>
-                <p className="text-muted small">
-                  Crear, editar o eliminar usuarios de manera individual.
-                </p>
-              </div>
-            </div>
+            <h5>Importar Usuarios</h5>
+            <p>Carga masiva de usuarios desde un archivo Excel o CSV.</p>
           </div>
 
-          {/* Fila 2 */}
-          <div className="usuarios-grid-row">
-            <div className="card dashboard-card" onClick={() => abrirModal("asignar")}>
-              <div className="card-body text-center">
-                <div className="dashboard-card-icon">📝</div>
-                <h5 className="card-title">Asignar Formularios</h5>
-                <p className="text-muted small">
-                  Asigna formularios a empleados o supervisores.
-                </p>
-              </div>
+          <div
+            className="user-card gestion"
+            onClick={() => abrirModal("gestion")}
+          >
+            <div className="icon-box">
+              <i className="bi bi-people-fill icon"></i>
             </div>
+            <h5>Gestión de Usuarios</h5>
+            <p>Crear, editar o eliminar usuarios de manera individual.</p>
+          </div>
+
+          <div
+            className="user-card asignar"
+            onClick={() => abrirModal("asignar")}
+          >
+            <div className="icon-box">
+              <i className="bi bi-clipboard-check icon"></i>
+            </div>
+            <h5>Asignar Formularios</h5>
+            <p>Asigna formularios a empleados o supervisores.</p>
           </div>
         </div>
 
-        {/* Modales */}
-        {modal === "importar" && <ImportarUsuariosModal onClose={cerrarModal} />}
-        {modal === "gestion" && <GestionUsuariosModal onClose={cerrarModal} />}
-        {modal === "asignar" && <AsignarFormulariosModal onClose={cerrarModal} />}
+        {/* Un solo contenedor de modales */}
+        {modal && (
+          <>
+            {modal === "importar" && (
+              <ImportarUsuariosModal key="importar" onClose={cerrarModal} />
+            )}
+            {modal === "gestion" && (
+              <GestionUsuariosModal key="gestion" onClose={cerrarModal} />
+            )}
+            {modal === "asignar" && (
+              <AsignarFormulariosModal key="asignar" onClose={cerrarModal} />
+            )}
+          </>
+        )}
       </div>
     </>
   );

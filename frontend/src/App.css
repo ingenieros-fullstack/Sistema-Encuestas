@@ -7,12 +7,7 @@ html, body, #root {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
 }
-/* 🔓 Elimina fondo negro del body */
-html,
-body {
-  background: transparent !important;
-  background-color: transparent !important;
-}
+
 
 
 /* === LOGIN STYLES === */
@@ -88,9 +83,16 @@ body {
 
 /* === NAVBAR STYLES === */
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   background-color: #1e293b !important;
   padding: 1rem 2rem;
 }
+
+
 
 .navbar .navbar-brand {
   font-size: 1.25rem;
@@ -118,32 +120,28 @@ body {
 
 /* Botón plano moderno (Logout) */
 .btn-logout {
-  background-color: transparent;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  color: #D62828 !important;
+  border: 1px solid #D62828 !important;
+  background-color: transparent !important;
+  transition: all 0.3s ease;
 }
 
 .btn-logout:hover {
-  background-color: #ef4444;
-  color: #fff;
-  border-color: #ef4444;
+  background-color: #D62828 !important;
+  color: #fff !important;
 }
 
 /* === DASHBOARD STYLES === */
 .admin-dashboard-wrapper {
-  flex-grow: 1;
+  flex: 1;
+  padding-top: 3rem;
+  padding-bottom: 4rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  padding-top: 40px;
-  padding-bottom: 40px;
+  background-color: #f7fafd;
 }
+
 
 .admin-title {
   text-align: center;
@@ -164,6 +162,15 @@ body {
   justify-content: center;
   gap: 24px;
   padding-bottom: 40px;
+  
+}
+
+.dashboard-cards-container {
+  padding: 2rem 1rem;
+  gap: 1.5rem;
+}
+.admin-title {
+  max-width: 90%;
 }
 
 .dashboard-card {
@@ -246,18 +253,25 @@ body {
 }
 
 .bg-custom {
-  background: linear-gradient(
-    90deg,
-    #000814 0%,
-    #001D3D 50%,
-    #003566 100%
-  ) !important;
-  color: white;
+  background: linear-gradient(135deg, #2F3E46, #354F52) !important;
+  color: #ffffff;
 }
 
 /* Color personalizado para íconos o texto secundarios */
 .text-custom {
-  color: #FFD60A !important; /* Amarillo claro */
+  color: #84A98C !important; /* Verde suave para detalles */
+}
+
+.btn-dashboard {
+  background-color: #FCBF49 !important;
+  color: #000 !important;
+  font-weight: bold;
+  border: none !important;
+  transition: background-color 0.3s ease;
+}
+
+.btn-dashboard:hover {
+  background-color: #F77F00 !important; /* Un poco más oscuro al hover */
 }
 
 /* Línea amarilla inferior */
@@ -329,6 +343,14 @@ body {
   transition: color 0.2s ease;
 }
 
+.text-logo {
+  color: #7ea777 !important; /* Color amarillo suave de tu paleta */
+}
+
+.admin-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+
 .btn-close-custom:hover {
   color: #FFD60A;
 }
@@ -379,29 +401,6 @@ body {
 .custom-modal-footer .btn-warning:hover {
   background-color: #FFD60A;
 }
-.modal-centered {
-  background: #fff;
-  border-radius: 10px;
-  max-width: 90%;   /* Aumenta el ancho de la modal */
-  width: 100%;      /* Ocupa todo el ancho disponible */
-  margin: auto;
-  padding: 0;
-  box-shadow: 0 0 25px rgba(0,0,0,0.3);
-}
-
-.modal-xl {
-  max-width: 1100px;  /* Ajusta el ancho máximo */
-}
-
-.modal-body {
-  max-height: 70vh;   /* Para que no sea demasiado alta */
-  overflow-y: auto;
-}
-
-.table td, .table th {
-  vertical-align: middle;
-}
-
 
 /* ===== ANIMACIONES ===== */
 @keyframes fadeIn {
@@ -424,3 +423,165 @@ body {
   }
 }
 
+
+
+/* Fondo con degradado moderno */
+.dashboard-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+  color: #111827;
+}
+
+/* Contenido principal */
+.dashboard-content {
+  padding: 60px 20px;
+}
+
+/* Título */
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: #111827;
+}
+
+.dashboard-title .highlight {
+  color: #4f46e5; /* Indigo */
+}
+
+/* Grid de tarjetas */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Iconos dentro de la tarjeta */
+.dashboard-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+}
+
+/* Contenedor del enlace */
+.glass-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+/* Tarjeta estilo glass */
+.glass-card {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  transition: all 0.4s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brillo animado al hacer hover */
+.glass-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg, #facc15, #4f46e5, #06b6d4);
+  transform: rotate(45deg);
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.glass-card:hover::before {
+  opacity: 0.3;
+}
+
+.glass-card {
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  width: 100%;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.glass-icon-wrapper {
+  font-size: 3rem;
+}
+
+
+
+/* NUEVOS COLORES más oscuros */
+/* NUEVA PALETA APLICADA A LAS CARDS */
+.glass-card.usuarios {
+  background: linear-gradient(135deg, #84A98C, #CAD2C5);
+  color: #fff;
+}
+
+.glass-card.formularios {
+  background: linear-gradient(135deg, #52796F, #84A98C);
+  color: #fff;
+}
+
+.glass-card.gestionar {
+  background: linear-gradient(135deg, #354F52, #52796F);
+  color: #fff;
+}
+
+.glass-card.reportes {
+  background: linear-gradient(135deg, #2F3E46, #354F52);
+  color: #fff;
+}
+
+
+/* Hover más intenso */
+.glass-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+
+
+
+/* Icono grande */
+.glass-icon-wrapper {
+  font-size: 2.4rem;
+  z-index: 1;
+}
+
+/* Título */
+.glass-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f9fafb;
+  z-index: 1;
+}
+.glass-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}

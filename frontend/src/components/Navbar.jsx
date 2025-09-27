@@ -13,7 +13,7 @@ export default function Navbar({ rol, nombre }) {
       <div className="container-fluid d-flex justify-content-between align-items-center">
         {/* IZQUIERDA: Logo + Título */}
         <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-shield-fill-exclamation fs-4 text-warning"></i>
+          <i className="bi bi-shield-fill-exclamation fs-4 text-logo"></i>
           <span className="fw-bold fs-5 text-white">
             Panel {rol.toUpperCase()}
           </span>
@@ -32,11 +32,11 @@ export default function Navbar({ rol, nombre }) {
             to={`/${rol}/dashboard`}
             className="btn btn-sm fw-bold text-dark"
             style={{
-              backgroundColor: "#FFC300",
+              backgroundColor: "#7aa77dff",
               border: "none",
             }}
           >
-            <i className="bi bi-layout-text-window me-1"></i> Salpicadero
+            <i className="bi bi-layout-text-window me-1"></i> Inicio
           </Link>
 
           {/* Botón Logout */}

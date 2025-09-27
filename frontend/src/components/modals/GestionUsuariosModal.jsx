@@ -1,5 +1,5 @@
-// src/components/modals/GestionUsuariosModal.jsx
 import { useState, useEffect } from "react";
+import "../../GestionUsuarios.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,7 +16,6 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
-  // 🔹 Cargar usuarios en la tabla
   useEffect(() => {
     fetch(`${API_URL}/usuarios?q=${busqueda}`)
       .then((res) => res.json())
@@ -24,7 +23,6 @@ export default function GestionUsuariosModal({ onClose }) {
       .catch((err) => console.error("Error cargando usuarios:", err));
   }, [busqueda]);
 
-  // 🔹 Buscar usuario por correo
   const handleBuscarUsuario = () => {
     fetch(`${API_URL}/usuarios/by-email?email=${correoBusqueda}`)
       .then((res) => {
@@ -41,7 +39,6 @@ export default function GestionUsuariosModal({ onClose }) {
       });
   };
 
-  // 🔹 Actualizar usuario
   const handleActualizarUsuario = async (e) => {
     e.preventDefault();
     if (!usuarioEncontrado) return;
@@ -68,7 +65,7 @@ export default function GestionUsuariosModal({ onClose }) {
         setUsuarioEncontrado(null);
         setCorreoBusqueda("");
         setForm({ rol: "", nuevaPass: "", confirmarPass: "" });
-        setBusqueda(""); // refresca tabla
+        setBusqueda("");
       } else {
         alert("❌ Error: " + data.error);
       }
@@ -77,7 +74,6 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
-  // 🔹 Eliminar usuario
   const handleEliminar = async (id) => {
     if (!window.confirm("¿Eliminar usuario?")) return;
     try {
@@ -88,128 +84,124 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
-  const usuariosFiltrados = usuarios;
+  const getBadgeClass = (rol) => {
+    switch (rol.toLowerCase()) {
+      case "admin":
+        return "badge badge-blue";
+      case "supervisor":
+        return "badge badge-yellow";
+      case "empleado":
+        return "badge badge-green";
+      default:
+        return "badge badge-gray";
+    }
+  };
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-centered modal-xl">
-        <div className="modal-header bg-success text-white d-flex justify-content-between align-items-center">
-          <h5 className="modal-title m-0">👥 Gestión de Usuarios</h5>
-          <button className="btn-close text-white" onClick={onClose}>×</button>
+      <div className="modal-container wide">
+        <div className="modal-header justify-content-between align-items-center">
+          <h5 className="modal-title">
+            <i className="bi bi-people-fill me-2"></i>Gestión de Usuarios
+          </h5>
+          <button className="btn-close" onClick={onClose}>×</button>
         </div>
 
-        <div className="modal-body">
-          <div className="row">
-            {/* Panel izquierdo: tabla */}
-            <div className="col-md-7 border-end">
-              <h6 className="mb-3">Lista de Usuarios</h6>
-              <input
-                type="text"
-                className="form-control mb-3"
-                placeholder="🔍 Buscar por nombre"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Contraseña</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usuariosFiltrados.map((u) => (
-                    <tr key={u.id}>
-                      <td>{u.nombre}</td>
-                      <td>{u.correo}</td>
-                      <td>{u.rol}</td>
-                      <td>{"*".repeat(8)}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleEliminar(u.id)}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {usuariosFiltrados.length === 0 && (
-                    <tr>
-                      <td colSpan="5" className="text-center text-muted">
-                        No se encontraron usuarios
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Panel derecho: actualizar */}
-            <div className="col-md-5 ps-4">
-              <h6 className="mb-3">🔑 Actualizar Usuario</h6>
-              <div className="d-flex mb-3">
-                <input
-                  type="email"
-                  className="form-control me-2"
-                  placeholder="Correo del empleado"
-                  value={correoBusqueda}
-                  onChange={(e) => setCorreoBusqueda(e.target.value)}
-                />
-                <button className="btn btn-primary" onClick={handleBuscarUsuario}>
-                  🔍 Buscar
-                </button>
-              </div>
-
-              {usuarioEncontrado && (
-                <form onSubmit={handleActualizarUsuario}>
-                  <div className="mb-3">
-                    <label className="form-label">Correo</label>
-                    <input type="email" className="form-control" value={usuarioEncontrado.correo} disabled />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Rol</label>
-                    <select
-                      className="form-select"
-                      value={form.rol}
-                      onChange={(e) => setForm({ ...form, rol: e.target.value })}
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="supervisor">Supervisor</option>
-                      <option value="empleado">Empleado</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Nueva Contraseña</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={form.nuevaPass}
-                      onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Confirmar Contraseña</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={form.confirmarPass}
-                      onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })}
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-success w-100">
-                    Actualizar Usuario
+        <div className="modal-body dashboard-layout">
+          {/* Panel izquierdo */}
+          <div className="left-panel">
+            <h6><i className="bi bi-person-lines-fill me-2"></i>Lista de Usuarios</h6>
+            <input
+              type="text"
+              className="form-control mb-3"
+              placeholder="🔍 Buscar por nombre"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+            <div className="user-card-grid">
+              {usuarios.map((u) => (
+                <div className="user-card" key={u.id}>
+                  <button className="btn-delete" onClick={() => handleEliminar(u.id)}>
+                    <i className="bi bi-trash-fill"></i>
                   </button>
-                </form>
+                  <h6>{u.nombre}</h6>
+                  <p className="mb-1 text-muted">{u.correo}</p>
+                  <span className={getBadgeClass(u.rol)}>{u.rol}</span>
+                  <p className="text-muted mt-2">Contraseña: ********</p>
+                </div>
+              ))}
+              {usuarios.length === 0 && (
+                <p className="text-muted">No hay usuarios para mostrar.</p>
               )}
             </div>
           </div>
+
+          {/* Panel derecho */}
+          <div className="right-panel">
+            <h6><i className="bi bi-person-gear me-2"></i>Actualizar Usuario</h6>
+            <div className="d-flex gap-2 mb-3">
+              <input
+                type="email"
+                className="form-control"
+                placeholder="Correo del empleado"
+                value={correoBusqueda}
+                onChange={(e) => setCorreoBusqueda(e.target.value)}
+              />
+              <button className="btn btn-primary" onClick={handleBuscarUsuario}>
+                🔍 Buscar
+              </button>
+            </div>
+
+            {usuarioEncontrado && (
+              <form onSubmit={handleActualizarUsuario}>
+                <div className="mb-3">
+                  <label className="form-label">Correo</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={usuarioEncontrado.correo}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Rol</label>
+                  <select
+                    className="form-select"
+                    value={form.rol}
+                    onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="empleado">Empleado</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={form.nuevaPass}
+                    onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Confirmar Contraseña</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={form.confirmarPass}
+                    onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })}
+                  />
+                </div>
+                <button type="submit" className="btn btn-success w-100">
+                  Actualizar Usuario
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
-        <div className="modal-footer">
+        <div className="modal-footer justify-content-end">
           <button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import CardModule from "../components/CardModule";
 import ChangePasswordModal from "../components/modals/ChangePasswordModal";
 import { FaUsers, FaFileAlt, FaFolderOpen, FaChartBar } from "react-icons/fa";
+import "../AdminPrincipal.css";
 
 export default function AdminDashboard() {
   const nombre = localStorage.getItem("nombre") || "Administrador";
@@ -30,38 +31,47 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-column">
+    <div className="dashboard-wrapper">
       <Navbar rol={rol} nombre={nombre} />
 
-      <main className="admin-dashboard-wrapper">
-        {/* Título centrado */}
-        <h1 className="admin-title mb-5">
-          Bienvenido <span style={{ color: "#4f46e5" }}>{nombre}</span>, este es
-          tu Dashboard de{" "}
-          <span className="text-uppercase">{rol}</span>
+      <main className="dashboard-content container text-center">
+        <h1 className="dashboard-title">
+          Bienvenido <span className="highlight">{nombre}</span>, este es tu
+          Dashboard de{" "}
+          <span className="text-uppercase highlight">{rol}</span>
         </h1>
 
-        {/* Tarjetas en grilla */}
-        <div className="dashboard-cards-container">
+        <div className="dashboard-cards">
           <CardModule
-            icon={<FaUsers className="dashboard-card-icon text-primary" />}
+            icon={<FaUsers />}
             title="Gestión de Usuarios"
             link="/admin/usuarios"
+            type="usuarios"
+            description="Crear, editar o eliminar usuarios."
           />
+
           <CardModule
-            icon={<FaFileAlt className="dashboard-card-icon text-success" />}
+            icon={<FaFileAlt />}
             title="Crear Formulario"
             link="/admin/formulario/crear"
+            type="crear"
+            description="Diseña nuevos formularios personalizados."
           />
+
           <CardModule
-            icon={<FaFolderOpen className="dashboard-card-icon text-warning" />}
+            icon={<FaFolderOpen />}
             title="Gestionar Formularios"
             link="/admin/formularios"
+            type="gestionar"
+            description="Edita, asigna o elimina formularios existentes."
           />
+
           <CardModule
-            icon={<FaChartBar className="dashboard-card-icon text-info" />}
+            icon={<FaChartBar />}
             title="Reportes"
             link="/admin/reportes"
+            type="reportes"
+            description="Visualiza estadísticas y exporta datos."
           />
         </div>
       </main>
