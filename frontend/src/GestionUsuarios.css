@@ -24,6 +24,7 @@ html, body {
   border-radius: 12px;
   width: 100%;
   max-width: 1050px;
+  max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -38,6 +39,9 @@ html, body {
   align-items: center;
   justify-content: space-between;
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .modal-header .btn-close {
@@ -50,6 +54,7 @@ html, body {
 
 /* ===== Layout en Dos Columnas ===== */
 .two-column-layout {
+  overflow-y: auto;
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
@@ -68,8 +73,28 @@ html, body {
 @media (max-width: 992px) {
   .two-column-layout {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+
   }
 }
+
+.user-card {
+    max-width: 100%;
+    margin: auto;
+}
+ 
+.right-panel {
+    margin-top: 1rem;
+}
+
+
+  .user-card-grid {
+    grid-template-columns: 1fr; /* Una sola columna en móvil */
+  }
+
 
 /* ===== Campos de Entrada ===== */
 .left-panel input,

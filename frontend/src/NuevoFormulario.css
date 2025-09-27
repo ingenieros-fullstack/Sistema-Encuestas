@@ -1,0 +1,454 @@
+/* ====== Palette & tokens ====== */
+:root{
+  --nf-surface:#ffffff;
+  --nf-surface-2:#f7f9fb;
+  --nf-primary:#0d6efd;
+  --nf-accent:#7c3aed;       /* morado acento */
+  --nf-ring:0 0 0 .25rem rgba(13,110,253,.15);
+  --nf-shadow-sm:0 6px 20px rgba(2,6,23,.06);
+  --nf-shadow-md:0 10px 30px rgba(2,6,23,.10);
+  --nf-radius-xl:1rem;
+}
+
+.bg-body-tertiary{ background:#eef2f7 !important; }
+
+/* ====== HERO ====== */
+.page-hero{ margin-top:1rem; }
+.page-hero__surface{
+  border-radius:var(--nf-radius-xl);
+  background:linear-gradient(180deg, #fff, #f8fbff);
+  border:1px solid rgba(2,6,23,.06);
+  box-shadow:var(--nf-shadow-sm);
+  padding:1.25rem 1.5rem;
+  display:flex; justify-content:space-between; align-items:center; gap:1rem;
+}
+.page-hero--accent{
+  background:
+    radial-gradient(1200px 300px at 10% -10%, rgba(13,110,253,.12), transparent),
+    radial-gradient(900px 250px at 90% -20%, rgba(124,58,237,.12), transparent),
+    linear-gradient(0deg, #fff, #fff);
+}
+.hero-icon{ font-size:2rem; color:var(--nf-primary); }
+
+/* Steps chips */
+.chips{ display:flex; gap:.5rem; }
+.chip{
+  border:1px dashed rgba(2,6,23,.12);
+  padding:.35rem .6rem; border-radius:999px; font-size:.85rem; color:#475569; background:#fff;
+}
+.chip i{ margin-right:.35rem; }
+.chip.active{ border-color:rgba(13,110,253,.35); color:var(--nf-primary); background:#eff6ff; }
+
+/* ====== Sections ====== */
+.section-card{
+  background:var(--nf-surface);
+  border:1px solid rgba(2,6,23,.06);
+  border-radius:var(--nf-radius-xl);
+  box-shadow:var(--nf-shadow-sm);
+  padding:1rem 1rem 1.25rem;
+  margin-bottom:1rem;
+  position:relative;
+}
+.section-card__header{
+  display:flex; align-items:center; gap:.6rem;
+  padding:.25rem .25rem .75rem; margin-bottom:.25rem;
+  border-bottom:1px solid rgba(2,6,23,.06);
+}
+.section-card__header i{ color:var(--nf-primary); }
+
+.section--info::before,
+.section--accent::before{
+  content:""; position:absolute; inset:0 auto auto 0; width:4px; height:100%;
+  border-radius:4px 0 0 4px; background:var(--nf-primary); opacity:.25;
+}
+.section--accent::before{ background:var(--nf-accent); opacity:.25; }
+
+/* ====== Grid utils ====== */
+.nf-grid{ display:grid; gap: .9rem; }
+.nf-grid-2{ grid-template-columns: 1fr; }
+@media (min-width: 992px){ .nf-grid-2{ grid-template-columns: 1fr 1fr; } }
+
+/* ====== Inputs with icons ====== */
+.input-icon{ position:relative; }
+.input-icon > i{
+  position:absolute; inset:0 auto 0 .75rem; display:grid; place-items:center;
+  color:#64748b; pointer-events:none;
+}
+.input-icon > .form-control,
+.input-icon > .form-select{ padding-left:2.25rem; }
+.form-control:focus, .form-select:focus, textarea:focus{ box-shadow:var(--nf-ring); }
+
+/* ====== Segmented control (Tipo) ====== */
+.segmented{
+  display:inline-grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:6px;
+  background:#f1f5f9; padding:6px; border-radius:999px; border:1px solid rgba(2,6,23,.1);
+}
+.segmented-input{ display:none; }
+.segmented-item{
+  user-select:none; cursor:pointer; padding:.45rem .9rem; border-radius:999px;
+  display:flex; align-items:center; justify-content:center; gap:.35rem;
+  color:#334155; transition: all .18s ease-in-out; background:transparent;
+}
+.segmented-item:hover{ background:#e9eef5; }
+.segmented-input:checked + .segmented-item{
+  background:linear-gradient(135deg, #e8f1ff, #f0e9ff);
+  color:#0f172a; border:1px solid rgba(13,110,253,.35);
+  box-shadow:0 4px 14px rgba(13,110,253,.12), inset 0 0 0 1px rgba(124,58,237,.15);
+}
+
+/* ====== Preview / tips ====== */
+.sticky-aside{ position:sticky; top:1rem; display:flex; flex-direction:column; gap:.75rem; }
+.preview-card{
+  background:linear-gradient(180deg, var(--nf-surface), var(--nf-surface-2));
+  border:1px solid rgba(2,6,23,.06);
+  border-radius:var(--nf-radius-xl);
+  box-shadow:var(--nf-shadow-sm);
+  padding:1rem;
+}
+.preview--glass{
+  backdrop-filter: blur(6px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.85), rgba(247,249,251,.9)),
+    radial-gradient(600px 140px at 90% -40%, rgba(124,58,237,.10), transparent),
+    radial-gradient(600px 140px at 10% -40%, rgba(13,110,253,.10), transparent);
+  border:1px solid rgba(124,58,237,.12);
+}
+.preview-card__header{ display:flex; justify-content:space-between; margin-bottom:.5rem; }
+
+.tips-card{
+  display:flex; gap:.6rem; align-items:flex-start;
+  background:#f8fafc; color:#334155; border:1px dashed rgba(2,6,23,.12);
+  border-radius:.875rem; padding:.8rem .9rem;
+}
+
+/* ====== Action bar ====== */
+.actionbar{
+  position:sticky; bottom:0;
+  background:var(--nf-surface);
+  border:1px solid rgba(2,6,23,.06);
+  border-radius:.875rem;
+  box-shadow:var(--nf-shadow-md);
+  padding:.75rem .9rem; margin-top:.75rem;
+}
+.actionbar--gradient{
+  background:
+    linear-gradient(180deg, #ffffff, #f6f9ff);
+  border-color: rgba(13,110,253,.12);
+}
+
+/* Ghost button */
+.btn-ghost-secondary{
+  background:transparent; border:1px solid rgba(15,23,42,.15); color:#334155;
+}
+.btn-ghost-secondary:hover{ background:#f1f5f9; color:#0f172a; }
+
+/* Small helpers */
+.form-text{ color:#64748b; }
+
+
+/* Stepper como botones */
+.chips button.chip{ background:#fff; border:1px dashed rgba(2,6,23,.12); }
+.chip.disabled{ opacity:.55; cursor:not-allowed; filter:grayscale(.1); }
+.chips button { border: none; }
+
+/* Validación visible en fechas cuando hay error compartido */
+.input-icon .invalid-feedback{ margin-left: 2.25rem; }
+
+/* Mejor foco en segmented */
+.segmented-input:checked + .segmented-item{
+  outline: none;
+  box-shadow: 0 4px 14px rgba(13,110,253,.12), inset 0 0 0 1px rgba(124,58,237,.18);
+}
+
+/* Botones fantasma coherentes */
+.btn-ghost-secondary{
+  background:transparent; border:1px solid rgba(15,23,42,.15); color:#334155;
+}
+.btn-ghost-secondary:hover{ background:#f1f5f9; color:#0f172a; }
+
+/* ===== Config cards & layout ===== */
+.settings-grid{ display:grid; gap:1rem; }
+@media (min-width: 992px){
+  .settings-grid{ grid-template-columns: 2fr 1fr; }
+  .settings-grid .setting-card:last-child{ grid-column: 1 / -1; }
+}
+
+.setting-card{
+  background:#fff;
+  border:1px solid rgba(2,6,23,.06);
+  border-radius:1rem;
+  box-shadow: var(--nf-shadow-sm);
+  padding:1rem;
+}
+.setting-card__title{
+  display:flex; align-items:center; gap:.5rem;
+  font-weight:600; color:#0f172a; margin-bottom:.75rem;
+}
+.setting-card__title i{ color: var(--nf-accent); }
+
+/* Switches */
+.switch-grid{ display:grid; gap:.75rem; }
+.switch-row .form-check-input{
+  width: 2.75rem; height: 1.4rem;
+}
+.switch-row .form-check-input:focus{ box-shadow: var(--nf-ring); }
+.switch-row .form-check-label{ margin-left:.35rem; }
+
+/* Input units (min, %) */
+.input-unit .input-group-text{
+  background:#f8fafc; border-left:0; color:#334155;
+}
+.input-unit .form-control{ border-right:0; }
+.input-unit .form-control:focus{ box-shadow: var(--nf-ring); }
+
+/* Improve textarea look */
+textarea.form-control{ resize: vertical; }
+
+/* Desactivar clicks cuando el paso está bloqueado */
+.chip.disabled { opacity:.55; cursor:not-allowed; filter:grayscale(.1); pointer-events:none; }
+
+/* Asegurar que la actionbar se vea por encima del contenido */
+.actionbar { z-index: 1030; }
+
+/* Botón primario con gradiente sutil y foco accesible */
+.btn.btn-primary{
+  background: linear-gradient(180deg, #1676ff, #0d6efd);
+  border-color: #0d6efd;
+}
+.btn.btn-primary:focus-visible{ box-shadow: 0 0 0 .25rem rgba(13,110,253,.35); }
+
+/* Realce suave al pasar sobre secciones (no invasivo) */
+.section-card:hover{
+  border-color: rgba(13,110,253,.18);
+  box-shadow: 0 8px 28px rgba(2,6,23,.12);
+}
+
+/* Tipografía y ritmo en formularios */
+.form-label{ font-weight:600; color:#0f172a; }
+.form-text{ margin-top:.25rem; }
+
+/* Radios consistentes en inputs y grupos con unidades */
+.form-control, .form-select, .input-group-text { border-radius: .75rem; }
+.input-group .form-control:first-child{
+  border-top-right-radius: 0; border-bottom-right-radius: 0;
+}
+.input-group .input-group-text:last-child{
+  border-top-left-radius: 0; border-bottom-left-radius: 0;
+}
+
+/* Switch más visible al activarse */
+.form-check-input:checked{
+  background-color: var(--nf-primary);
+  border-color: var(--nf-primary);
+}
+
+/* Micro-tuning mobile */
+@media (max-width: 575.98px){
+  .page-hero__surface{ padding:.9rem 1rem; }
+  .actionbar{ margin-left:-4px; margin-right:-4px; border-radius:.75rem; }
+}
+
+/* (Opcional) Scrollbar sutil en WebKit */
+*::-webkit-scrollbar{ height:10px; width:10px; }
+*::-webkit-scrollbar-thumb{ background:#c7d2fe; border-radius:10px; border:2px solid #eef2f7; }
+*::-webkit-scrollbar-track{ background:transparent; }
+
+/* Rejilla más estable para campos de sección */
+.field-grid{
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 992px){
+  .field-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+/* Tarjeta de parámetro: slider + input */
+.param-card{
+  background:#f8fafc;
+  border:1px solid rgba(2,6,23,.06);
+  border-radius:.75rem;
+  padding:.65rem .75rem;
+}
+.form-range{ margin: .35rem 0 .65rem; accent-color: var(--nf-primary); }
+
+/* Lista de opciones (switches) con icono */
+.option-list{ list-style:none; padding:0; margin:0; display:grid; gap:.6rem; }
+.option-row{
+  display:grid; grid-template-columns: 36px 1fr auto;
+  align-items:center; gap:.6rem;
+  background:#fff; border:1px solid rgba(2,6,23,.06);
+  border-radius:.75rem; padding:.6rem .75rem;
+}
+.option-icon{
+  width:36px; height:36px; border-radius:10px;
+  display:grid; place-items:center;
+  color:#5831c6; background: #f1eaff;
+}
+.option-title{ font-weight:600; color:#0f172a; }
+.option-desc{ font-size:.875rem; color:#64748b; }
+
+/* Floating labels más agradables en textarea */
+.form-floating > .form-control{ border-radius:.75rem; }
+.form-floating label{ color:#64748b; }
+
+/* Valor centrado bajo el slider (Encuesta) */
+.param-card--stack{
+  grid-template-columns: 1fr;               /* apila slider + readout */
+}
+.param-card--stack .readout-center{
+  width: clamp(140px, 40%, 200px);
+  margin: .4rem auto 0;                     /* CENTRA horizontalmente */
+}
+.param-card--stack .readout-center .form-control{
+  text-align: center;
+}
+
+/* Layout compacto para Cuestionario: evita huecos en desktop */
+.settings-grid--compact{ display:grid; gap:1rem; }
+@media (min-width: 992px){
+  .settings-grid--compact{
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+  /* en esta variante NO hacemos que el último card ocupe todo el ancho */
+  .settings-grid--compact .setting-card:last-child{ grid-column: auto; }
+}
+
+/* Param cards, sliders y responsividad (si no lo tenías ya) */
+.param-grid{
+  display:grid; gap:1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.param-card{
+  display:grid; grid-template-columns: 1fr auto;
+  align-items:center; gap:.75rem;
+  background:#f8fafc; border:1px solid rgba(2,6,23,.06);
+  border-radius:.75rem; padding:.75rem .85rem;
+}
+.param-card .input-unit{ min-width: 120px; }
+.form-range{ width:100%; height:.6rem; background:transparent; }
+.form-range::-webkit-slider-runnable-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--nf-primary); margin-top:-6px; box-shadow:0 0 0 4px rgba(13,110,253,.12);
+}
+.form-range::-moz-range-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-moz-range-thumb{ width:16px; height:16px; border:none; border-radius:50%; background:var(--nf-primary); }
+
+/* ===== Cuestionario layout (dos columnas en desktop, apilado en móvil) ===== */
+.config-grid{
+  display:grid;
+  gap:1rem;
+}
+.config-col{
+  display:grid;
+  gap:1rem;
+}
+
+@media (min-width: 992px){
+  .config-grid{
+    grid-template-columns: 2fr 1fr; /* izquierda más ancha, derecha lateral */
+    align-items:start;
+  }
+  /* Opcional: que el panel derecho “siga” al hacer scroll */
+  .config-col--side .setting-card{
+    position: sticky;
+    top: 0.5rem;
+  }
+}
+
+/* Ya existentes, pero útiles para este layout */
+.param-grid{
+  display:grid; gap:1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 576px){
+  .param-grid{ grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+.param-card{
+  display:grid; grid-template-columns: 1fr auto;
+  align-items:center; gap:.75rem;
+  background:#f8fafc; border:1px solid rgba(2,6,23,.06);
+  border-radius:.75rem; padding:.75rem .85rem;
+}
+.param-card .input-unit{ min-width: 120px; }
+
+/* Sliders */
+.form-range{ width:100%; height:.6rem; background:transparent; }
+.form-range::-webkit-slider-runnable-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--nf-primary); margin-top:-6px; box-shadow:0 0 0 4px rgba(13,110,253,.12);
+}
+.form-range::-moz-range-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-moz-range-thumb{ width:16px; height:16px; border:none; border-radius:50%; background:var(--nf-primary); }
+
+/* ===== Cuestionario layout (dos columnas en desktop, apilado en móvil) ===== */
+.config-grid{
+  display:grid;
+  gap:1rem;
+}
+.config-col{
+  display:grid;
+  gap:1rem;
+}
+
+@media (min-width: 992px){
+  .config-grid{
+    grid-template-columns: 2fr 1fr; /* izquierda más ancha, derecha lateral */
+    align-items:start;
+  }
+  /* Opcional: que el panel derecho “siga” al hacer scroll */
+  .config-col--side .setting-card{
+    position: sticky;
+    top: 0.5rem;
+  }
+}
+
+/* Ya existentes, pero útiles para este layout */
+.param-grid{
+  display:grid; gap:1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 576px){
+  .param-grid{ grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+.param-card{
+  display:grid; grid-template-columns: 1fr auto;
+  align-items:center; gap:.75rem;
+  background:#f8fafc; border:1px solid rgba(2,6,23,.06);
+  border-radius:.75rem; padding:.75rem .85rem;
+}
+.param-card .input-unit{ min-width: 120px; }
+
+/* Sliders */
+.form-range{ width:100%; height:.6rem; background:transparent; }
+.form-range::-webkit-slider-runnable-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--nf-primary); margin-top:-6px; box-shadow:0 0 0 4px rgba(13,110,253,.12);
+}
+.form-range::-moz-range-track{ height:.375rem; background:#e9efff; border-radius:999px; }
+.form-range::-moz-range-thumb{ width:16px; height:16px; border:none; border-radius:50%; background:var(--nf-primary); }
+
+/* ===== Centrar verticalmente el panel de Parámetros en desktop ===== */
+@media (min-width: 992px){
+  /* Centra SOLO la columna derecha dentro de la fila del grid */
+  .config-col--side{
+    align-self: center;        /* coloca la columna en la mitad */
+  }
+  /* Desactiva sticky para permitir el centrado real */
+  .config-col--side .setting-card{
+    position: static;          /* antes podía estar sticky */
+    top: auto;
+    margin-top: 0;
+  }
+}
+
+/* (Opcional) Si aún lo quieres un pelín más abajo, añade un micro ajuste: */
+/*
+@media (min-width: 992px){
+  .config-col--side{ transform: translateY(8px); }  // ajusta 8–16px a tu gusto
+}
+*/
