@@ -1,104 +1,135 @@
-/* === Fondo oscuro del modal === */
+/* ===== Fondo del Modal ===== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 1.5rem;
   overflow-y: auto;
+  z-index: 9999;
 }
 
-/* === Contenedor principal del modal === */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: none !important;
+}
+
+/* ===== Contenedor Principal ===== */
 .modal-container {
-  background-color: #ffffff;
-  width: 100%;
-  max-width: 1200px;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 1050px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
-.modal-container.wide {
-  max-width: 95%;
-}
-
-/* === Encabezado === */
+/* ===== Encabezado ===== */
 .modal-header {
-  background-color: #2d60e3;
-  color: #ffffff;
-  padding: 1rem 1.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
+  background: linear-gradient(90deg, #2563eb, #1e40af);
+  color: #fff;
+  padding: 0.8rem 1.2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.modal-header .modal-title i {
-  font-size: 1.3rem;
-  margin-right: 0.5rem;
+  font-weight: 600;
 }
 
 .modal-header .btn-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: #ffffff;
+  font-size: 1.3rem;
+  color: #fff;
   cursor: pointer;
-  line-height: 1;
 }
 
-/* === Cuerpo del modal === */
-.modal-body {
-  padding: 1.5rem;
-  background-color: #f9fafb;
-}
-
-/* === Layout principal === */
-.dashboard-layout {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-/* === Panel izquierdo === */
-.left-panel {
-  flex: 1.6;
-  min-width: 320px;
-}
-
-.user-card-grid {
+/* ===== Layout en Dos Columnas ===== */
+.two-column-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 2fr 1fr;
   gap: 1rem;
+  padding: 0.8rem 1rem;
 }
 
-/* === Card de usuario === */
-.user-card {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+.left-panel,
+.right-panel {
+  background: #fff;
   border-radius: 10px;
   padding: 1rem;
-  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Responsive: Pila en pantallas pequeñas ===== */
+@media (max-width: 992px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Campos de Entrada ===== */
+.left-panel input,
+.right-panel input,
+.right-panel select {
+  width: 100%;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem; /* Antes: 0.95rem */
+  transition: border 0.2s ease;
+}
+
+.left-panel input:focus,
+.right-panel input:focus,
+.right-panel select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  outline: none;
+}
+
+/* ===== Grid de Usuarios ===== */
+.user-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.8rem; /* Antes: 1rem */
+  justify-items: center;
+  margin-top: 0.5rem;
+}
+
+/* ===== Card de Usuario ===== */
+.user-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.8rem;
+  width: 100%;
+  max-width: 200px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .user-card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .user-card h6 {
+  margin: 0.5rem 0;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.3rem;
-  font-size: 0.95rem;
+  color: #1f2937;
+}
+/* Títulos más compactos */
+h6 {
+  font-size: 0.95rem; /* Antes: 1rem */
+  margin-bottom: 0.4rem;
 }
 
 .user-card p {
@@ -107,162 +138,95 @@
   color: #4b5563;
 }
 
-.user-card .btn-delete {
+/* ===== Botón Eliminar Usuario ===== */
+.btn-delete {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
+  top: 8px;
+  right: 8px;
+  background: none;
   border: none;
-  color: #dc3545;
-  font-size: 1rem;
+  color: #dc2626;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
-/* === Badge de rol === */
+/* ===== Etiquetas de Rol ===== */
 .badge {
   display: inline-block;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: #fff;
   margin-top: 0.3rem;
+  text-transform: uppercase;
 }
 
-.badge-blue {
-  background-color: #3b82f6;
-}
+.badge-blue { background-color: #3b82f6; }
+.badge-yellow { background-color: #f59e0b; }
+.badge-green { background-color: #10b981; }
+.badge-gray { background-color: #6b7280; }
 
-.badge-yellow {
-  background-color: #f59e0b;
-}
-
-.badge-green {
-  background-color: #10b981;
-}
-
-.badge-gray {
-  background-color: #6b7280;
-}
-
-/* === Panel derecho === */
-.right-panel {
-  flex: 1;
-  min-width: 280px;
-}
-
-.right-panel h6 {
-  font-weight: 600;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
-
-.right-panel input,
-.right-panel select {
-  width: 100%;
-  padding: 0.6rem 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  outline: none;
-}
-
-.right-panel input:focus,
-.right-panel select:focus {
-  border-color: #2d60e3;
-  box-shadow: 0 0 0 3px rgba(45, 96, 227, 0.2);
-}
-
-/* === Botones === */
+/* ===== Botones ===== */
 .btn {
-  display: inline-block;
-  font-weight: 600;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  text-align: center;
+  padding: 0.4rem 0.8rem; /* Antes: 0.5rem 0.9rem */
+  border-radius: 6px;
   border: none;
+  cursor: pointer;
+  font-size: 0.85rem; /* Antes: 0.9rem */
+  font-weight: 600;
+  transition: background 0.2s ease;
 }
 
-.btn-primary {
-  background-color: #2d60e3;
-  color: #ffffff;
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1e40af; }
+
+.btn-success { background: #10b981; color: #fff; }
+.btn-success:hover { background: #059669; }
+
+.btn-secondary { background: #6b7280; color: #fff; }
+.btn-secondary:hover { background: #4b5563; }
+
+/* ===== Paginación ===== */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-.btn-primary:hover {
-  background-color: #1e3fa5;
+.pagination-info {
+  font-weight: 500;
+  color: #374151;
 }
 
-.btn-success {
-  background-color: #10b981;
-  color: #ffffff;
-  width: 100%;
-}
-
-.btn-success:hover {
-  background-color: #059669;
-}
-
-.btn-secondary {
-  background-color: #6b7280;
-  color: white;
-  padding: 0.6rem 1.2rem;
-}
-
-.btn-secondary:hover {
-  background-color: #4b5563;
-}
-
-/* === Footer === */
+/* ===== Footer ===== */
 .modal-footer {
-  padding: 1rem 1.5rem;
-  background-color: #f3f4f6;
+  padding: 0.8rem 1rem;
+  background: #f9fafb;
   border-top: 1px solid #e5e7eb;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 
-/* === Responsive para móviles === */
-@media (max-width: 768px) {
-  .dashboard-layout {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+/* Evitar que el texto del correo se salga de la card */
+.user-card p {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  display: block;
+  text-align: center;
+}
 
-  .modal-container {
-    max-width: 100%;
-    border-radius: 0;
-    height: 100%;
-    overflow-y: auto;
-  }
-
-  .user-card-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .btn {
-    width: 100%;
-  }
-
-  .modal-footer {
-    text-align: center;
-    padding: 1rem;
-  }
-
-  .modal-header {
-    flex-direction: row;
-    align-items: center;
-    font-size: 1rem;
-  }
-
-  .modal-header .modal-title {
-    font-size: 1rem;
-  }
-
-  .right-panel input,
-  .right-panel select {
-    font-size: 0.9rem;
-  }
+/* Ajuste para títulos largos */
+.user-card h6 {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+  text-align: center;
 }

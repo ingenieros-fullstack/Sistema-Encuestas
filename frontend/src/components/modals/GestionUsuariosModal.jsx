@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "../../GestionUsuarios.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const USUARIOS_POR_PAGINA = 6;
 
 export default function GestionUsuariosModal({ onClose }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -9,17 +10,15 @@ export default function GestionUsuariosModal({ onClose }) {
   const [correoBusqueda, setCorreoBusqueda] = useState("");
   const [usuarioEncontrado, setUsuarioEncontrado] = useState(null);
   const [form, setForm] = useState({ rol: "", nuevaPass: "", confirmarPass: "" });
-
-  const handleBackdropClick = (e) => {
-    if (e.target.classList.contains("modal-backdrop")) {
-      onClose();
-    }
-  };
+  const [paginaActual, setPaginaActual] = useState(1);
 
   useEffect(() => {
     fetch(`${API_URL}/usuarios?q=${busqueda}`)
       .then((res) => res.json())
-      .then((data) => setUsuarios(data))
+      .then((data) => {
+        setUsuarios(data);
+        setPaginaActual(1);
+      })
       .catch((err) => console.error("Error cargando usuarios:", err));
   }, [busqueda]);
 
@@ -47,10 +46,7 @@ export default function GestionUsuariosModal({ onClose }) {
       return;
     }
 
-    const payload = {
-      email: usuarioEncontrado.correo,
-      rol: form.rol,
-    };
+    const payload = { email: usuarioEncontrado.correo, rol: form.rol };
     if (form.nuevaPass) payload.password = form.nuevaPass;
 
     try {
@@ -86,90 +82,91 @@ export default function GestionUsuariosModal({ onClose }) {
 
   const getBadgeClass = (rol) => {
     switch (rol.toLowerCase()) {
-      case "admin":
-        return "badge badge-blue";
-      case "supervisor":
-        return "badge badge-yellow";
-      case "empleado":
-        return "badge badge-green";
-      default:
-        return "badge badge-gray";
+      case "admin": return "badge badge-blue";
+      case "supervisor": return "badge badge-yellow";
+      case "empleado": return "badge badge-green";
+      default: return "badge badge-gray";
     }
   };
 
+  const totalPaginas = Math.ceil(usuarios.length / USUARIOS_POR_PAGINA);
+  const indiceInicio = (paginaActual - 1) * USUARIOS_POR_PAGINA;
+  const usuariosPaginados = usuarios.slice(indiceInicio, indiceInicio + USUARIOS_POR_PAGINA);
+
   return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-container wide">
-        <div className="modal-header justify-content-between align-items-center">
-          <h5 className="modal-title">
-            <i className="bi bi-people-fill me-2"></i>Gestión de Usuarios
-          </h5>
+    <div className="modal-backdrop" onClick={(e) => e.target.classList.contains("modal-backdrop") && onClose()}>
+      <div className="modal-container">
+
+        {/* Header */}
+        <div className="modal-header">
+          <h5 className="modal-title"><i className="bi bi-people-fill"></i> Gestión de Usuarios</h5>
           <button className="btn-close" onClick={onClose}>×</button>
         </div>
 
-        <div className="modal-body dashboard-layout">
-          {/* Panel izquierdo */}
+        {/* Contenedor dos columnas */}
+        <div className="two-column-layout">
+          {/* Columna Izquierda: Lista de usuarios */}
           <div className="left-panel">
-            <h6><i className="bi bi-person-lines-fill me-2"></i>Lista de Usuarios</h6>
+            <h6><i className="bi bi-list-ul"></i> Lista de Usuarios</h6>
             <input
               type="text"
-              className="form-control mb-3"
               placeholder="🔍 Buscar por nombre"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
+              className="mb-3"
             />
+
             <div className="user-card-grid">
-              {usuarios.map((u) => (
+              {usuariosPaginados.map((u) => (
                 <div className="user-card" key={u.id}>
                   <button className="btn-delete" onClick={() => handleEliminar(u.id)}>
                     <i className="bi bi-trash-fill"></i>
                   </button>
                   <h6>{u.nombre}</h6>
-                  <p className="mb-1 text-muted">{u.correo}</p>
+                  <p>{u.correo}</p>
                   <span className={getBadgeClass(u.rol)}>{u.rol}</span>
-                  <p className="text-muted mt-2">Contraseña: ********</p>
+                  <p className="mt-2">Contraseña: ********</p>
                 </div>
               ))}
-              {usuarios.length === 0 && (
-                <p className="text-muted">No hay usuarios para mostrar.</p>
-              )}
+              {usuarios.length === 0 && <p className="text-muted">No hay usuarios para mostrar.</p>}
             </div>
+
+            {usuarios.length > USUARIOS_POR_PAGINA && (
+              <div className="pagination-controls">
+                <button onClick={() => setPaginaActual(paginaActual - 1)} disabled={paginaActual === 1} className="btn btn-secondary">
+                  ← Anterior
+                </button>
+                <span className="pagination-info">Página {paginaActual} de {totalPaginas}</span>
+                <button onClick={() => setPaginaActual(paginaActual + 1)} disabled={paginaActual === totalPaginas} className="btn btn-secondary">
+                  Siguiente →
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Panel derecho */}
+          {/* Columna Derecha: Actualizar usuario */}
           <div className="right-panel">
-            <h6><i className="bi bi-person-gear me-2"></i>Actualizar Usuario</h6>
-            <div className="d-flex gap-2 mb-3">
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Correo del empleado"
-                value={correoBusqueda}
-                onChange={(e) => setCorreoBusqueda(e.target.value)}
-              />
-              <button className="btn btn-primary" onClick={handleBuscarUsuario}>
-                🔍 Buscar
-              </button>
-            </div>
+            <h6><i className="bi bi-person-gear"></i> Actualizar Usuario</h6>
+            <input
+              type="email"
+              placeholder="Correo del empleado"
+              value={correoBusqueda}
+              onChange={(e) => setCorreoBusqueda(e.target.value)}
+              className="mb-2"
+            />
+            <button className="btn btn-primary mb-3" onClick={handleBuscarUsuario}>
+              <i className="bi bi-search"></i> Buscar
+            </button>
 
             {usuarioEncontrado && (
               <form onSubmit={handleActualizarUsuario}>
                 <div className="mb-3">
                   <label className="form-label">Correo</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    value={usuarioEncontrado.correo}
-                    disabled
-                  />
+                  <input type="email" className="form-control" value={usuarioEncontrado.correo} disabled />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Rol</label>
-                  <select
-                    className="form-select"
-                    value={form.rol}
-                    onChange={(e) => setForm({ ...form, rol: e.target.value })}
-                  >
+                  <select className="form-select" value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}>
                     <option value="admin">Admin</option>
                     <option value="supervisor">Supervisor</option>
                     <option value="empleado">Empleado</option>
@@ -177,32 +174,16 @@ export default function GestionUsuariosModal({ onClose }) {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Nueva Contraseña</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={form.nuevaPass}
-                    onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })}
-                  />
+                  <input type="password" className="form-control" value={form.nuevaPass} onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })} />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Confirmar Contraseña</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={form.confirmarPass}
-                    onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })}
-                  />
+                  <input type="password" className="form-control" value={form.confirmarPass} onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })} />
                 </div>
-                <button type="submit" className="btn btn-success w-100">
-                  Actualizar Usuario
-                </button>
+                <button type="submit" className="btn btn-success w-100">Actualizar Usuario</button>
               </form>
             )}
           </div>
-        </div>
-
-        <div className="modal-footer justify-content-end">
-          <button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
         </div>
       </div>
     </div>
