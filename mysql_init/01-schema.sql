@@ -89,25 +89,26 @@ CREATE INDEX idx_usuarios_must_change ON usuarios (must_change_password);
 -- =========================================
 -- Tabla: formularios
 -- =========================================
-CREATE TABLE formularios (
-  codigo VARCHAR(50) PRIMARY KEY,
-  id_empresa INT NOT NULL,
-  tipo ENUM('Encuesta','Cuestionario') NOT NULL,
-  titulo VARCHAR(150) NOT NULL,
-  descripcion TEXT,
-  introduccion TEXT,
-  texto_final TEXT,
-  fecha_inicio DATE,
-  fecha_fin DATE,
-  estatus ENUM('abierto','cerrado') DEFAULT 'abrierto',
-  umbral_aprobacion INT,
-  navegacion_preguntas TINYINT(1) DEFAULT 0,
-  mostrar_respuestas TINYINT(1) DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_formularios_empresa ON formularios (id_empresa);
+CREATE TABLE formularios (  
+  codigo VARCHAR(50) PRIMARY KEY,  
+  id_empresa INT NOT NULL,  
+  tipo ENUM('Encuesta','Cuestionario') NOT NULL,  
+  titulo VARCHAR(150) NOT NULL,  
+  descripcion TEXT,  
+  introduccion TEXT,  
+  texto_final TEXT,  
+  fecha_inicio DATE,  
+  fecha_fin DATE,  
+  estatus ENUM('abierto','cerrado') DEFAULT 'abierto',  
+  umbral_aprobacion INT,  
+  tiempo_limite INT DEFAULT NULL,  
+  navegacion_preguntas TINYINT(1) DEFAULT 0,  
+  mostrar_respuestas TINYINT(1) DEFAULT 0,  
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+  FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE  
+);  
+  
+CREATE INDEX idx_formularios_empresa ON formularios (id_empresa);  
 CREATE INDEX idx_formularios_tipo ON formularios (tipo);
 -- =========================================
 -- Tabla: totales_formulario
