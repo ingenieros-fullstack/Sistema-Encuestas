@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "../../GestionFormularios.css";
+import { FaEdit } from "react-icons/fa";
 
 export default function Formularios() {
   const [formularios, setFormularios] = useState([]);
@@ -46,6 +47,12 @@ export default function Formularios() {
     }
   };
 
+  // Dentro del componente Formularios, después de obtenerFormularios  
+const handleEdit = (codigo) => {  
+  console.log('Editando formulario con código:', codigo); // Para debug  
+  navigate(`/admin/formularios/editar/${codigo}`);  
+};
+
   const eliminarFormulario = async (codigo) => {
     if (!window.confirm("¿Estás seguro de eliminar este formulario?")) return;
     try {
@@ -79,6 +86,8 @@ export default function Formularios() {
       return "No definida";
     }
   };
+
+
 
   // ---------- FILTRO ----------
   const formulariosFiltrados = useMemo(() => {
@@ -320,9 +329,8 @@ export default function Formularios() {
                       <td>
                         <span className={badgeEstado(f.estatus)}>
                           <i
-                            className={`bi me-1 ${
-                              f.estatus === "abierto" ? "bi-unlock" : "bi-lock"
-                            }`}
+                            className={`bi me-1 ${f.estatus === "abierto" ? "bi-unlock" : "bi-lock"
+                              }`}
                           ></i>
                           {f.estatus}
                         </span>
@@ -350,14 +358,10 @@ export default function Formularios() {
                             <i className="bi bi-eye"></i>
                           </button>
                           <button
-                            type="button"
-                            className="btn btn-sm btn-outline-success"
-                            title="Editar"
-                            onClick={() => {
-                              // navigate(`/admin/formulario/editar/${f.codigo}`);
-                            }}
+                            onClick={() => handleEdit(f.codigo)}
+                            className="btn-action edit"
                           >
-                            <i className="bi bi-pencil-square"></i>
+                            <FaEdit />
                           </button>
                           <button
                             type="button"
