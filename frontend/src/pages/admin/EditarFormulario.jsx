@@ -1,413 +1,521 @@
-import { useState, useEffect } from 'react';  
-import { useParams, useNavigate } from 'react-router-dom';  
-import Navbar from '../../components/Navbar';  
-  
-export default function EditarFormulario() {  
-  const { codigo } = useParams();  
-  const navigate = useNavigate();  
-  const [formulario, setFormulario] = useState({  
-    titulo: '',  
-    descripcion: '',  
-    introduccion: '',  
-    texto_final: '',  
-    tipo: 'Cuestionario',  
-    estatus: 'abierto',  
-    fecha_inicio: '',  
-    fecha_fin: '',  
-    umbral_aprobacion: 70,  
-    tiempo_limite: 45,  
-    navegacion_preguntas: true,  
-    mostrar_respuestas: true  
-  });  
-  const [loading, setLoading] = useState(true);  
-  const [saving, setSaving] = useState(false);  
-  const [error, setError] = useState('');  
-    
-  const nombre = localStorage.getItem("nombre") || "Administrador";  
-  const rol = localStorage.getItem("rol") || "admin";  
-  
-  useEffect(() => {  
-    fetchFormulario();  
-  }, [codigo]);  
-  
-  const fetchFormulario = async () => {  
-    try {  
-      setLoading(true);  
-      const token = localStorage.getItem('token');  
-      console.log('Fetching formulario con código:', codigo);  
-        
-      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {  
-        headers: {  
-          'Authorization': `Bearer ${token}`,  
-          'Content-Type': 'application/json'  
-        }  
-      });  
-        
-      console.log('Response status:', response.status);  
-        
-      if (response.ok) {  
-        const data = await response.json();  
-        console.log('Data received:', data);  
-          
-        // ✅ CORRECCIÓN: Acceder a data.formulario en lugar de data directamente  
-        const formularioData = data.formulario || data;  
-          
-        setFormulario({  
-          titulo: formularioData.titulo || '',  
-          descripcion: formularioData.descripcion || '',  
-          introduccion: formularioData.introduccion || '',  
-          texto_final: formularioData.texto_final || '',  
-          tipo: formularioData.tipo || 'Cuestionario',  
-          estatus: formularioData.estatus || 'abierto',  
-          fecha_inicio: formularioData.fecha_inicio ? formularioData.fecha_inicio.split('T')[0] : '',  
-          fecha_fin: formularioData.fecha_fin ? formularioData.fecha_fin.split('T')[0] : '',  
-          umbral_aprobacion: formularioData.umbral_aprobacion || 70,  
-          tiempo_limite: formularioData.tiempo_limite || 45,  
-          navegacion_preguntas: formularioData.navegacion_preguntas || true,  
-          mostrar_respuestas: formularioData.mostrar_respuestas || true  
-        });  
-      } else {  
-        const errorText = await response.text();  
-        console.error('Error response:', errorText);  
-        setError('Error al cargar el formulario');  
-        setTimeout(() => navigate('/admin/formularios'), 2000);  
-      }  
-    } catch (error) {  
-      console.error('Fetch error:', error);  
-      setError('Error de conexión al cargar el formulario');  
-      setTimeout(() => navigate('/admin/formularios'), 2000);  
-    } finally {  
-      setLoading(false);  
-    }  
-  };  
-  
-  const handleSubmit = async (e) => {  
-    e.preventDefault();  
-    setSaving(true);  
-    setError('');  
-  
-    try {  
-      const token = localStorage.getItem('token');  
-      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {  
-        method: 'PUT',  
-        headers: {  
-          'Authorization': `Bearer ${token}`,  
-          'Content-Type': 'application/json'  
-        },  
-        body: JSON.stringify(formulario)  
-      });  
-  
-      if (response.ok) {  
-        alert('Formulario actualizado exitosamente');  
-        navigate('/admin/formularios');  
-      } else {  
-        const errorData = await response.json();  
-        setError(errorData.message || 'Error al actualizar el formulario');  
-      }  
-    } catch (error) {  
-      console.error('Error updating formulario:', error);  
-      setError('Error de conexión al actualizar el formulario');  
-    } finally {  
-      setSaving(false);  
-    }  
-  };  
-  
-  const handleChange = (e) => {  
-    const { name, value, type, checked } = e.target;  
-    setFormulario(prev => ({  
-      ...prev,  
-      [name]: type === 'checkbox' ? checked : value  
-    }));  
-  };  
-  
-  if (loading) {  
-    return (  
-      <div className="min-vh-100 d-flex flex-column bg-body-tertiary">  
-        <Navbar rol={rol} nombre={nombre} />  
-        <main className="flex-grow-1 container-xxl py-4">  
-          <section className="section-card">  
-            <div className="d-flex align-items-center gap-3">  
-              <div className="spinner-border text-primary" role="status" />  
-              <div className="text-body-secondary">Cargando formulario...</div>  
-            </div>  
-          </section>  
-        </main>  
-      </div>  
-    );  
-  }  
-  
-  return (  
-    <div className="min-vh-100 d-flex flex-column bg-body-tertiary">  
-      <Navbar rol={rol} nombre={nombre} />  
-        
-      {/* HERO */}  
-      <header className="page-hero container-xxl">  
-        <div className="page-hero__surface page-hero--accent">  
-          <div className="d-flex align-items-center gap-3">  
-            <span className="hero-icon bi bi-pencil-square"></span>  
-            <div>  
-              <h1 className="h3 mb-1">Editar Formulario</h1>  
-              <p className="mb-0 text-body-secondary">  
-                Código: {codigo}  
-              </p>  
-            </div>  
-          </div>  
-            
-          <div className="d-flex align-items-center gap-2">  
-            <button  
-              type="button"  
-              className="btn btn-outline-secondary"  
-              onClick={() => navigate('/admin/formularios')}  
-            >  
-              <i className="bi bi-arrow-left me-2"></i> Volver  
-            </button>  
-          </div>  
-        </div>  
-      </header>  
-  
-      <main className="flex-grow-1 container-xxl py-4">  
-        {error && (  
-          <section className="section-card mb-4">  
-            <div className="alert alert-danger mb-0">  
-              <i className="bi bi-exclamation-triangle me-2"></i>  
-              {error}  
-            </div>  
-          </section>  
-        )}  
-  
-        <section className="section-card">  
-          <form onSubmit={handleSubmit}>  
-            <div className="row g-4">  
-              <div className="col-12">  
-                <label htmlFor="titulo" className="form-label">  
-                  Título del Formulario <span className="text-danger">*</span>  
-                </label>  
-                <input  
-                  type="text"  
-                  id="titulo"  
-                  name="titulo"  
-                  className="form-control"  
-                  value={formulario.titulo}  
-                  onChange={handleChange}  
-                  required  
-                  placeholder="Ingresa el título del formulario"  
-                />  
-              </div>  
-  
-              <div className="col-12">  
-                <label htmlFor="descripcion" className="form-label">  
-                  Descripción  
-                </label>  
-                <textarea  
-                  id="descripcion"  
-                  name="descripcion"  
-                  className="form-control"  
-                  rows="3"  
-                  value={formulario.descripcion}  
-                  onChange={handleChange}  
-                  placeholder="Describe el propósito del formulario"  
-                />  
-              </div>  
-  
-              <div className="col-12">  
-                <label htmlFor="introduccion" className="form-label">  
-                  Introducción  
-                </label>  
-                <textarea  
-                  id="introduccion"  
-                  name="introduccion"  
-                  className="form-control"  
-                  rows="3"  
-                  value={formulario.introduccion}  
-                  onChange={handleChange}  
-                  placeholder="Texto introductorio para los participantes"  
-                />  
-              </div>  
-  
-              <div className="col-12">  
-                <label htmlFor="texto_final" className="form-label">  
-                  Texto Final  
-                </label>  
-                <textarea  
-                  id="texto_final"  
-                  name="texto_final"  
-                  className="form-control"  
-                  rows="3"  
-                  value={formulario.texto_final}  
-                  onChange={handleChange}  
-                  placeholder="Mensaje de agradecimiento al finalizar"  
-                />  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="tipo" className="form-label">  
-                  <i className="bi bi-ui-radios-grid me-1"></i>  
-                  Tipo <span className="text-danger">*</span>  
-                </label>  
-                <select  
-                  id="tipo"  
-                  name="tipo"  
-                  className="form-select"  
-                  value={formulario.tipo}  
-                  onChange={handleChange}  
-                  required  
-                >  
-                  <option value="Encuesta">Encuesta</option>  
-                  <option value="Cuestionario">Cuestionario</option>  
-                </select>  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="estatus" className="form-label">  
-                  <i className="bi bi-unlock me-1"></i>  
-                  Estado <span className="text-danger">*</span>  
-                </label>  
-                <select  
-                  id="estatus"  
-                  name="estatus"  
-                  className="form-select"  
-                  value={formulario.estatus}  
-                  onChange={handleChange}  
-                  required  
-                >  
-                  <option value="abierto">Abierto</option>  
-                  <option value="cerrado">Cerrado</option>  
-                </select>  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="fecha_inicio" className="form-label">  
-                  <i className="bi bi-calendar-event me-1"></i>  
-                  Fecha de Inicio  
-                </label>  
-                <input  
-                  type="date"  
-                  id="fecha_inicio"  
-                  name="fecha_inicio"  
-                  className="form-control"  
-                  value={formulario.fecha_inicio}  
-                  onChange={handleChange}  
-                />  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="fecha_fin" className="form-label">  
-                  <i className="bi bi-calendar-check me-1"></i>  
-                  Fecha de Fin  
-                </label>  
-                <input  
-                  type="date"  
-                  id="fecha_fin"  
-                  name="fecha_fin"  
-                  className="form-control"  
-                  value={formulario.fecha_fin}  
-                  onChange={handleChange}  
-                />  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="umbral_aprobacion" className="form-label">  
-                  <i className="bi bi-percent me-1"></i>  
-                  Umbral de Aprobación (%)  
-                </label>  
-                <input  
-                  type="number"  
-                  id="umbral_aprobacion"  
-                  name="umbral_aprobacion"  
-                  className="form-control"  
-                  value={formulario.umbral_aprobacion}  
-                  onChange={handleChange}  
-                  min="0"  
-                  max="100"  
-                />  
-              </div>  
-  
-              <div className="col-md-6">  
-                <label htmlFor="tiempo_limite" className="form-label">  
-                  <i className="bi bi-clock me-1"></i>  
-                  Tiempo Límite (minutos)  
-                </label>  
-                <input  
-                  type="number"  
-                  id="tiempo_limite"  
-                  name="tiempo_limite"  
-                  className="form-control"  
-                  value={formulario.tiempo_limite}  
-                  onChange={handleChange}  
-                  min="1"  
-                />  
-              </div>  
-  
-              <div className="col-12">  
-                <div className="row g-3">  
-                  <div className="col-md-6">  
-                    <div className="form-check">  
-                      <input  
-                        type="checkbox"  
-                        id="navegacion_preguntas"  
-                        name="navegacion_preguntas"  
-                        className="form-check-input"  
-                        checked={formulario.navegacion_preguntas}  
-                        onChange={handleChange}  
-                      />  
-                      <label htmlFor="navegacion_preguntas" className="form-check-label">  
-                        Permitir navegación entre preguntas  
-                      </label>  
-                    </div>  
-                  </div>  
-                  <div className="col-md-6">  
-                    <div className="form-check">  
-                      <input  
-                        type="checkbox"  
-                        id="mostrar_respuestas"  
-                        name="mostrar_respuestas"  
-                        className="form-check-input"  
-                        checked={formulario.mostrar_respuestas}  
-                        onChange={handleChange}  
-                      />  
-                      <label htmlFor="mostrar_respuestas" className="form-check-label">  
-                        Mostrar respuestas al finalizar  
-                      </label>  
-                    </div>  
-                  </div>  
-                </div>  
-              </div>  
-  
-              <div className="col-12">  
-                <hr className="my-4" />  
-                <div className="d-flex gap-3">  
-                  <button  
-                    type="submit"  
-                    className="btn btn-primary"  
-                    disabled={saving}  
-                  >  
-                    {saving ? (  
-                      <>  
-                        <span className="spinner-border spinner-border-sm me-2" role="status" />  
-                        Guardando...  
-                      </>  
-                    ) : (  
-                      <>  
-                        <i className="bi bi-check-lg me-2"></i>  
-                        Actualizar Formulario  
-                      </>  
-                    )}  
-                  </button>  
-                  <button  
-                    type="button"  
-                    className="btn btn-outline-secondary"  
-                    onClick={() => navigate('/admin/formularios')}  
-                    disabled={saving}  
-                  >  
-                    <i className="bi bi-x-lg me-2"></i>  
-                    Cancelar  
-                  </button>  
-                </div>  
-              </div>  
-            </div>  
-          </form>  
-        </section>  
-      </main>  
-    </div>  
-  );  
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import "../../EditarFormulario.css";
+
+export default function EditarFormulario() {
+  const { codigo } = useParams();
+  const navigate = useNavigate();
+
+  const [formulario, setFormulario] = useState({
+    titulo: "",
+    descripcion: "",
+    introduccion: "",
+    texto_final: "",
+    tipo: "Cuestionario",
+    estatus: "abierto",
+    fecha_inicio: "",
+    fecha_fin: "",
+    umbral_aprobacion: 70,
+    tiempo_limite: 45,
+    navegacion_preguntas: true,
+    mostrar_respuestas: true,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const nombre = localStorage.getItem("nombre") || "Administrador";
+  const rol = localStorage.getItem("rol") || "admin";
+
+  const isCuestionario = useMemo(() => formulario.tipo === "Cuestionario", [formulario.tipo]);
+
+  useEffect(() => {
+    fetchFormulario();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [codigo]);
+
+  const fetchFormulario = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const f = data.formulario || data;
+
+        setFormulario({
+          titulo: f.titulo || "",
+          descripcion: f.descripcion || "",
+          introduccion: f.introduccion || "",
+          texto_final: f.texto_final || "",
+          tipo: f.tipo || "Cuestionario",
+          estatus: f.estatus || "abierto",
+          fecha_inicio: f.fecha_inicio ? String(f.fecha_inicio).split("T")[0] : "",
+          fecha_fin: f.fecha_fin ? String(f.fecha_fin).split("T")[0] : "",
+          umbral_aprobacion: typeof f.umbral_aprobacion === "number" ? f.umbral_aprobacion : 70,
+          tiempo_limite: typeof f.tiempo_limite === "number" ? f.tiempo_limite : 45,
+          navegacion_preguntas: f.navegacion_preguntas ?? true,
+          mostrar_respuestas: f.mostrar_respuestas ?? true,
+        });
+      } else {
+        setError("Error al cargar el formulario");
+        setTimeout(() => navigate("/admin/formularios"), 1500);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error de conexión al cargar el formulario");
+      setTimeout(() => navigate("/admin/formularios"), 1500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormulario((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  // para sincronizar sliders con inputs numéricos
+  const setField = useCallback(
+    (name, value) => setFormulario((prev) => ({ ...prev, [name]: value })),
+    []
+  );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(formulario),
+      });
+
+      if (response.ok) {
+        // éxito
+        navigate("/admin/formularios");
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.message || "Error al actualizar el formulario");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error de conexión al actualizar el formulario");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex flex-column bg-body-tertiary">
+        <Navbar rol={rol} nombre={nombre} />
+        <main className="flex-grow-1 container-xxl py-4">
+          <section className="section-card">
+            <div className="d-flex align-items-center gap-3">
+              <div className="spinner-border text-primary" role="status" />
+              <div className="text-body-secondary">Cargando formulario…</div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-vh-100 d-flex flex-column bg-body-tertiary">
+      <Navbar rol={rol} nombre={nombre} />
+
+      {/* HERO */}
+      <header className="page-hero container-xxl">
+        <div className="page-hero__surface page-hero--accent">
+          <div className="d-flex align-items-center gap-3">
+            <span className="hero-icon bi bi-pencil-square"></span>
+            <div>
+              <h1 className="h3 mb-1">Editar Formulario</h1>
+              <p className="mb-0 text-body-secondary">Código: {codigo}</p>
+            </div>
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => navigate("/admin/formularios")}
+            >
+              <i className="bi bi-arrow-left me-2"></i> Volver
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow-1 container-xxl py-4">
+        {error && (
+          <section className="section-card mb-3">
+            <div className="alert alert-danger mb-0">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+            </div>
+          </section>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="settings-grid">
+            {/* Columna principal */}
+            <div className="setting-card">
+              <div className="setting-card__title">
+                <i className="bi bi-info-circle"></i> Información
+              </div>
+
+              <div className="nf-grid nf-grid-2">
+                <div className="col-12">
+                  <label className="form-label">
+                    Título del Formulario <span className="text-danger">*</span>
+                  </label>
+                  <div className="input-icon">
+                    <i className="bi bi-type"></i>
+                    <input
+                      type="text"
+                      name="titulo"
+                      className="form-control"
+                      value={formulario.titulo}
+                      onChange={handleChange}
+                      placeholder="Ingresa el título del formulario"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label">Descripción</label>
+                  <textarea
+                    name="descripcion"
+                    rows={3}
+                    className="form-control"
+                    value={formulario.descripcion}
+                    onChange={handleChange}
+                    placeholder="Describe el propósito del formulario"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="setting-card">
+              <div className="setting-card__title">
+                <i className="bi bi-chat-left-text"></i> Mensajes
+              </div>
+
+              <div className="nf-grid nf-grid-2">
+                <div className="form-floating">
+                  <textarea
+                    id="intro"
+                    className="form-control"
+                    name="introduccion"
+                    value={formulario.introduccion}
+                    onChange={handleChange}
+                    placeholder="Introducción"
+                    style={{ minHeight: 120 }}
+                  />
+                  <label htmlFor="intro">Introducción</label>
+                </div>
+
+                <div className="form-floating">
+                  <textarea
+                    id="final"
+                    className="form-control"
+                    name="texto_final"
+                    value={formulario.texto_final}
+                    onChange={handleChange}
+                    placeholder="Texto final"
+                    style={{ minHeight: 120 }}
+                  />
+                  <label htmlFor="final">Texto Final</label>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna lateral */}
+            <div className="setting-card">
+              <div className="setting-card__title">
+                <i className="bi bi-sliders2"></i> Propiedades
+              </div>
+
+              {/* ⬇️ Reorganizado a 2 columnas: izquierda (Tipo/Estado) | derecha (Fechas) */}
+              <div className="nf-grid nf-grid-2">
+                {/* Columna izquierda: Tipo + Estado */}
+                <div>
+                  {/* Tipo */}
+                  <div className="mb-3">
+                    <label className="form-label d-block">
+                      <i className="bi bi-ui-radios-grid me-1"></i> Tipo{" "}
+                      <span className="text-danger">*</span>
+                    </label>
+                    <div className="segmented">
+                      <input
+                        id="tipo-enc"
+                        type="radio"
+                        name="tipo"
+                        className="segmented-input"
+                        checked={formulario.tipo === "Encuesta"}
+                        onChange={() => setField("tipo", "Encuesta")}
+                      />
+                      <label className="segmented-item" htmlFor="tipo-enc">
+                        <i className="bi bi-ui-radios-grid"></i> Encuesta
+                      </label>
+
+                      <input
+                        id="tipo-cue"
+                        type="radio"
+                        name="tipo"
+                        className="segmented-input"
+                        checked={formulario.tipo === "Cuestionario"}
+                        onChange={() => setField("tipo", "Cuestionario")}
+                      />
+                      <label className="segmented-item" htmlFor="tipo-cue">
+                        <i className="bi bi-journal-check"></i> Cuestionario
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Estado */}
+                  <div className="mb-3">
+                    <label className="form-label d-block">
+                      <i className="bi bi-unlock me-1"></i> Estado{" "}
+                      <span className="text-danger">*</span>
+                    </label>
+                    <div className="segmented">
+                      <input
+                        id="est-abierto"
+                        type="radio"
+                        name="estatus"
+                        className="segmented-input"
+                        checked={formulario.estatus === "abierto"}
+                        onChange={() => setField("estatus", "abierto")}
+                      />
+                      <label className="segmented-item" htmlFor="est-abierto">
+                        <i className="bi bi-unlock"></i> Abierto
+                      </label>
+
+                      <input
+                        id="est-cerrado"
+                        type="radio"
+                        name="estatus"
+                        className="segmented-input"
+                        checked={formulario.estatus === "cerrado"}
+                        onChange={() => setField("estatus", "cerrado")}
+                      />
+                      <label className="segmented-item" htmlFor="est-cerrado">
+                        <i className="bi bi-lock"></i> Cerrado
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Columna derecha: Fechas */}
+                <div>
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <i className="bi bi-calendar-event me-1"></i> Fecha de Inicio
+                    </label>
+                    <div className="input-icon">
+                      <i className="bi bi-calendar3"></i>
+                      <input
+                        type="date"
+                        name="fecha_inicio"
+                        className="form-control"
+                        value={formulario.fecha_inicio}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">
+                      <i className="bi bi-calendar-check me-1"></i> Fecha de Fin
+                    </label>
+                    <div className="input-icon">
+                      <i className="bi bi-calendar3-event"></i>
+                      <input
+                        type="date"
+                        name="fecha_fin"
+                        className="form-control"
+                        value={formulario.fecha_fin}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* ⬆️ Fin reorganización */}
+            </div>
+
+            {/* Parámetros */}
+            <div className="setting-card">
+              <div className="setting-card__title">
+                <i className="bi bi-speedometer2"></i> Parámetros
+              </div>
+
+              <div className="param-grid">
+                {/* Tiempo límite */}
+                <div>
+                  <div className="form-label fw-semibold">Tiempo Límite (minutos)</div>
+                  <div className="param-card">
+                    <input
+                      type="range"
+                      min="0"
+                      max="180"
+                      step="5"
+                      value={Number(formulario.tiempo_limite || 0)}
+                      onChange={(e) => setField("tiempo_limite", Number(e.target.value))}
+                      className="form-range"
+                      aria-label="Tiempo límite (min)"
+                    />
+                    <div className="input-group input-unit" style={{ minWidth: 120 }}>
+                      <input
+                        type="number"
+                        min="0"
+                        max="180"
+                        step="1"
+                        name="tiempo_limite"
+                        value={formulario.tiempo_limite}
+                        onChange={(e) => setField("tiempo_limite", Number(e.target.value))}
+                        className="form-control text-end"
+                        placeholder="0"
+                      />
+                      <span className="input-group-text">min</span>
+                    </div>
+                  </div>
+                  <div className="form-text">Usa 0 si no deseas límite de tiempo.</div>
+                </div>
+
+                {/* Umbral solo para Cuestionario */}
+                {isCuestionario && (
+                  <div>
+                    <div className="form-label fw-semibold">Umbral de Aprobación</div>
+                    <div className="param-card">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={Number(formulario.umbral_aprobacion || 0)}
+                        onChange={(e) => setField("umbral_aprobacion", Number(e.target.value))}
+                        className="form-range"
+                        aria-label="Umbral de aprobación (%)"
+                      />
+                      <div className="input-group input-unit" style={{ minWidth: 120 }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="1"
+                          name="umbral_aprobacion"
+                          value={formulario.umbral_aprobacion}
+                          onChange={(e) => setField("umbral_aprobacion", Number(e.target.value))}
+                          className="form-control text-end"
+                          placeholder="70"
+                        />
+                        <span className="input-group-text">%</span>
+                      </div>
+                    </div>
+                    <div className="form-text">Se usa en reportes y reglas de aprobación.</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Preferencias */}
+            <div className="setting-card">
+              <div className="setting-card__title">
+                <i className="bi bi-gear"></i> Preferencias
+              </div>
+
+              <ul className="option-list">
+                <li className="option-row">
+                  <div className="option-icon">
+                    <i className="bi bi-arrow-left-right"></i>
+                  </div>
+                  <div className="option-body">
+                    <div className="option-title">Permitir navegación entre preguntas</div>
+                    <div className="option-desc">El participante puede revisar y editar respuestas.</div>
+                  </div>
+                  <div className="option-action">
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="navPreguntas"
+                        name="navegacion_preguntas"
+                        checked={!!formulario.navegacion_preguntas}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </li>
+
+                <li className="option-row">
+                  <div className="option-icon">
+                    <i className="bi bi-eye"></i>
+                  </div>
+                  <div className="option-body">
+                    <div className="option-title">Mostrar respuestas al finalizar</div>
+                    <div className="option-desc">Muestra un resumen al completar el formulario.</div>
+                  </div>
+                  <div className="option-action">
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="mostrarResp"
+                        name="mostrar_respuestas"
+                        checked={!!formulario.mostrar_respuestas}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Barra de acciones */}
+          <div className="actionbar actionbar--gradient d-flex justify-content-between align-items-center mt-3">
+            <div className="text-body-secondary d-flex align-items-center gap-2">
+              <i className="bi bi-shield-check"></i>
+              Revisa los cambios antes de guardar.
+            </div>
+            <div className="d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-ghost-secondary"
+                onClick={() => navigate("/admin/formularios")}
+                disabled={saving}
+              >
+                <i className="bi bi-x-lg me-2"></i> Cancelar
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" />
+                    Guardando…
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-circle me-2"></i> Actualizar Formulario
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
 }
