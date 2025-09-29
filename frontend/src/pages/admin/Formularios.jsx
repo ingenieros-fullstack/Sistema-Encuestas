@@ -47,11 +47,9 @@ export default function Formularios() {
     }
   };
 
-  // Dentro del componente Formularios, después de obtenerFormularios  
-const handleEdit = (codigo) => {  
-  console.log('Editando formulario con código:', codigo); // Para debug  
-  navigate(`/admin/formularios/editar/${codigo}`);  
-};
+  const handleEdit = (codigo) => {
+    navigate(`/admin/formularios/editar/${codigo}`);
+  };
 
   const eliminarFormulario = async (codigo) => {
     if (!window.confirm("¿Estás seguro de eliminar este formulario?")) return;
@@ -87,8 +85,6 @@ const handleEdit = (codigo) => {
     }
   };
 
-
-
   // ---------- FILTRO ----------
   const formulariosFiltrados = useMemo(() => {
     const text = filtro.trim().toLowerCase();
@@ -102,7 +98,6 @@ const handleEdit = (codigo) => {
     });
   }, [formularios, filtro, tipoFiltro]);
 
-  // Reset de página si cambian filtros
   useEffect(() => {
     setPage(1);
   }, [filtro, tipoFiltro]);
@@ -117,10 +112,9 @@ const handleEdit = (codigo) => {
 
   const goto = (p) => setPage(Math.min(Math.max(1, p), totalPages));
 
-  // construir lista corta de páginas (…)
   const buildPages = () => {
     const pages = [];
-    const maxButtons = 5; // botones numéricos visibles
+    const maxButtons = 5;
     if (totalPages <= maxButtons) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
       return pages;
@@ -209,51 +203,6 @@ const handleEdit = (codigo) => {
       </header>
 
       <main className="flex-grow-1 container-xxl py-4">
-        {/* Filtros */}
-        <section className="section-card">
-          <div className="row g-3 align-items-center">
-            <div className="col-12 col-lg-8">
-              <label className="form-label mb-1">Buscar</label>
-              <div className="input-icon">
-                <i className="bi bi-search"></i>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar por título, descripción o código…"
-                  value={filtro}
-                  onChange={(e) => setFiltro(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="col-12 col-lg-4 d-flex justify-content-between justify-content-lg-end align-items-end">
-              <div className="small text-body-secondary d-none d-lg-block me-3">
-                {total} resultado(s)
-              </div>
-
-              {/* Selector de tamaño de página */}
-              <div className="d-flex align-items-center gap-2">
-                <label className="form-label mb-0 small text-body-secondary">Mostrar</label>
-                <select
-                  className="form-select form-select-sm"
-                  style={{ width: 90 }}
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setPage(1);
-                  }}
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span className="small text-body-secondary">por página</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Contenido */}
         {loading ? (
           <section className="section-card">
@@ -271,9 +220,6 @@ const handleEdit = (codigo) => {
           </section>
         ) : total === 0 ? (
           <section className="section-card text-center">
-            <div className="mb-2">
-              <i className="bi bi-inboxes fs-2 text-body-tertiary"></i>
-            </div>
             <h3 className="h5">No se encontraron formularios</h3>
             <p className="text-body-secondary mb-3">
               Prueba cambiando los filtros o crea un nuevo formulario.
@@ -304,9 +250,7 @@ const handleEdit = (codigo) => {
                       <td>
                         <div className="fw-semibold">{f.titulo}</div>
                         {f.descripcion && (
-                          <div className="text-body-secondary small">
-                            {f.descripcion}
-                          </div>
+                          <div className="text-body-secondary small">{f.descripcion}</div>
                         )}
                         <div className="small text-secondary-emphasis mt-1">
                           <i className="bi bi-qr-code me-1"></i>
@@ -329,8 +273,9 @@ const handleEdit = (codigo) => {
                       <td>
                         <span className={badgeEstado(f.estatus)}>
                           <i
-                            className={`bi me-1 ${f.estatus === "abierto" ? "bi-unlock" : "bi-lock"
-                              }`}
+                            className={`bi me-1 ${
+                              f.estatus === "abierto" ? "bi-unlock" : "bi-lock"
+                            }`}
                           ></i>
                           {f.estatus}
                         </span>
@@ -347,32 +292,96 @@ const handleEdit = (codigo) => {
                       </td>
                       <td>
                         <div className="d-flex justify-content-end gap-1">
+                          {/* 👁️ Preview */}
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-primary"
-                            title="Ver detalles"
-                            onClick={() => {
-                              // navigate(`/admin/formularios/${f.codigo}`);
-                            }}
+                            title="Previsualizar"
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/preview`
+                                  : `/admin/cuestionarios/${f.codigo}/preview`
+                              )
+                            }
                           >
                             <i className="bi bi-eye"></i>
                           </button>
+
+                          {/* ✏️ Editar */}
                           <button
                             onClick={() => handleEdit(f.codigo)}
                             className="btn-action edit"
                           >
                             <FaEdit />
                           </button>
+
+                          {/* ❓ Gestionar preguntas */}
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-warning"
                             title="Gestionar preguntas"
-                            onClick={() => {
-                              // navigate(`/admin/formulario/${f.codigo}/preguntas`);
-                            }}
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/secciones`
+                                  : `/admin/cuestionarios/${f.codigo}/secciones`
+                              )
+                            }
                           >
                             <i className="bi bi-node-plus"></i>
                           </button>
+
+                          {/* 📊 Respuestas */}
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-info"
+                            title="Ver respuestas"
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/respuestas`
+                                  : `/admin/cuestionarios/${f.codigo}/respuestas`
+                              )
+                            }
+                          >
+                            <i className="bi bi-bar-chart-line"></i>
+                          </button>
+
+                          {/* 🌍 Resolver (simulación admin) */}
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-success"
+                            title="Ir a resolver"
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/resolver`
+                                  : `/admin/cuestionarios/${f.codigo}/resolver`
+                              )
+                            }
+                          >
+                            <i className="bi bi-globe"></i>
+                          </button>
+
+                          {/* 📱 Generar QR */}
+<button
+  type="button"
+  className="btn btn-sm btn-outline-secondary"
+  title="Generar QR"
+  onClick={() =>
+    navigate(
+      f.tipo === "Encuesta"
+        ? `/admin/encuestas/${f.codigo}/qr`
+        : `/admin/cuestionarios/${f.codigo}/qr`
+    )
+  }
+>
+  <i className="bi bi-qr-code"></i>
+</button>
+
+
+                          {/* 🗑️ Eliminar */}
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-danger"
@@ -392,38 +401,47 @@ const handleEdit = (codigo) => {
             {/* Footer de paginación */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-3">
               <div className="small text-body-secondary">
-                Mostrando <strong>{total === 0 ? 0 : startIndex + 1}</strong>–<strong>{endIndex}</strong> de{" "}
-                <strong>{total}</strong> resultados
+                Mostrando{" "}
+                <strong>{total === 0 ? 0 : startIndex + 1}</strong>–
+                <strong>{endIndex}</strong> de <strong>{total}</strong> resultados
               </div>
 
               <nav aria-label="Paginación de formularios">
                 <ul className="pagination mb-0">
                   <li className={`page-item ${safePage === 1 ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => goto(1)} aria-label="Primera">
-                      <span aria-hidden="true">&laquo;</span>
+                    <button className="page-link" onClick={() => goto(1)}>
+                      &laquo;
                     </button>
                   </li>
                   <li className={`page-item ${safePage === 1 ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => goto(safePage - 1)} aria-label="Anterior">
+                    <button className="page-link" onClick={() => goto(safePage - 1)}>
                       Anterior
                     </button>
                   </li>
 
-                  {/* Números */}
                   {buildPages().map((p) => (
-                    <li key={p} className={`page-item ${p === safePage ? "active" : ""}`}>
-                      <button className="page-link" onClick={() => goto(p)}>{p}</button>
+                    <li
+                      key={p}
+                      className={`page-item ${p === safePage ? "active" : ""}`}
+                    >
+                      <button className="page-link" onClick={() => goto(p)}>
+                        {p}
+                      </button>
                     </li>
                   ))}
 
-                  <li className={`page-item ${safePage === totalPages ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => goto(safePage + 1)} aria-label="Siguiente">
+                  <li
+                    className={`page-item ${safePage === totalPages ? "disabled" : ""}`}
+                  >
+                    <button className="page-link" onClick={() => goto(safePage + 1)}>
                       Siguiente
                     </button>
                   </li>
-                  <li className={`page-item ${safePage === totalPages ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => goto(totalPages)} aria-label="Última">
-                      <span aria-hidden="true">&raquo;</span>
+                  <li
+                    className={`page-item ${safePage === totalPages ? "disabled" : ""}`}
+                  >
+                    <button className="page-link" onClick={() => goto(totalPages)}>
+                      &raquo;
                     </button>
                   </li>
                 </ul>

@@ -6,13 +6,24 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import sequelize from "./config/db.js";
 
+// ==========================
 // Rutas
+// ==========================
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import empleadoRoutes from "./routes/empleado.routes.js";
 import supervisorRoutes from "./routes/supervisor.routes.js";
-import usuariosRoutes from "./routes/usuarios.routes.js"; // 🆕 nuevo
+import usuariosRoutes from "./routes/usuarios.routes.js";
+import publicRoutes from "./routes/public.routes.js";
 
+// 🔹 Rutas de encuestas
+import adminEncuestasRoutes from "./routes/adminEncuestas.routes.js";
+import empleadoEncuestasRoutes from "./routes/empleadoEncuestas.routes.js";
+import supervisorEncuestasRoutes from "./routes/supervisorEncuestas.routes.js";
+
+// 🔹 Rutas de asignaciones
+import asignacionRoutes from "./routes/asignacionRoutes.js";
+import adminCuestionariosRoutes from "./routes/adminCuestionarios.routes.js";
 // Seeder
 import { seedAdminYUsuario } from "./controllers/seeder.js";
 
@@ -66,7 +77,16 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/empleado", empleadoRoutes);
 app.use("/supervisor", supervisorRoutes);
-app.use("/usuarios", usuariosRoutes); // 🆕 agregado
+app.use("/usuarios", usuariosRoutes);
+
+// 🔹 Rutas de encuestas
+app.use("/admin/encuestas", adminEncuestasRoutes);
+app.use("/empleado/encuestas", empleadoEncuestasRoutes);
+app.use("/supervisor/encuestas", supervisorEncuestasRoutes);
+
+app.use("/", publicRoutes);
+app.use("/admin/cuestionarios", adminCuestionariosRoutes);
+
 
 // ==========================
 // 404 handler

@@ -166,6 +166,19 @@ CREATE INDEX idx_preguntas_seccion ON preguntas (id_seccion);
 CREATE INDEX idx_preguntas_tipo ON preguntas (tipo_pregunta);
 
 -- =========================================
+-- Tabla: opciones
+-- =========================================
+CREATE TABLE opciones (
+  id_opcion INT AUTO_INCREMENT PRIMARY KEY,
+  id_pregunta INT NOT NULL,
+  texto VARCHAR(255) NOT NULL,
+  valor VARCHAR(100),
+  FOREIGN KEY (id_pregunta) REFERENCES preguntas(id_pregunta) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_opciones_pregunta ON opciones (id_pregunta);
+
+-- =========================================
 -- Tabla: asignaciones (con codigo_formulario)
 -- =========================================
 DROP TABLE IF EXISTS asignaciones;
