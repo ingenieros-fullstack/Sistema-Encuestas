@@ -26,11 +26,17 @@ router.post("/login", async (req, res) => {
     }  
   
     // Generar token  
-    const token = jwt.sign(  
-      { id: user.id_usuario, rol: user.rol, nombre: user.nombre },  
-      process.env.JWT_SECRET,  
-      { expiresIn: "8h" }  
-    );  
+    const token = jwt.sign(
+  {
+    id_usuario: user.id_usuario,   // ✅ ahora es consistente
+    rol: user.rol,
+    nombre: user.nombre,
+    correo_electronico: user.correo_electronico
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "8h" }
+);
+ 
   
     // Redirección según rol  
     let nextPath = "/dashboard";  

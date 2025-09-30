@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { listarAsignacionesSupervisor } from "../controllers/supervisor.controller.js";
 
 const router = Router();
 
@@ -10,5 +11,12 @@ router.get("/dashboard", authMiddleware(["supervisor"]), (req, res) => {
     usuario: req.user,
   });
 });
+
+// 📋 Formularios asignados al supervisor
+router.get(
+  "/asignaciones",
+  authMiddleware(["supervisor"]),
+  listarAsignacionesSupervisor
+);
 
 export default router;
