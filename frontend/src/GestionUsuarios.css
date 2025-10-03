@@ -1,257 +1,405 @@
-/* ===== Fondo del Modal ===== */
+/* ====== Fondo del modal ====== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem;
-  overflow-y: auto;
-  z-index: 9999;
+  z-index: 1050;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background: none !important;
-}
-
-/* ===== Contenedor Principal ===== */
+/* ====== Contenedor del modal ====== */
 .modal-container {
-  background: #ffffff;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 1050px;
-  max-height: 90vh;
+  background: #fff;
+  width: 95%;
+  max-width: 1100px;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-/* ===== Encabezado ===== */
+/* ====== Header ====== */
 .modal-header {
-  background: linear-gradient(90deg, #2563eb, #1e40af);
+  background: #1d4ed8;
   color: #fff;
-  padding: 0.8rem 1.2rem;
+  padding: 12px 20px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  align-items: center;
+  position: relative;
 }
 
-.modal-header .btn-close {
-  background: none;
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn-close {
+  background: transparent;
   border: none;
-  font-size: 1.3rem;
+  font-size: 22px;
   color: #fff;
   cursor: pointer;
 }
 
-/* ===== Layout en Dos Columnas ===== */
+.btn-close:hover {
+  color: #ffcccc;
+}
+
+/* ====== Layout dos columnas ====== */
 .two-column-layout {
-  overflow-y: auto;
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1rem;
-  padding: 0.8rem 1rem;
+  grid-template-columns: 65% 35%;
+  gap: 15px;
+  padding: 20px;
 }
 
 .left-panel,
 .right-panel {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* ===== Responsive: Pila en pantallas pequeñas ===== */
-@media (max-width: 992px) {
-  .two-column-layout {
-    grid-template-columns: 1fr;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0.5rem;
-
-  }
-}
-
-.user-card {
-    max-width: 100%;
-    margin: auto;
-}
- 
-.right-panel {
-    margin-top: 1rem;
-}
-
-
-  .user-card-grid {
-    grid-template-columns: 1fr; /* Una sola columna en móvil */
-  }
-
-
-/* ===== Campos de Entrada ===== */
-.left-panel input,
-.right-panel input,
-.right-panel select {
-  width: 100%;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid #d1d5db;
+  background: #fafafa;
   border-radius: 8px;
-  margin-bottom: 0.8rem;
-  font-size: 0.9rem; /* Antes: 0.95rem */
-  transition: border 0.2s ease;
-}
-
-.left-panel input:focus,
-.right-panel input:focus,
-.right-panel select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-  outline: none;
-}
-
-/* ===== Grid de Usuarios ===== */
-.user-card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.8rem; /* Antes: 1rem */
-  justify-items: center;
-  margin-top: 0.5rem;
-}
-
-/* ===== Card de Usuario ===== */
-.user-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 0.8rem;
-  width: 100%;
-  max-width: 200px;
-  text-align: center;
+  padding: 15px;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.user-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-card h6 {
-  margin: 0.5rem 0;
-  font-size: 1rem;
+.left-panel h6,
+.right-panel h6 {
   font-weight: 600;
-  color: #1f2937;
-}
-/* Títulos más compactos */
-h6 {
-  font-size: 0.95rem; /* Antes: 1rem */
-  margin-bottom: 0.4rem;
-}
-
-.user-card p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #4b5563;
-}
-
-/* ===== Botón Eliminar Usuario ===== */
-.btn-delete {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #dc2626;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-/* ===== Etiquetas de Rol ===== */
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #fff;
-  margin-top: 0.3rem;
-  text-transform: uppercase;
-}
-
-.badge-blue { background-color: #3b82f6; }
-.badge-yellow { background-color: #f59e0b; }
-.badge-green { background-color: #10b981; }
-.badge-gray { background-color: #6b7280; }
-
-/* ===== Botones ===== */
-.btn {
-  padding: 0.4rem 0.8rem; /* Antes: 0.5rem 0.9rem */
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem; /* Antes: 0.9rem */
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-
-.btn-primary { background: #2563eb; color: #fff; }
-.btn-primary:hover { background: #1e40af; }
-
-.btn-success { background: #10b981; color: #fff; }
-.btn-success:hover { background: #059669; }
-
-.btn-secondary { background: #6b7280; color: #fff; }
-.btn-secondary:hover { background: #4b5563; }
-
-/* ===== Paginación ===== */
-.pagination-controls {
+  margin-bottom: 15px;
+  color: #374151;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.pagination-info {
+/* ====== Tabla de usuarios ====== */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 8px;
+  text-align: center;
+}
+
+.table td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+  background-color: #f9fafb;
+}
+
+/* ====== Acciones (editar/eliminar) ====== */
+.table td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table td:last-child .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0 3px;
+  border-radius: 6px;
+}
+
+.table td:last-child .btn i {
+  font-size: 14px;
+}
+
+/* ====== Paginación ====== */
+.pagination-controls {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.pagination-controls button {
+  margin: 0 8px;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.pagination-controls span {
+  font-size: 0.9rem;
   font-weight: 500;
   color: #374151;
 }
 
-/* ===== Footer ===== */
-.modal-footer {
-  padding: 0.8rem 1rem;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+/* ====== Badges ====== */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.badge-blue {
+  background-color: #2563eb;
+}
+
+.badge-green {
+  background-color: #16a34a;
+}
+
+.badge-yellow {
+  background-color: #facc15;
+  color: #111827;
+}
+
+.badge-gray {
+  background-color: #6b7280;
+}
+
+/* ====== Botones ====== */
+.btn {
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #15803d;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+/* ====== Inputs y selects ====== */
+input.form-control,
+select.form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+input.form-control:focus,
+select.form-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ====== Compactar formulario ====== */
+.form-compact .mb-2 {
+  margin-bottom: 8px !important;
+}
+
+.form-compact label {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.form-compact input,
+.form-compact select {
+  font-size: 0.85rem;
+  padding: 6px 8px;
+}
+
+/* ====== Responsive ====== */
+
+/* 📱 Móviles y tablets */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;      /* Fullscreen en móviles */
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .modal-header {
+    border-radius: 0;
+    padding: 15px;
+  }
+
+  .two-column-layout {
+    grid-template-columns: 1fr; /* Apila tabla y formulario */
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .left-panel,
+  .right-panel {
+    padding: 12px;
+    border: none;
+    background: transparent;
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+  }
+}
+
+/* 📱 Botones compactos */
+@media (max-width: 500px) {
+  .table td:last-child .btn {
+    width: 28px;
+    height: 28px;
+    margin: 0 2px;
+  }
+
+  .form-compact input,
+  .form-compact select {
+    font-size: 0.8rem;
+    padding: 5px 7px;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+}
+
+/* ====== Animaciones ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== Modal: soporte scroll vertical ===== */
+.modal-container {
+  background: #fff;
+  width: 95%;
+  max-width: 1100px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
 }
 
-/* Evitar que el texto del correo se salga de la card */
-.user-card p {
-  word-wrap: break-word;
-  word-break: break-word;
-  white-space: normal;
-  overflow-wrap: break-word;
-  max-width: 100%;
-  display: block;
-  text-align: center;
+/* Contenido interno scrollable */
+.two-column-layout {
+  flex: 1;
+  overflow-y: auto;  /* 🔹 permite desplazarse hacia abajo */
+  overflow-x: hidden;
 }
 
-/* Ajuste para títulos largos */
-.user-card h6 {
-  word-wrap: break-word;
-  word-break: break-word;
-  white-space: normal;
-  max-width: 100%;
-  text-align: center;
+/* ===== Tabla scroll horizontal en móviles ===== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;            /* 🔹 activa scroll horizontal */
+  -webkit-overflow-scrolling: touch;
 }
+
+.table {
+  min-width: 700px;            /* 🔹 asegura que no se aplasten columnas */
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive móviles ===== */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;       /* 🔹 ocupa toda la pantalla */
+    max-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    border-radius: 0;
+    padding: 12px 16px;
+  }
+
+  .two-column-layout {
+    display: block;      /* 🔹 apila contenido */
+    padding: 10px;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    margin-bottom: 20px;
+    border: none;
+    background: transparent;
+    padding: 10px;
+  }
+
+  /* Asegura scroll vertical completo */
+  .modal-container {
+    overflow-y: auto;    /* 🔹 permite desplazar todo el modal */
+  }
+}
+

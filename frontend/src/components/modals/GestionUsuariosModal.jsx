@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../../GestionUsuarios.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
-const USUARIOS_POR_PAGINA = 6;
+const USUARIOS_POR_PAGINA = 5;
 
 export default function GestionUsuariosModal({ onClose }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -12,6 +12,7 @@ export default function GestionUsuariosModal({ onClose }) {
   const [form, setForm] = useState({ rol: "", nuevaPass: "", confirmarPass: "" });
   const [paginaActual, setPaginaActual] = useState(1);
 
+  // === Cargar usuarios
   useEffect(() => {
     fetch(`${API_URL}/usuarios?q=${busqueda}`)
       .then((res) => res.json())
@@ -22,8 +23,12 @@ export default function GestionUsuariosModal({ onClose }) {
       .catch((err) => console.error("Error cargando usuarios:", err));
   }, [busqueda]);
 
-  const handleBuscarUsuario = () => {
-    fetch(`${API_URL}/usuarios/by-email?email=${correoBusqueda}`)
+  // === Buscar usuario
+  const handleBuscarUsuario = (correo = correoBusqueda) => {
+    if (!correo) return;
+    setCorreoBusqueda(correo);
+
+    fetch(`${API_URL}/usuarios/by-email?email=${correo}`)
       .then((res) => {
         if (!res.ok) throw new Error("No encontrado");
         return res.json();
@@ -31,6 +36,8 @@ export default function GestionUsuariosModal({ onClose }) {
       .then((data) => {
         setUsuarioEncontrado(data);
         setForm({ rol: data.rol, nuevaPass: "", confirmarPass: "" });
+        // 🔹 Llevar el foco visual al panel derecho
+        document.querySelector(".right-panel")?.scrollIntoView({ behavior: "smooth" });
       })
       .catch(() => {
         alert("⚠️ Usuario no encontrado");
@@ -38,6 +45,13 @@ export default function GestionUsuariosModal({ onClose }) {
       });
   };
 
+  // === Editar usuario desde tabla
+  const handleEditar = (correo) => {
+    setCorreoBusqueda(correo); // ✅ rellenar automáticamente el input
+    handleBuscarUsuario(correo);
+  };
+
+  // === Actualizar usuario
   const handleActualizarUsuario = async (e) => {
     e.preventDefault();
     if (!usuarioEncontrado) return;
@@ -70,6 +84,7 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
+  // === Eliminar
   const handleEliminar = async (id) => {
     if (!window.confirm("¿Eliminar usuario?")) return;
     try {
@@ -80,6 +95,7 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
+  // === Badges por rol
   const getBadgeClass = (rol) => {
     switch (rol.toLowerCase()) {
       case "admin": return "badge badge-blue";
@@ -89,6 +105,7 @@ export default function GestionUsuariosModal({ onClose }) {
     }
   };
 
+  // === Paginación
   const totalPaginas = Math.ceil(usuarios.length / USUARIOS_POR_PAGINA);
   const indiceInicio = (paginaActual - 1) * USUARIOS_POR_PAGINA;
   const usuariosPaginados = usuarios.slice(indiceInicio, indiceInicio + USUARIOS_POR_PAGINA);
@@ -96,91 +113,148 @@ export default function GestionUsuariosModal({ onClose }) {
   return (
     <div className="modal-backdrop" onClick={(e) => e.target.classList.contains("modal-backdrop") && onClose()}>
       <div className="modal-container">
-
         {/* Header */}
         <div className="modal-header">
           <h5 className="modal-title"><i className="bi bi-people-fill"></i> Gestión de Usuarios</h5>
           <button className="btn-close" onClick={onClose}>×</button>
         </div>
 
-        {/* Contenedor dos columnas */}
         <div className="two-column-layout">
-          {/* Columna Izquierda: Lista de usuarios */}
+          {/* === Columna izquierda: Tabla === */}
           <div className="left-panel">
             <h6><i className="bi bi-list-ul"></i> Lista de Usuarios</h6>
             <input
               type="text"
-              placeholder="🔍 Buscar por nombre"
+              placeholder="Buscar por nombre o correo"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="mb-3"
+              className="mb-3 form-control"
             />
 
-            <div className="user-card-grid">
-              {usuariosPaginados.map((u) => (
-                <div className="user-card" key={u.id}>
-                  <button className="btn-delete" onClick={() => handleEliminar(u.id)}>
-                    <i className="bi bi-trash-fill"></i>
-                  </button>
-                  <h6>{u.nombre}</h6>
-                  <p>{u.correo}</p>
-                  <span className={getBadgeClass(u.rol)}>{u.rol}</span>
-                  <p className="mt-2">Contraseña: ********</p>
-                </div>
-              ))}
-              {usuarios.length === 0 && <p className="text-muted">No hay usuarios para mostrar.</p>}
+            <div className="table-responsive">
+              <table className="table table-bordered table-striped align-middle">
+                <thead className="table-primary">
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Correo electrónico</th>
+                    <th>Centro de trabajo</th>
+                    <th>Departamento</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuariosPaginados.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.nombre || "-"}</td>
+                      <td>{u.correo}</td>
+                      <td>{u.centroTrabajo || "-"}</td>
+                      <td>{u.departamento || "-"}</td>
+                      <td><span className={getBadgeClass(u.rol)}>{u.rol}</span></td>
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleEditar(u.correo)}
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleEliminar(u.id)}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {usuarios.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center text-muted">
+                        No hay usuarios para mostrar.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
+            {/* Paginación */}
             {usuarios.length > USUARIOS_POR_PAGINA && (
-              <div className="pagination-controls">
-                <button onClick={() => setPaginaActual(paginaActual - 1)} disabled={paginaActual === 1} className="btn btn-secondary">
+              <div className="pagination-controls d-flex justify-content-between align-items-center">
+                <button
+                  onClick={() => setPaginaActual(paginaActual - 1)}
+                  disabled={paginaActual === 1}
+                  className="btn btn-secondary"
+                >
                   ← Anterior
                 </button>
-                <span className="pagination-info">Página {paginaActual} de {totalPaginas}</span>
-                <button onClick={() => setPaginaActual(paginaActual + 1)} disabled={paginaActual === totalPaginas} className="btn btn-secondary">
+                <span>Página {paginaActual} de {totalPaginas}</span>
+                <button
+                  onClick={() => setPaginaActual(paginaActual + 1)}
+                  disabled={paginaActual === totalPaginas}
+                  className="btn btn-secondary"
+                >
                   Siguiente →
                 </button>
               </div>
             )}
           </div>
 
-          {/* Columna Derecha: Actualizar usuario */}
+          {/* === Columna derecha: Editar usuario === */}
           <div className="right-panel">
-            <h6><i className="bi bi-person-gear"></i> Actualizar Usuario</h6>
+            <h6><i className="bi bi-person-gear"></i> Editar Usuario</h6>
             <input
               type="email"
               placeholder="Correo del empleado"
               value={correoBusqueda}
               onChange={(e) => setCorreoBusqueda(e.target.value)}
-              className="mb-2"
+              className="mb-2 form-control"
             />
-            <button className="btn btn-primary mb-3" onClick={handleBuscarUsuario}>
+            <button className="btn btn-primary mb-3 w-100" onClick={() => handleBuscarUsuario()}>
               <i className="bi bi-search"></i> Buscar
             </button>
 
             {usuarioEncontrado && (
-              <form onSubmit={handleActualizarUsuario}>
-                <div className="mb-3">
+              <form onSubmit={handleActualizarUsuario} className="form-compact">
+                <div className="mb-2">
                   <label className="form-label">Correo</label>
                   <input type="email" className="form-control" value={usuarioEncontrado.correo} disabled />
                 </div>
-                <div className="mb-3">
+                <div className="mb-2">
                   <label className="form-label">Rol</label>
-                  <select className="form-select" value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}>
+                  <select
+                    className="form-select"
+                    value={form.rol}
+                    onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                  >
                     <option value="admin">Admin</option>
                     <option value="supervisor">Supervisor</option>
                     <option value="empleado">Empleado</option>
                   </select>
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Nueva Contraseña</label>
-                  <input type="password" className="form-control" value={form.nuevaPass} onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })} />
+                <div className="row">
+                  <div className="col">
+                    <label className="form-label">Nueva Contraseña</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={form.nuevaPass}
+                      onChange={(e) => setForm({ ...form, nuevaPass: e.target.value })}
+                    />
+                  </div>
+                  <div className="col">
+                    <label className="form-label">Confirmar</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={form.confirmarPass}
+                      onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Confirmar Contraseña</label>
-                  <input type="password" className="form-control" value={form.confirmarPass} onChange={(e) => setForm({ ...form, confirmarPass: e.target.value })} />
-                </div>
-                <button type="submit" className="btn btn-success w-100">Actualizar Usuario</button>
+                <button type="submit" className="btn btn-success w-100 mt-3">Actualizar Usuario</button>
               </form>
             )}
           </div>

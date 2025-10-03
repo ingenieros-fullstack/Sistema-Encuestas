@@ -392,7 +392,7 @@ export default function GestionSecciones() {
                   onChange={(e) =>
                     setNuevaPregunta({ ...nuevaPregunta, enunciado: e.target.value })
                   }
-                  placeholder="¿Cuál es tu pregunta?"
+                  placeholder="Escribe la Pregunta..."
                 />
               </div>
             </div>
