@@ -4,6 +4,7 @@ import Intro from "../../components/encuestas/Intro";
 import Seccion from "../../components/encuestas/Seccion";
 import MensajeFinal from "../../components/encuestas/MensajeFinal";
 
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export default function ResolverEncuestaAdmin() {

@@ -1,103 +1,287 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Intro from "../../components/encuestas/Intro";
 import Seccion from "../../components/encuestas/Seccion";
 import MensajeFinal from "../../components/encuestas/MensajeFinal";
+import "../../PreviewEncuestas.css";
 import { QRCodeCanvas } from "qrcode.react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export default function PreviewEncuesta() {
   const { codigo } = useParams();
+  const navigate = useNavigate();
+
   const [encuesta, setEncuesta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [mostrarIntro, setMostrarIntro] = useState(true);
   const [finalizado, setFinalizado] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
-  const navigate = useNavigate();
 
+  const qrRef = useRef(null);
+
+  // ---------- Carga ----------
   useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError("");
+
     fetch(`${API_URL}/admin/encuestas/${codigo}/preview`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar preview");
+        if (!res.ok) throw new Error("No se pudo cargar la vista previa.");
         return res.json();
       })
-      .then((data) => setEncuesta(data))
-      .catch((err) => console.error("Error cargando preview:", err));
+      .then((data) => mounted && setEncuesta(data))
+      .catch((e) => mounted && setError(e.message || "Error inesperado."))
+      .finally(() => mounted && setLoading(false));
+
+    return () => { mounted = false; };
   }, [codigo]);
 
-  if (!encuesta) return <p>Cargando encuesta...</p>;
+  const totalSecciones = encuesta?.Secciones?.length || 0;
+  const tiempoTxt = useMemo(
+    () => (encuesta?.tiempo_limite ? `${encuesta.tiempo_limite} min` : "Sin límite"),
+    [encuesta]
+  );
 
-  if (mostrarIntro) {
+  const descargarQR = () => {
+    const canvas = qrRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `QR-${codigo}.png`;
+    a.click();
+  };
+
+  // ---------- Loading / Error ----------
+  if (loading) {
     return (
-      <Intro
-        titulo={encuesta.titulo}
-        introduccion={encuesta.introduccion}
-        tiempoLimite={encuesta.tiempo_limite}
-        onComenzar={() => setMostrarIntro(false)}
-      />
+      <div className="preview-shell d-flex align-items-center justify-content-center">
+        <div className="text-center">
+          <div className="spinner-border mb-3" role="status" aria-label="Cargando" />
+          <div className="text-secondary">Cargando encuesta…</div>
+        </div>
+      </div>
     );
   }
 
-  if (finalizado) {
+  if (error || !encuesta) {
     return (
-      <div className="p-6 space-y-6">
-        <MensajeFinal
-          mensajeFinal={
-            encuesta.texto_final || "Has terminado la vista previa de la encuesta."
-          }
-        />
+      <div className="preview-shell d-flex align-items-center justify-content-center">
+        <div className="glass-subtle p-4">
+          <div className="text-danger fw-semibold mb-2">{error || "No se encontró la encuesta."}</div>
+          <button className="btn btn-ghost" onClick={() => navigate(-1)}>← Volver</button>
+        </div>
+      </div>
+    );
+  }
 
-        {/* Botones de acciones */}
-        <div className="flex gap-4 mt-6">
-          <button
-  onClick={() => navigate(`/resolver/${codigo}`)}
-  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
->
-  🌍 Resolver Encuesta
-</button>
+  // ================= HERO INTRO =================
+  if (mostrarIntro) {
+    return (
+      <div className="preview-shell">
+        <div className="container position-relative">
+          <button className="link-back" onClick={() => navigate(-1)}>← Volver</button>
 
+          <section className="cover cover--deep glass shadow-lg preview-hero">
+            <div className="cover-badges">
+              <span className="metric-chip">⏱️ {tiempoTxt}</span>
+              <span className="metric-chip">📚 {totalSecciones} secciones</span>
+              <span className="metric-chip"># {codigo}</span>
+            </div>
 
-          <button
-            onClick={() => setMostrarQR(!mostrarQR)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            📱 Generar QR
-          </button>
+            <h1 className="display-6 fw-semibold mb-2 text-white-imp text-center">
+              {encuesta.titulo}
+            </h1>
+            <p className="lead text-white-imp text-center mb-4">
+              {encuesta.introduccion || "Vista previa de la encuesta."}
+            </p>
+
+            <div className="d-flex flex-wrap justify-content-center gap-2">
+              <button className="btn btn-gradient btn-lg px-4 btn-primary-imp" onClick={() => setMostrarIntro(false)}>
+                Comenzar
+              </button>
+
+              <button className="btn btn-outline-light-imp btn-lg" onClick={() => setMostrarQR(true)}>
+                Ver QR
+              </button>
+
+              <button className="btn btn-outline-light-imp btn-lg" onClick={() => navigate(-1)}>
+                Cancelar
+              </button>
+            </div>
+          </section>
+
+          {/* Tarjetas informativas */}
+          <div className="row g-3 mt-4">
+            <div className="col-12 col-md-4">
+              <div className="detail-card glass-subtle">
+                <div className="detail-ico">⏳</div>
+                <div className="detail-title">Tiempo</div>
+                <div className="detail-sub">{tiempoTxt}</div>
+              </div>
+            </div>
+            <div className="col-12 col-md-4">
+              <div className="detail-card glass-subtle">
+                <div className="detail-ico">🗂️</div>
+                <div className="detail-title">Secciones</div>
+                <div className="detail-sub">{totalSecciones}</div>
+              </div>
+            </div>
+            <div className="col-12 col-md-4">
+              <div className="detail-card glass-subtle">
+                <div className="detail-ico">🔗</div>
+                <div className="detail-title">Código</div>
+                <div className="detail-sub">{codigo}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Mostrar QR */}
+        {/* Modal QR */}
         {mostrarQR && (
-          <div className="mt-6 p-4 border rounded bg-white shadow">
-            <p className="mb-2 font-medium">
-              Escanea este QR para abrir la encuesta:
-            </p>
-            <QRCodeCanvas
-              value={`${window.location.origin}/resolver/${codigo}`}
-              size={180}
-            />
-          </div>
+          <>
+            <div className="modal fade show d-block" tabIndex="-1" aria-modal="true">
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content border-0 shadow-lg">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Abrir desde otro dispositivo</h5>
+                    <button className="btn-close" onClick={() => setMostrarQR(false)} />
+                  </div>
+                  <div className="modal-body text-center">
+                    <p className="text-secondary small mb-2">
+                      {window.location.origin}/resolver/{codigo}
+                    </p>
+                    <div className="qr-frame">
+                      <QRCodeCanvas value={`${window.location.origin}/resolver/${codigo}`} size={220} ref={qrRef} />
+                    </div>
+                  </div>
+                  <div className="modal-footer d-flex justify-content-between">
+                    <button className="btn btn-outline-secondary" onClick={() => setMostrarQR(false)}>Cerrar</button>
+                    <button className="btn btn-primary" onClick={descargarQR}>Descargar PNG</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-backdrop show"></div>
+          </>
         )}
       </div>
     );
   }
 
+  // ================= SECCIONES (Preview idéntico al cuestionario) =================
+  if (!finalizado) {
+    return (
+      <div className="preview-shell">
+        {/* Header fijo */}
+        <div className="preview-toolbar">
+          <div className="toolbar-left">
+            <button className="btn btn-ghost btn-square" onClick={() => navigate(-1)}>←</button>
+            <div className="toolbar-title">
+              <div className="title-main text-truncate">{encuesta.titulo}</div>
+              <div className="meta-chips">
+                <span className="metric-chip">⏱️ {tiempoTxt}</span>
+                <span className="metric-chip">📚 {totalSecciones} secciones</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="toolbar-center">
+            <div className="progress progress-slim" role="progressbar" aria-valuenow={100}>
+              <div className="progress-bar progress-bar-gradient" style={{ width: "100%" }}>
+                Vista previa
+              </div>
+            </div>
+          </div>
+
+          <div className="toolbar-right">
+            <button className="btn btn-gradient" onClick={() => setFinalizado(true)}>
+              Terminar vista previa
+            </button>
+          </div>
+        </div>
+
+        {/* Spacer físico que empuja el contenido bajo el header */}
+        <div className="preview-toolbar-spacer" />
+
+        {/* Contenido */}
+        <div className="container py-4 content-light">
+          <div className="paper">
+            {encuesta.Secciones?.map((seccion, idx) => (
+              <div className="card section-card shadow-sm border-0 mb-4" key={seccion.id_seccion}>
+                <div className="card-body p-md-4">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h2 className="h6 mb-0">
+                      <span className="section-pill">{idx + 1}</span> {seccion.nombre_seccion}
+                    </h2>
+                    <span className="badge text-bg-secondary">
+                      {(seccion?.Preguntas || []).length} preguntas
+                    </span>
+                  </div>
+                  <Seccion seccion={seccion} modo="preview" />
+                </div>
+              </div>
+            ))}
+
+            {!encuesta.Secciones?.length && (
+              <div className="alert alert-warning">Esta encuesta no tiene secciones configuradas.</div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal QR */}
+        {mostrarQR && (
+          <>
+            <div className="modal fade show d-block" tabIndex="-1" aria-modal="true">
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content border-0 shadow-lg">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Abrir desde otro dispositivo</h5>
+                    <button className="btn-close" onClick={() => setMostrarQR(false)} />
+                  </div>
+                  <div className="modal-body text-center">
+                    <div className="qr-frame">
+                      <QRCodeCanvas value={`${window.location.origin}/resolver/${codigo}`} size={220} ref={qrRef} />
+                    </div>
+                    <p className="small text-muted mt-3 mb-0">
+                      {window.location.origin}/resolver/{codigo}
+                    </p>
+                  </div>
+                  <div className="modal-footer d-flex justify-content-between">
+                    <button className="btn btn-outline-secondary" onClick={() => setMostrarQR(false)}>Cerrar</button>
+                    <button className="btn btn-primary" onClick={descargarQR}>Descargar PNG</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-backdrop show"></div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ================= MENSAJE FINAL =================
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">{encuesta.titulo}</h1>
-      {encuesta.Secciones?.map((seccion, idx) => (
-        <Seccion
-          key={seccion.id_seccion}
-          seccion={seccion}
-          modo="preview"
-          onFinalizar={
-            idx === encuesta.Secciones.length - 1
-              ? () => setFinalizado(true)
-              : null
-          }
-        />
-      ))}
+    <div className="preview-shell">
+      <div className="container py-4">
+        <MensajeFinal mensajeFinal={encuesta.texto_final || "Has terminado la vista previa de la encuesta."} />
+        <div className="d-flex flex-wrap gap-2 mt-4">
+          <button className="btn btn-primary" onClick={() => navigate(`/resolver/${codigo}`)}>
+            🚀 Resolver encuesta
+          </button>
+          <button className="btn btn-outline-secondary" onClick={() => setMostrarIntro(true)}>
+            Volver al inicio
+          </button>
+          <button className="btn btn-outline-success" onClick={() => setMostrarQR(true)}>
+            Ver QR
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

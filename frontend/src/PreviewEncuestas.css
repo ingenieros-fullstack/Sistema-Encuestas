@@ -1,0 +1,149 @@
+/* =========================
+   HEADER FIJO - PREVIEW
+   ========================= */
+
+/* Altura configurable del header */
+:root {
+  --preview-toolbar-h: 78px; /* altura visual del header */
+}
+
+/* Barra fija superior */
+.preview-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: var(--preview-toolbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0.75rem 1.5rem;
+  background: #1a1a2e;              /* tono oscuro del header */
+  color: #fff;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.30);
+
+  /* Debajo de modales Bootstrap (~1055) para que los modales queden por encima */
+  z-index: 1030;
+}
+
+/* Estructura interna del header */
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toolbar-title .title-main {
+  font-weight: 600;
+  max-width: 40vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-chips { display: flex; gap: .5rem; }
+.metric-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* =========================
+   OFFSET DEL CONTENIDO
+   ========================= */
+
+/* Offset del contenido para no quedar detrás del header */
+.preview-offset {
+  /* más espacio para que no “tape” la parte superior */
+  padding-top: calc(var(--preview-toolbar-h) + 40px);
+}
+
+/* En pantallas pequeñas, aún más aire */
+@media (max-width: 992px) {
+  .preview-offset {
+    padding-top: calc(var(--preview-toolbar-h) + 52px);
+  }
+}
+
+/* Ajuste adicional para separar el paper del header */
+.preview-offset .paper {
+  margin-top: 0.75rem;
+}
+
+/* El shell general NO debe sumar padding-top para evitar doble offset */
+.preview-shell {}
+
+/* =========================
+   PROGRESS BAR
+   ========================= */
+
+.progress {
+  height: 14px; /* más alta para que el texto tenga espacio */
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  margin: 0 1rem;
+  flex: 1;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #7b5cff, #b057f6);
+  height: 100%;
+  border-radius: inherit;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.progress-bar-gradient {
+  animation: shine 3s ease-in-out infinite;
+  background: linear-gradient(90deg, #7b5cff, #b057f6, #7b5cff);
+  background-size: 200%;
+}
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Versión compacta si la usas */
+.progress.progress-slim {
+  height: 14px;
+}
+
+:root {
+  --preview-toolbar-h: 78px; /* tu altura real del header */
+  --preview-toolbar-gap: 40px; /* espacio extra deseado */
+}
+
+/* Spacer físico bajo el header para evitar solapamiento */
+.preview-toolbar-spacer {
+  height: calc(var(--preview-toolbar-h) + var(--preview-toolbar-gap));
+}
+
+/* Si aún conservas esta clase, déjala vacía para no sumar doble */
+.preview-offset { padding-top: 0 !important; }
+
+/* En móviles puedes dar un poco más de espacio si quieres */
+@media (max-width: 992px) {
+  .preview-toolbar-spacer {
+    height: calc(var(--preview-toolbar-h) + 52px);
+  }
+}

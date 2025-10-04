@@ -1,9 +1,9 @@
 export default function MensajeFinal({ mensajeFinal }) {
   return (
-    <div className="p-6 text-center">
-      <h2 className="text-2xl font-bold mb-4">¡Gracias por participar!</h2>
-      <p className="text-gray-700">
-        {mensajeFinal || "Tus respuestas han sido registradas con éxito."}
+    <div className="text-center p-4">
+      <h2 className="h4 fw-bold mb-2">¡Gracias por participar!</h2>
+      <p className="text-muted mb-0">
+        {mensajeFinal || "Has terminado la vista previa de la encuesta."}
       </p>
     </div>
   );

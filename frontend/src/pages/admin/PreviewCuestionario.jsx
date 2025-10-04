@@ -242,9 +242,7 @@ export default function PreviewCuestionario() {
               </div>
             </div>
             <div className="toolbar-right">
-              <button className="btn btn-outline-success btn-icon" onClick={() => setMostrarQR(true)}>
-                QR
-              </button>
+            
               <button className="btn btn-gradient" onClick={() => navigate(`/resolver/${codigo}`)}>
                 Resolver
               </button>
@@ -348,9 +346,6 @@ export default function PreviewCuestionario() {
           </div>
 
           <div className="toolbar-right">
-            <button className="btn btn-outline-success btn-icon" onClick={() => setMostrarQR(true)}>
-              QR
-            </button>
             <button className="btn btn-gradient" onClick={() => setFinalizado(true)}>
               Terminar vista previa
             </button>

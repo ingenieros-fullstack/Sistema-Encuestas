@@ -30,6 +30,7 @@ export default function EditarFormulario() {
   const rol = localStorage.getItem("rol") || "admin";
 
   const isCuestionario = useMemo(() => formulario.tipo === "Cuestionario", [formulario.tipo]);
+  const isEncuesta = useMemo(() => formulario.tipo === "Encuesta", [formulario.tipo]);
 
   useEffect(() => {
     fetchFormulario();
@@ -60,7 +61,8 @@ export default function EditarFormulario() {
           umbral_aprobacion: typeof f.umbral_aprobacion === "number" ? f.umbral_aprobacion : 70,
           tiempo_limite: typeof f.tiempo_limite === "number" ? f.tiempo_limite : 45,
           navegacion_preguntas: f.navegacion_preguntas ?? true,
-          mostrar_respuestas: f.mostrar_respuestas ?? true,
+          // 🔒 Si es Encuesta, siempre false:
+          mostrar_respuestas: (f.tipo === "Encuesta") ? false : (f.mostrar_respuestas ?? true),
         });
       } else {
         setError("Error al cargar el formulario");
@@ -77,6 +79,12 @@ export default function EditarFormulario() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // 🔒 Bloquea cambios al toggle cuando es Encuesta
+    if (name === "mostrar_respuestas" && isEncuesta) {
+      return;
+    }
+
     setFormulario((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
@@ -93,14 +101,19 @@ export default function EditarFormulario() {
 
     try {
       const token = localStorage.getItem("token");
+
+      // 🛡️ Payload seguro: en Encuesta, forzar mostrar_respuestas = false
+      const payload = formulario.tipo === "Encuesta"
+        ? { ...formulario, mostrar_respuestas: false }
+        : formulario;
+
       const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(formulario),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        // éxito
         navigate("/admin/formularios");
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -247,9 +260,9 @@ export default function EditarFormulario() {
                 <i className="bi bi-sliders2"></i> Propiedades
               </div>
 
-              {/* ⬇️ Reorganizado a 2 columnas: izquierda (Tipo/Estado) | derecha (Fechas) */}
+              {/* ⬇️ Izquierda (Tipo/Estado) | Derecha (Fechas) */}
               <div className="nf-grid nf-grid-2">
-                {/* Columna izquierda: Tipo + Estado */}
+                {/* Izquierda: Tipo + Estado */}
                 <div>
                   {/* Tipo */}
                   <div className="mb-3">
@@ -264,7 +277,13 @@ export default function EditarFormulario() {
                         name="tipo"
                         className="segmented-input"
                         checked={formulario.tipo === "Encuesta"}
-                        onChange={() => setField("tipo", "Encuesta")}
+                        onChange={() =>
+                          setFormulario((prev) => ({
+                            ...prev,
+                            tipo: "Encuesta",
+                            mostrar_respuestas: false, // 🔒 al cambiar a Encuesta
+                          }))
+                        }
                       />
                       <label className="segmented-item" htmlFor="tipo-enc">
                         <i className="bi bi-ui-radios-grid"></i> Encuesta
@@ -276,7 +295,13 @@ export default function EditarFormulario() {
                         name="tipo"
                         className="segmented-input"
                         checked={formulario.tipo === "Cuestionario"}
-                        onChange={() => setField("tipo", "Cuestionario")}
+                        onChange={() =>
+                          setFormulario((prev) => ({
+                            ...prev,
+                            tipo: "Cuestionario",
+                            // no tocamos mostrar_respuestas: el usuario decide
+                          }))
+                        }
                       />
                       <label className="segmented-item" htmlFor="tipo-cue">
                         <i className="bi bi-journal-check"></i> Cuestionario
@@ -318,7 +343,7 @@ export default function EditarFormulario() {
                   </div>
                 </div>
 
-                {/* Columna derecha: Fechas */}
+                {/* Derecha: Fechas */}
                 <div>
                   <div className="mb-3">
                     <label className="form-label">
@@ -353,7 +378,7 @@ export default function EditarFormulario() {
                   </div>
                 </div>
               </div>
-              {/* ⬆️ Fin reorganización */}
+              {/* ⬆️ Fin */}
             </div>
 
             {/* Parámetros */}
@@ -466,7 +491,14 @@ export default function EditarFormulario() {
                   </div>
                   <div className="option-body">
                     <div className="option-title">Mostrar respuestas al finalizar</div>
-                    <div className="option-desc">Muestra un resumen al completar el formulario.</div>
+                    <div className="option-desc">
+                      Muestra un resumen al completar el formulario.
+                      {!isCuestionario && (
+                        <span className="text-muted d-block mt-1">
+                          (No disponible para formularios de tipo Encuesta)
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="option-action">
                     <div className="form-check form-switch m-0">
@@ -475,8 +507,10 @@ export default function EditarFormulario() {
                         type="checkbox"
                         id="mostrarResp"
                         name="mostrar_respuestas"
-                        checked={!!formulario.mostrar_respuestas}
+                        // 🔒 si NO es Cuestionario, se muestra apagado y bloqueado
+                        checked={isCuestionario ? !!formulario.mostrar_respuestas : false}
                         onChange={handleChange}
+                        disabled={!isCuestionario}
                       />
                     </div>
                   </div>

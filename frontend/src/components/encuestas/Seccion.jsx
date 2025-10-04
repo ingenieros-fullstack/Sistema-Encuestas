@@ -1,55 +1,40 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import Pregunta from "./Pregunta";
 
-export default function Seccion({ seccion, modo = "preview", onRespuesta, onFinalizar }) {
-  const [indice, setIndice] = useState(0); // índice de bloque de preguntas
-  const preguntas = seccion.Preguntas || [];
-  const totalBloques = Math.ceil(preguntas.length / 2);
-
-  const handleSiguiente = () => {
-    if (indice < totalBloques - 1) {
-      setIndice(indice + 1);
-    } else if (onFinalizar) {
-      onFinalizar();
-    }
-  };
-
-  const handleAnterior = () => {
-    if (indice > 0) setIndice(indice - 1);
-  };
-
-  const preguntasVisibles = preguntas.slice(indice * 2, indice * 2 + 2);
+export default function Seccion({ seccion, index = 0, totalSecciones = 1, modo = "preview", onFinalizar }) {
+  const preguntas = useMemo(() => seccion.Preguntas || [], [seccion]);
 
   return (
-    <div className="p-6 border rounded-lg mb-6 bg-white shadow-sm">
-      <h2 className="text-lg font-bold mb-2">{seccion.nombre_seccion}</h2>
-      <p className="text-gray-600 mb-4">{seccion.tema}</p>
+    <div className="card section-card border-0 shadow-sm mb-4">
+      <div className="card-body p-md-4">
+        {/* encabezado sección */}
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2 className="h6 mb-0">
+            <span className="section-pill">{index + 1}</span>
+            {seccion.nombre_seccion || `Sección ${index + 1}`}{" "}
+            <span className="text-muted">/ {totalSecciones}</span>
+          </h2>
+          <span className="section-badge">
+            {(seccion.Preguntas || []).length} preguntas
+          </span>
+        </div>
 
-      {preguntasVisibles.map((pregunta) => (
-        <Pregunta
-          key={pregunta.id_pregunta}
-          pregunta={pregunta}
-          modo={modo}
-          onRespuesta={onRespuesta}
-        />
-      ))}
+        {/* preguntas */}
+        {preguntas.map((p, i) => (
+          <Pregunta key={p.id_pregunta ?? i} pregunta={p} index={i + 1} modo={modo} />
+        ))}
 
-      {/* Navegación entre bloques */}
-      <div className="flex justify-between mt-6">
-        {indice > 0 && (
-          <button
-            onClick={handleAnterior}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-          >
-            Anterior
-          </button>
+        {preguntas.length === 0 && (
+          <div className="alert alert-warning mb-0">Esta sección no tiene preguntas.</div>
         )}
-        <button
-          onClick={handleSiguiente}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded ml-auto"
-        >
-          {indice < totalBloques - 1 ? "Siguiente" : "Finalizar sección"}
-        </button>
+
+        {onFinalizar && (
+          <div className="d-flex justify-content-end mt-3">
+            <button className="btn btn-gradient" onClick={onFinalizar}>
+              Finalizar sección
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

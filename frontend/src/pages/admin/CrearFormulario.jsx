@@ -27,8 +27,17 @@ export default function CrearFormulario() {
   const rol = localStorage.getItem("rol") || "admin";
   const navigate = useNavigate();
 
+  // Helper para saber si es Encuesta
+  const isEncuesta = formData.tipo === "Encuesta";
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // 🔒 Bloquea interacciones con "mostrar_respuestas" cuando es Encuesta
+    if (name === "mostrar_respuestas" && isEncuesta) {
+      return;
+    }
+
     const next = { ...formData, [name]: type === "checkbox" ? checked : value };
     setFormData(next);
     if (step === 1) setGeneralErrors(validateGeneral(next));
@@ -64,10 +73,17 @@ export default function CrearFormulario() {
     setMensaje("");
     try {
       const token = localStorage.getItem("token");
+
+      // 🛡️ Forzar que en Encuesta se envíe mostrar_respuestas = false
+      const payload =
+        formData.tipo === "Encuesta"
+          ? { ...formData, mostrar_respuestas: false }
+          : formData;
+
       const res = await fetch("http://localhost:4000/admin/formularios", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
@@ -183,7 +199,13 @@ export default function CrearFormulario() {
                         name="tipoSegmented"
                         className="segmented-input"
                         checked={formData.tipo === "Encuesta"}
-                        onChange={() => setFormData((p) => ({ ...p, tipo: "Encuesta" }))}
+                        onChange={() =>
+                          setFormData((p) => ({
+                            ...p,
+                            tipo: "Encuesta",
+                            mostrar_respuestas: false, // 🔒 siempre apagado en encuestas
+                          }))
+                        }
                       />
                       <label htmlFor="tipoEncuesta" className="segmented-item">
                         <i className="bi bi-ui-radios-grid me-1"></i> Encuesta
@@ -195,7 +217,13 @@ export default function CrearFormulario() {
                         name="tipoSegmented"
                         className="segmented-input"
                         checked={formData.tipo === "Cuestionario"}
-                        onChange={() => setFormData((p) => ({ ...p, tipo: "Cuestionario" }))}
+                        onChange={() =>
+                          setFormData((p) => ({
+                            ...p,
+                            tipo: "Cuestionario",
+                            // no tocamos mostrar_respuestas; el usuario podrá activarlo
+                          }))
+                        }
                       />
                       <label htmlFor="tipoCuestionario" className="segmented-item">
                         <i className="bi bi-journal-check me-1"></i> Cuestionario
@@ -288,9 +316,17 @@ export default function CrearFormulario() {
                 </div>
 
                 {formData.tipo === "Encuesta" ? (
-                  <EncuestaConfig formData={formData} handleInputChange={handleInputChange} />
+                  <EncuestaConfig
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    disableMostrarRespuestas={true} // 🔒 deshabilitado en Encuesta
+                  />
                 ) : (
-                  <CuestionarioConfig formData={formData} handleInputChange={handleInputChange} />
+                  <CuestionarioConfig
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    disableMostrarRespuestas={false}
+                  />
                 )}
 
                 {/* Actionbar paso 2 */}
