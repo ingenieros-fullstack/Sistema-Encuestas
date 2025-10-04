@@ -213,6 +213,7 @@ CREATE TABLE respuestas (
   id_pregunta INT NOT NULL,  
   respuesta TEXT,  
   es_correcta TINYINT(1) DEFAULT NULL,  
+  puntaje_obtenido INT DEFAULT 0, 
   fecha_respuesta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
   FOREIGN KEY (id_asignacion) REFERENCES asignaciones(id_asignacion) ON DELETE CASCADE,  
   FOREIGN KEY (id_pregunta) REFERENCES preguntas(id_pregunta) ON DELETE CASCADE  

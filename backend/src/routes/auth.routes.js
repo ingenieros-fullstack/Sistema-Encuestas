@@ -65,7 +65,7 @@ router.post("/login", async (req, res) => {
 router.post("/change-password", authMiddleware(), async (req, res) => {  
   try {  
     const { currentPassword, newPassword } = req.body;  
-    const userId = req.user.id;  
+    const userId = req.user.id_usuario;
   
     // Validaciones básicas  
     if (!currentPassword || !newPassword) {  
