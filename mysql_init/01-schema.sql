@@ -1,25 +1,14 @@
--- =========================================
--- Script de inicialización BD encuestas_db
--- Versión: v2 (formularios con PK = codigo)
--- =========================================
-
--- Crear Base de Datos
 CREATE DATABASE IF NOT EXISTS encuestas_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 USE encuestas_db;
 
--- =========================================
--- Usuario MySQL y privilegios (opcional)
--- =========================================
 CREATE USER IF NOT EXISTS 'encuestas_user'@'%' IDENTIFIED BY 'encuestas_pass';
 GRANT ALL PRIVILEGES ON encuestas_db.* TO 'encuestas_user'@'%';
 FLUSH PRIVILEGES;
 
--- =========================================
--- Tabla: empresas
--- =========================================
+-- empresas
 DROP TABLE IF EXISTS empresas;
 CREATE TABLE empresas (
   id_empresa INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,12 +24,9 @@ CREATE TABLE empresas (
   actividad_economica VARCHAR(100),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_empresas_nombre ON empresas (nombre);
 
--- =========================================
--- TABLA: data_empleados
--- =========================================
+-- data_empleados
 DROP TABLE IF EXISTS data_empleados;
 CREATE TABLE data_empleados (
   id_data INT AUTO_INCREMENT PRIMARY KEY,
@@ -63,35 +49,29 @@ CREATE TABLE data_empleados (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_data_empleados_empresa ON data_empleados (id_empresa);
 CREATE INDEX idx_data_empleados_numero ON data_empleados (numero_empleado);
 CREATE INDEX idx_data_empleados_correo ON data_empleados (correo_electronico);
 
--- =========================================
--- TABLA: usuarios
--- =========================================
+-- usuarios
 DROP TABLE IF EXISTS usuarios;
 CREATE TABLE usuarios (
   id_usuario INT AUTO_INCREMENT PRIMARY KEY,
   id_data INT NOT NULL,
   correo_electronico VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(100) NOT NULL, -- para hash bcrypt (~60)
+  password VARCHAR(100) NOT NULL,
   rol ENUM('admin','supervisor','empleado') NOT NULL DEFAULT 'empleado',
   estatus TINYINT(1) DEFAULT 1,
   must_change_password TINYINT(1) DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_data) REFERENCES data_empleados(id_data) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_usuarios_data ON usuarios (id_data);
 CREATE INDEX idx_usuarios_correo ON usuarios (correo_electronico);
 CREATE INDEX idx_usuarios_rol ON usuarios (rol);
 CREATE INDEX idx_usuarios_must_change ON usuarios (must_change_password);
 
--- =========================================
--- Tabla: formularios (PK = codigo)
--- =========================================
+-- formularios
 DROP TABLE IF EXISTS formularios;
 CREATE TABLE formularios (
   codigo VARCHAR(50) PRIMARY KEY,
@@ -105,82 +85,65 @@ CREATE TABLE formularios (
   fecha_fin DATE,
   estatus ENUM('abierto','cerrado') DEFAULT 'abierto',
   umbral_aprobacion INT,
-  tiempo_limite INT DEFAULT NULL,      -- minutos u otra unidad
+  tiempo_limite INT DEFAULT NULL,
   navegacion_preguntas TINYINT(1) DEFAULT 0,
   mostrar_respuestas TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_formularios_empresa ON formularios (id_empresa);
 CREATE INDEX idx_formularios_tipo ON formularios (tipo);
 
--- =========================================
--- Tabla: totales_formulario
--- =========================================
-DROP TABLE IF EXISTS totales_formulario;
-CREATE TABLE totales_formulario (
-  id_total INT AUTO_INCREMENT PRIMARY KEY,
-  codigo_formulario VARCHAR(50) NOT NULL,
-  total_empleados INT DEFAULT 0,
-  total_respuestas INT DEFAULT 0,
-  total_pendientes INT DEFAULT 0,
-  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
+-- preguntas
+DROP TABLE IF EXISTS preguntas;
+CREATE TABLE preguntas (
+  id_pregunta INT AUTO_INCREMENT PRIMARY KEY,
+  id_seccion INT,
+  numero_pregunta INT,
+  enunciado TEXT NOT NULL,
+  tipo_pregunta ENUM(
+    'respuesta_corta',
+    'opcion_multiple',
+    'seleccion_unica',
+    'si_no',
+    'escala_1_5',
+    'condicional'
+  ) NOT NULL,
+  obligatoria TINYINT(1) DEFAULT 0,
+  puntaje INT,
+  respuesta_correcta TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+CREATE INDEX idx_preguntas_tipo ON preguntas (tipo_pregunta);
 
-CREATE INDEX idx_totales_codigo ON totales_formulario (codigo_formulario);
-
--- =========================================
--- Tabla: secciones (usa codigo_formulario)
--- =========================================
+-- secciones
 DROP TABLE IF EXISTS secciones;
 CREATE TABLE secciones (
   id_seccion INT AUTO_INCREMENT PRIMARY KEY,
   codigo_formulario VARCHAR(50) NOT NULL,
+  condicion_pregunta_id INT NULL,
+  condicion_valor VARCHAR(100) NULL,
   tema VARCHAR(150),
   nombre_seccion VARCHAR(150),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE,
+  FOREIGN KEY (condicion_pregunta_id) REFERENCES preguntas(id_pregunta) ON DELETE SET NULL
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_secciones_formulario ON secciones (codigo_formulario);
+CREATE INDEX idx_secciones_condicion_pregunta ON secciones (condicion_pregunta_id);
 
--- =========================================
--- Tabla: preguntas
--- =========================================
-DROP TABLE IF EXISTS preguntas;
-CREATE TABLE preguntas (
-  id_pregunta INT AUTO_INCREMENT PRIMARY KEY,
-  id_seccion INT NOT NULL,
-  numero_pregunta INT,
-  enunciado TEXT NOT NULL,
-  tipo_pregunta ENUM('respuesta_corta','opcion_multiple','seleccion_unica','si_no','escala_1_5') NOT NULL,
-  obligatoria TINYINT(1) DEFAULT 0,
-  puntaje INT,
-  respuesta_correcta TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_seccion) REFERENCES secciones(id_seccion) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE INDEX idx_preguntas_seccion ON preguntas (id_seccion);
-CREATE INDEX idx_preguntas_tipo ON preguntas (tipo_pregunta);
-
--- =========================================
--- Tabla: opciones
--- =========================================
+-- opciones
+DROP TABLE IF EXISTS opciones;
 CREATE TABLE opciones (
   id_opcion INT AUTO_INCREMENT PRIMARY KEY,
   id_pregunta INT NOT NULL,
   texto VARCHAR(255) NOT NULL,
   valor VARCHAR(100),
   FOREIGN KEY (id_pregunta) REFERENCES preguntas(id_pregunta) ON DELETE CASCADE
-);
-
+) ENGINE=InnoDB;
 CREATE INDEX idx_opciones_pregunta ON opciones (id_pregunta);
 
--- =========================================
--- Tabla: asignaciones (con codigo_formulario)
--- =========================================
+-- asignaciones
 DROP TABLE IF EXISTS asignaciones;
 CREATE TABLE asignaciones (
   id_asignacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,15 +156,12 @@ CREATE TABLE asignaciones (
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
   FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_asignaciones_usuario ON asignaciones (id_usuario);
 CREATE INDEX idx_asignaciones_formulario ON asignaciones (codigo_formulario);
 CREATE INDEX idx_asignaciones_estado ON asignaciones (estado);
 CREATE INDEX idx_asignaciones_usuario_formulario ON asignaciones (id_usuario, codigo_formulario);
 
--- =========================================
--- Tabla: respuestas
--- =========================================
+-- respuestas
 DROP TABLE IF EXISTS respuestas;
 CREATE TABLE respuestas (
   id_respuesta INT AUTO_INCREMENT PRIMARY KEY,
@@ -214,13 +174,22 @@ CREATE TABLE respuestas (
   FOREIGN KEY (id_asignacion) REFERENCES asignaciones(id_asignacion) ON DELETE CASCADE,
   FOREIGN KEY (id_pregunta) REFERENCES preguntas(id_pregunta) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_respuestas_asignacion ON respuestas (id_asignacion);
 CREATE INDEX idx_respuestas_pregunta ON respuestas (id_pregunta);
 
--- =========================================
--- Tabla: qr_formularios (con codigo_formulario)
--- =========================================
+-- totales_formulario
+DROP TABLE IF EXISTS totales_formulario;
+CREATE TABLE totales_formulario (
+  id_total INT AUTO_INCREMENT PRIMARY KEY,
+  codigo_formulario VARCHAR(50) NOT NULL,
+  total_empleados INT DEFAULT 0,
+  total_respuestas INT DEFAULT 0,
+  total_pendientes INT DEFAULT 0,
+  FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE INDEX idx_totales_codigo ON totales_formulario (codigo_formulario);
+
+-- qr_formularios
 DROP TABLE IF EXISTS qr_formularios;
 CREATE TABLE qr_formularios (
   id_qr INT AUTO_INCREMENT PRIMARY KEY,
@@ -230,5 +199,4 @@ CREATE TABLE qr_formularios (
   fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (codigo_formulario) REFERENCES formularios(codigo) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 CREATE INDEX idx_qr_formulario ON qr_formularios (codigo_formulario);

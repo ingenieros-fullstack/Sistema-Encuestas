@@ -24,6 +24,7 @@ import supervisorEncuestasRoutes from "./routes/supervisorEncuestas.routes.js";
 // 🔹 Rutas de asignaciones
 import asignacionRoutes from "./routes/asignacionRoutes.js";
 import adminCuestionariosRoutes from "./routes/adminCuestionarios.routes.js";
+import adminRespuestasRoutes from "./routes/adminRespuestas.routes.js";
 // Seeder
 import { seedAdminYUsuario } from "./controllers/seeder.js";
 
@@ -71,6 +72,14 @@ app.get("/health", (_req, res) => {
 });
 
 // ==========================
+// Middleware de logging global
+// ==========================
+app.use((req, res, next) => {
+  console.log(`➡️  ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// ==========================
 // Rutas principales
 // ==========================
 app.use("/auth", authRoutes);
@@ -83,15 +92,15 @@ app.use("/usuarios", usuariosRoutes);
 app.use("/admin/encuestas", adminEncuestasRoutes);
 app.use("/empleado/encuestas", empleadoEncuestasRoutes);
 app.use("/supervisor/encuestas", supervisorEncuestasRoutes);
-
+app.use("/admin/encuestas", adminRespuestasRoutes);
 app.use("/", publicRoutes);
 app.use("/admin/cuestionarios", adminCuestionariosRoutes);
-
 
 // ==========================
 // 404 handler
 // ==========================
 app.use((req, res) => {
+  console.warn(`❌ Ruta no encontrada: ${req.method} ${req.originalUrl}`);
   res
     .status(404)
     .json({ message: `Ruta no encontrada: ${req.method} ${req.originalUrl}` });

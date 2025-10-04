@@ -47,8 +47,9 @@ export default function EmpleadoDashboard() {
   }, [token]);
 
   const handleOpenForm = (codigo) => {
-    navigate(`/resolver-cuestionario/${codigo}`);
-  };
+  navigate(`/empleado/encuestas/${codigo}`);
+};
+
 
   // Filtrar formularios
   const formulariosFiltrados =

@@ -1,0 +1,253 @@
+/* ===== Sección (por si aún ves blanco) ===== */
+.section-card{
+  --bs-card-bg: rgba(255,255,255,.06) !important;
+  --bs-card-border-color: rgba(255,255,255,.12);
+  border-radius: 1rem;
+}
+
+/* ===== Pregunta: tarjeta con acento lateral ===== */
+.question-card{
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.question-card::before{
+  content:"";
+  position:absolute; inset:0 0 0 auto;
+  width: 4px;
+  background: linear-gradient(180deg, var(--brand-start), var(--brand-end));
+  opacity:.85;
+  right:auto; left:0; /* acento a la izquierda */
+}
+
+/* Header */
+.question-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+.question-title{ color:#eef2ff; }
+.question-meta{ display:flex; flex-wrap:wrap; gap:.4rem; }
+
+/* Icono por tipo */
+.qtype-ico{
+  width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  color:#fff; font-size:16px; box-shadow:0 6px 14px rgba(0,0,0,.25);
+}
+
+/* Chips neutros */
+.chip-soft{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.28rem .6rem; border-radius:999px;
+  background: rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.12);
+  color:#e5e7eb; font-size:.85rem;
+}
+
+/* ===== Input group oscuro ===== */
+.input-dark .input-group-text{
+  background: rgba(255,255,255,.10);
+  color:#e5e7eb; border:1px solid rgba(255,255,255,.18);
+}
+.input-dark .form-control{
+  background: rgba(255,255,255,.08);
+  color:#f8fafc; border:1px solid rgba(255,255,255,.18);
+}
+.input-dark .form-control::placeholder{ color:#a7b0d5; }
+
+/* ===== Opción (tile) con letra A/B/C ===== */
+.option-tile{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.6rem .8rem;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:12px;
+  transition: background .2s ease, border-color .2s ease, transform .05s ease;
+}
+.option-tile:hover{ background: rgba(255,255,255,.09); }
+.option-tile--ok{
+  background: rgba(34,197,94,.12);
+  border-color: rgba(34,197,94,.45);
+}
+.option-left{ min-width:0; }
+.option-letter{
+  width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;
+  background: rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.22);
+  color:#e5e7eb; font-weight:700; font-size:.9rem;
+}
+.option-ok-badge{
+  display:inline-grid; place-items:center;
+  width:24px;height:24px;border-radius:999px;
+  background:#22c55e22; color:#22c55e;
+  border:1px solid #22c55e55; font-weight:700;
+}
+
+/* ===== Pills Sí/No ===== */
+.pill-choice{
+  border-radius:12px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+}
+.pill-label{
+  display:inline-block; padding:.45rem .9rem; cursor:default;
+  color:#f8fafc;
+}
+.pill-choice--ok{
+  border-color:#22c55e55;
+  background:#22c55e22;
+}
+.pill-choice--ok .pill-label{ color:#22c55e; font-weight:600; }
+
+/* ===== Escala 1–5 con anillo ===== */
+.scale-pill{
+  width:44px;height:44px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  color:#f8fafc; font-weight:700;
+  position:relative;
+}
+.scale-pill--ok{
+  color:#22c55e; background:#22c55e22; border-color:#22c55e55;
+  box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+}
+
+/* ===== Callout “Respuesta correcta” ===== */
+.correct-callout{
+  margin-top: .9rem;
+  padding: .65rem .85rem;
+  border-radius: .8rem;
+  background: rgba(34,197,94,.10);
+  border: 1px dashed rgba(34,197,94,.55);
+  color: #d1fae5;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 576px){
+  .qtype-ico{ width:24px;height:24px;font-size:14px; }
+  .option-letter{ width:26px;height:26px;border-radius:7px; }
+  .scale-pill{ width:40px;height:40px;border-radius:10px; }
+  .chip-soft{ font-size:.8rem; padding:.22rem .5rem; }
+}
+
+/* ======================== LIGHT CONTENT ======================== */
+
+/* Hoja blanca principal */
+.content-light .paper{
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(16,24,40,.06);
+  padding: clamp(.75rem, 1.8vw, 1.25rem);
+}
+
+/* Tarjetas de sección / pregunta blancas */
+.content-light .section-card{
+  background: #ffffff !important;
+  border: 1px solid #e6eaf0 !important;
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(16,24,40,.04);
+}
+.content-light .question-card{
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 14px;
+}
+.content-light .question-card::before{
+  /* acento lateral se mantiene */
+  background: linear-gradient(180deg, var(--brand-start), var(--brand-end));
+  opacity: .9;
+}
+.content-light .question-title{ color: #111827; }
+
+/* Chips neutros en claro */
+.content-light .chip-soft{
+  background: #f2f4f7;
+  border-color: #e5e7eb;
+  color: #344054;
+}
+
+/* Opciones (tiles) claras */
+.content-light .option-tile{
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.content-light .option-tile:hover{ background: #f3f4f6; }
+.content-light .option-tile--ok{
+  background: #ecfdf3;
+  border-color: #22c55e66;
+}
+.content-light .option-letter{
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #344054;
+}
+
+/* Pills Sí/No claras */
+.content-light .pill-choice{
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.content-light .pill-choice--ok{
+  background: #ecfdf3;
+  border-color: #22c55e66;
+}
+.content-light .pill-choice--ok .pill-label{ color: #047857; }
+
+/* Escala 1–5 clara */
+.content-light .scale-pill{
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #111827;
+}
+.content-light .scale-pill--ok{
+  background: #ecfdf3;
+  color: #047857;
+  border-color: #05966966;
+  box-shadow: 0 0 0 3px rgba(16,185,129,.18);
+}
+
+/* Callout de respuesta correcta en claro */
+.content-light .correct-callout{
+  background: #ecfdf3;
+  border: 1px dashed #22c55e66;
+  color: #065f46;
+}
+
+/* Inputs claros (sobrescriben los oscuros cuando el contenido es light) */
+.content-light .input-dark .input-group-text,
+.content-light .input-dark .form-control{
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+.content-light .input-dark .form-control::placeholder{ color: #667085; }
+
+/* === TOOLBAR ESTÁTICA (override de la variante sticky) === */
+.preview-shell .sticky-toolbar{
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+  backdrop-filter: none;            /* evita blur raro al desplazarse */
+  margin-bottom: clamp(12px,2vw,18px);
+  box-shadow: 0 1px 0 rgba(16,24,40,.06); /* sombra sutil y constante */
+}
+
+/* Si tu sticky añadía fades/velos laterales, los apagamos */
+.preview-shell .sticky-toolbar::before,
+.preview-shell .sticky-toolbar::after{
+  content: none !important;
+}
+
+/* (Opcional) Ajuste fino de los chips dentro del toolbar */
+.preview-shell .sticky-toolbar .metric-chip{
+  background: rgba(0,0,0,.06);
+  border-color: rgba(0,0,0,.08);
+}

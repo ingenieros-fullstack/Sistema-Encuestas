@@ -1,31 +1,38 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+// =================== Páginas Base ===================
 import Login from "./pages/Login";
 import ChangePassword from "./components/modals/ChangePasswordModal";
 import AdminDashboard from "./pages/AdminDashboard";
 import EmpleadoDashboard from "./pages/EmpleadoDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
+
+// =================== Admin ===================
 import Usuarios from "./pages/admin/Usuarios";
 import CrearFormulario from "./pages/admin/CrearFormulario";
 import Formularios from "./pages/admin/Formularios";
 import Reportes from "./pages/admin/Reportes";
 import EditarFormulario from "./pages/admin/EditarFormulario";
 
-// 🆕 Páginas Encuestas
+// =================== Encuestas ===================
 import PreviewEncuesta from "./pages/admin/PreviewEncuesta";
 import ResolverEncuestaEmpleado from "./pages/empleado/ResolverEncuesta";
 import ResolverEncuestaSupervisor from "./pages/supervisor/ResolverEncuesta";
-import GestionSecciones from "./pages/admin/GestionSecciones";
+import ResolverEncuestaAdmin from "./pages/admin/ResolverEncuestaAdmin";
 import RedirectResolver from "./pages/RedirectResolver";
 import GenerarQR from "./pages/admin/GenerarQR";
-import ResolverEncuestaAdmin from "./pages/admin/ResolverEncuestaAdmin";
+import VerRespuestasEncuesta from "./pages/admin/VerRespuestasEncuesta";
+import VerRespuestasCuestionario from "./pages/admin/VerRespuestasCuestionario";
+// 🆕 Nueva ruta modularizada
+import GestionSecciones from "./pages/admin/GestionSeccionesEncuesta/GestionSecciones";
 
-// 🆕 Páginas Cuestionarios
+// =================== Cuestionarios ===================
 import PreviewCuestionario from "./pages/admin/PreviewCuestionario";
 import ResolverCuestionarioEmpleado from "./pages/empleado/ResolverCuestionario";
 import ResolverCuestionarioSupervisor from "./pages/supervisor/ResolverCuestionario";
 import ResolverCuestionarioAdmin from "./pages/admin/ResolverCuestionarioAdmin";
 import GestionSeccionesCuestionario from "./pages/admin/GestionSeccionesCuestionario";
-import GenerarQRCuestionario from "./pages/admin/GenerarQRCuestionario"; // ✅ IMPORTADO
+import GenerarQRCuestionario from "./pages/admin/GenerarQRCuestionario";
 
 // =================== Helpers ===================
 function PrivateRoute({ children, roles }) {
@@ -61,13 +68,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Login */}
+        {/* ========== LOGIN & PASSWORD ========== */}
         <Route path="/" element={<Login />} />
-
-        {/* Cambio de contraseña */}
         <Route path="/change-password" element={<ProtectedChangePassword />} />
 
-        {/* Dashboards */}
+        {/* ========== DASHBOARDS ========== */}
         <Route
           path="/admin/dashboard"
           element={
@@ -93,7 +98,7 @@ function App() {
           }
         />
 
-        {/* ===================== ENCUESTAS ===================== */}
+        {/* ========== ADMIN (Usuarios, Formularios, Reportes) ========== */}
         <Route
           path="/admin/usuarios"
           element={
@@ -135,6 +140,7 @@ function App() {
           }
         />
 
+        {/* ========== ENCUESTAS ========== */}
         <Route
           path="/admin/encuestas/:codigo/preview"
           element={
@@ -143,14 +149,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/empleado/encuestas/:codigo"
-          element={
-            <PrivateRoute roles={["empleado"]}>
-              <ResolverEncuestaEmpleado />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/empleado/encuestas/:codigo" element={<ResolverEncuestaEmpleado />} />
         <Route
           path="/supervisor/encuestas/:codigo"
           element={
@@ -191,8 +190,16 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+  path="/admin/encuestas/:codigo/respuestas"
+  element={<VerRespuestasEncuesta />}
+/>
+<Route
+  path="/admin/cuestionarios/:codigo/respuestas"
+  element={<VerRespuestasCuestionario />}
+/>
 
-        {/* ===================== CUESTIONARIOS ===================== */}
+        {/* ========== CUESTIONARIOS ========== */}
         <Route
           path="/admin/cuestionarios/:codigo/preview"
           element={
@@ -242,7 +249,7 @@ function App() {
           }
         />
 
-        {/* Default */}
+        {/* ========== DEFAULT ========== */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

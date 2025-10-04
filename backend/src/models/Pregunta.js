@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import { DataTypes } from "sequelize"; 
 import sequelize from "../config/db.js";
 
 const Pregunta = sequelize.define("Pregunta", {
@@ -21,7 +21,8 @@ const Pregunta = sequelize.define("Pregunta", {
       "opcion_multiple", 
       "seleccion_unica", 
       "si_no", 
-      "escala_1_5"
+      "escala_1_5",
+      "condicional"   // 🆕 nuevo tipo
     ),
     allowNull: false
   },

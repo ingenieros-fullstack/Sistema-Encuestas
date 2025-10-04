@@ -1,18 +1,19 @@
 import Pregunta from "./Pregunta";
 
-export default function Seccion({ seccion, modo, onFinalizar }) {
+export default function Seccion({ seccion, modo = "preview", onFinalizar }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-xl font-semibold mb-3 text-indigo-700">
-        {seccion.nombre_seccion}
+    <div className="mb-8">
+      <h2 className="text-xl font-semibold mb-4 text-indigo-700">
+        {seccion?.nombre_seccion || "Sección"}
       </h2>
 
-      {seccion.Preguntas?.length > 0 ? (
-        seccion.Preguntas.map((pregunta) => (
+      {Array.isArray(seccion?.Preguntas) && seccion.Preguntas.length > 0 ? (
+        seccion.Preguntas.map((pregunta, i) => (
           <Pregunta
-            key={pregunta.id_pregunta}
+            key={pregunta.id_pregunta ?? i}
             pregunta={pregunta}
             modo={modo}
+            idx={i}
           />
         ))
       ) : (
@@ -20,7 +21,7 @@ export default function Seccion({ seccion, modo, onFinalizar }) {
       )}
 
       {onFinalizar && (
-        <div className="text-end mt-4">
+        <div className="text-end mt-5">
           <button
             onClick={onFinalizar}
             className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"

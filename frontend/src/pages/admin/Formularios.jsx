@@ -333,20 +333,21 @@ export default function Formularios() {
                           </button>
 
                           {/* 📊 Respuestas */}
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-info"
-                            title="Ver respuestas"
-                            onClick={() =>
-                              navigate(
-                                f.tipo === "Encuesta"
-                                  ? `/admin/encuestas/${f.codigo}/respuestas`
-                                  : `/admin/cuestionarios/${f.codigo}/respuestas`
-                              )
-                            }
-                          >
-                            <i className="bi bi-bar-chart-line"></i>
-                          </button>
+<button
+  type="button"
+  className="btn btn-sm btn-outline-info"
+  title="Ver respuestas"
+  onClick={() =>
+    navigate(
+      f.tipo === "Encuesta"
+        ? `/admin/encuestas/${f.codigo}/respuestas`
+        : `/admin/cuestionarios/${f.codigo}/respuestas`
+    )
+  }
+>
+  <i className="bi bi-bar-chart-line"></i>
+</button>
+
 
                           {/* 🌍 Resolver (simulación admin) */}
                           <button
