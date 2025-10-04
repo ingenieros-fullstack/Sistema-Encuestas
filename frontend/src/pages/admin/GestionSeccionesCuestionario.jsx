@@ -504,11 +504,7 @@ export default function GestionSeccionesCuestionario() {
 
       {/* Toolbar */}
       <div className="gs2-toolbar">
-        <div className="gs2-toolbar-left">
-          <a href={`/admin`} className="gs2-btn gs2-btn-ghost">
-            ← Inicio
-          </a>
-        </div>
+
 
         <div className="gs2-title">
           <span className="gs2-dot" />
@@ -536,34 +532,7 @@ export default function GestionSeccionesCuestionario() {
         </div>
       </div>
 
-      {/* Tabs móviles */}
-      <div className="gs2-mobile-tabs" role="tablist" aria-label="Navegación móvil">
-        <button
-          role="tab"
-          aria-selected={mobileTab === "secciones"}
-          className={"gs2-mtab " + (mobileTab === "secciones" ? "active" : "")}
-          onClick={() => setMobileTab("secciones")}
-        >
-          Secciones
-        </button>
-        <button
-          role="tab"
-          aria-selected={mobileTab === "preguntas"}
-          className={"gs2-mtab " + (mobileTab === "preguntas" ? "active" : "")}
-          onClick={() => setMobileTab("preguntas")}
-        >
-          Preguntas
-        </button>
-        <button
-          role="tab"
-          aria-selected={mobileTab === "editor"}
-          className={"gs2-mtab " + (mobileTab === "editor" ? "active" : "")}
-          onClick={() => setMobileTab("editor")}
-        >
-          Editor
-        </button>
-      </div>
-
+      
       {/* Contenido 3 paneles */}
       <div className="gs2-content" data-mobile-tab={mobileTab}>
         {/* Panel izquierdo: Secciones */}
