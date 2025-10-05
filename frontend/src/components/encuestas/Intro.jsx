@@ -1,22 +1,80 @@
-export default function Intro({ titulo, introduccion, tiempoLimite, totalSecciones, codigo, onComenzar, onVerQR, onCancelar }) {
-  const tiempoTxt = tiempoLimite ? `${tiempoLimite} min` : "Sin límite";
+import React from "react";
 
+export default function Intro({
+  titulo = "Encuesta",
+  introduccion = "",
+  tiempoLimite = null,
+  onComenzar,
+  onCancelar,
+  onVerQR,
+  onVerSecciones,
+}) {
   return (
-    <section className="cover cover--deep glass shadow-lg preview-hero">
-      <div className="cover-badges">
-        <span className="metric-chip">⏱️ {tiempoTxt}</span>
-        <span className="metric-chip">📚 {totalSecciones} secciones</span>
-        {codigo && <span className="metric-chip">#{codigo}</span>}
-      </div>
+    <div className="intro-hero-wrapper">
+      {/* capa decorativa */}
+      <div className="intro-aurora"></div>
+      <div className="intro-grid"></div>
 
-      <h1 className="display-6 fw-semibold mb-2 text-center">{titulo}</h1>
-      <p className="lead text-center mb-4">{introduccion || "Revisa y prueba antes de publicar."}</p>
+      <header className="container intro-hero">
+        <div className="intro-head d-flex gap-2 justify-content-center flex-wrap">
+          <span className="chip">
+            <span className="chip-dot"></span>
+            {tiempoLimite ? `${tiempoLimite} min` : "Sin límite"}
+          </span>
+          <button
+            type="button"
+            className="chip chip-ghost d-none d-md-inline-flex"
+            onClick={onVerSecciones}
+          >
+            <span className="chip-dot"></span>
+            secciones
+          </button>
+        </div>
 
-      <div className="d-flex flex-wrap justify-content-center gap-2">
-        <button className="btn btn-gradient btn-lg px-4" onClick={onComenzar}>Comenzar</button>
-        <button className="btn btn-outline-light-imp btn-lg" onClick={onVerQR}>Ver QR</button>
-        <button className="btn btn-outline-light-imp btn-lg" onClick={onCancelar}>Cancelar</button>
-      </div>
-    </section>
+        <h1 className="intro-title text-center">{titulo}</h1>
+        {introduccion && (
+          <p className="intro-subtitle text-center text-white-50 mb-4">
+            {introduccion}
+          </p>
+        )}
+
+        <div className="d-flex gap-2 justify-content-center flex-wrap">
+          <button className="btn btn-neo" onClick={onComenzar}>
+            Comenzar
+          </button>
+
+          <button
+            className="btn btn-neo ghost"
+            type="button"
+            onClick={onVerQR}
+          >
+            Ver QR
+          </button>
+
+          <button
+            className="btn btn-neo link"
+            type="button"
+            onClick={onCancelar}
+          >
+            Cancelar
+          </button>
+        </div>
+
+        <div className="intro-meta d-flex gap-3 justify-content-center mt-4">
+          <div className="meta-item">
+            <span className="meta-k">Rápida</span>
+            <span className="meta-v">~5 min</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-k">Anonimato</span>
+            <span className="meta-v">activo</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-k">Dispositivo</span>
+            <span className="meta-v">móvil/desktop</span>
+          </div>
+        </div>
+      </header>
+    </div>
   );
 }

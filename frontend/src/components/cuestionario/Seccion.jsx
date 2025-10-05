@@ -1,30 +1,53 @@
+// src/components/Seccion.jsx (cuestionario)
+
 import Pregunta from "./Pregunta";
 
-export default function Seccion({ seccion, modo = "preview", onFinalizar }) {
+/* Helpers de normalización */
+const getQuestions = (sec) => {
+  if (!sec) return [];
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4 text-indigo-700">
-        {seccion?.nombre_seccion || "Sección"}
-      </h2>
+    sec.Preguntas ||   // plural (habitual)
+    sec.Pregunta  ||   // singular (algunas respuestas de la API)
+    sec.preguntas ||   // por si viene en minúscula
+    []
+  );
+};
 
-      {Array.isArray(seccion?.Preguntas) && seccion.Preguntas.length > 0 ? (
-        seccion.Preguntas.map((pregunta, i) => (
+export default function Seccion({
+  seccion,
+  modo = "resolver",          // "resolver" | "preview"
+  respuestas = {},            // estado controlado desde el padre
+  onResponder,                // (id_pregunta, valor) => void
+  onFinalizar,                // opcional
+}) {
+  const preguntas = getQuestions(seccion);
+
+  return (
+    <div className="mb-3">
+      {/* Render de preguntas */}
+      {preguntas.length > 0 ? (
+        preguntas.map((pregunta, i) => (
           <Pregunta
-            key={pregunta.id_pregunta ?? i}
+            key={pregunta.id_pregunta ?? pregunta.id ?? i}
             pregunta={pregunta}
-            modo={modo}
             idx={i}
+            modo={modo}
+            respuestas={respuestas}
+            onResponder={onResponder}
           />
         ))
       ) : (
-        <p className="text-gray-500">No hay preguntas en esta sección.</p>
+        <div className="alert alert-secondary mb-0">
+          No hay preguntas en esta sección.
+        </div>
       )}
 
+      {/* Botón finalizar opcional */}
       {onFinalizar && (
-        <div className="text-end mt-5">
+        <div className="text-end mt-3">
           <button
             onClick={onFinalizar}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            className="btn btn-primary"
           >
             Finalizar
           </button>
