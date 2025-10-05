@@ -25,7 +25,7 @@ router.get("/:codigo", authMiddleware(["empleado"]), async (req, res) => {
       });  
     }  
   
-    // 🆕 Verificar si ya está completado  
+    // Verificar si ya está completado  
     if (asignacion.estado === "completado") {  
       return res.status(403).json({   
         error: "Este cuestionario ya fue completado",  
@@ -36,40 +36,46 @@ router.get("/:codigo", authMiddleware(["empleado"]), async (req, res) => {
     // Reutilizar el controlador existente  
     return getCuestionarioPreview(req, res);  
   } catch (err) {  
-    console.error("Error getCuestionarioParaResolver:", err);  
-    return res.status(500).json({ error: "Error interno del servidor" });  
+    console.error("Error al obtener cuestionario:", err);  
+    return res.status(500).json({ error: err.message });  
   }  
 });  
   
-// POST guardar respuestas del cuestionario  
+// POST respuestas del cuestionario (empleado)  
 router.post("/:codigo/respuestas", authMiddleware(["empleado"]), async (req, res) => {  
   try {  
     const { codigo } = req.params;  
     const id_usuario = req.user.id_usuario;  
-    const { respuestas } = req.body;  
   
-    // Buscar la asignación del empleado  
+    // Obtener la asignación  
     const asignacion = await Asignacion.findOne({  
-      where: { id_usuario, codigo_formulario: codigo },  
+      where: {   
+        id_usuario,   
+        codigo_formulario: codigo   
+      },  
     });  
-      
-    if (!asignacion) {  
-      return res.status(403).json({ error: "No tienes acceso a este cuestionario" });  
-    }  
   
-    // Verificar que no esté ya completado  
-    if (asignacion.estado === "completado") {  
+    if (!asignacion) {  
       return res.status(403).json({   
-        error: "Este cuestionario ya fue completado anteriormente"   
+        error: "No tienes acceso a este cuestionario"   
       });  
     }  
   
-    // Llamar al controlador existente con el id_asignacion  
+    // Verificar si ya está completado  
+    if (asignacion.estado === "completado") {  
+      return res.status(403).json({   
+        error: "Este cuestionario ya fue completado"  
+      });  
+    }  
+  
+    // Agregar id_asignacion al body  
     req.body.id_asignacion = asignacion.id_asignacion;  
+  
+    // Llamar al controlador de resolución  
     return resolverCuestionario(req, res);  
   } catch (err) {  
-    console.error("Error guardando respuestas cuestionario:", err);  
-    return res.status(500).json({ error: "Error interno del servidor" });  
+    console.error("Error al guardar respuestas:", err);  
+    return res.status(500).json({ error: err.message });  
   }  
 });  
   

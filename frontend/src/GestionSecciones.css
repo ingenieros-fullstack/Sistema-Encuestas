@@ -633,3 +633,6 @@ body {
 .gs2-modal .gs2-btn:hover {
   filter: brightness(1.05);
 }
+
+.gs2-list-item { cursor: pointer; position: relative; }
+.gs2-list .gs2-icon { pointer-events: auto; }

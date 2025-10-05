@@ -1,16 +1,28 @@
 import Pregunta from "./Pregunta.js";  
 import Opcion from "./Opcion.js";  
+import Respuesta from "./Respuesta.js";  
   
-// Establecer relaciones después de que ambos modelos estén definidos  
-Pregunta.hasMany(Opcion, {   
-  foreignKey: "id_pregunta",   
+// Relación Pregunta -> Opciones  
+Pregunta.hasMany(Opcion, {  
+  foreignKey: "id_pregunta",  
   as: "Opciones",  
   onDelete: "CASCADE"  
 });  
   
-Opcion.belongsTo(Pregunta, {   
-  foreignKey: "id_pregunta",   
-  as: "Pregunta"   
+Opcion.belongsTo(Pregunta, {  
+  foreignKey: "id_pregunta",  
+  as: "Pregunta"  
 });  
   
-export { Pregunta, Opcion };
+// Relación Respuesta -> Pregunta  
+Respuesta.belongsTo(Pregunta, {  
+  foreignKey: "id_pregunta",  
+  as: "Pregunta"  
+});  
+  
+Pregunta.hasMany(Respuesta, {  
+  foreignKey: "id_pregunta",  
+  as: "Respuestas"  
+});  
+  
+export { Pregunta, Opcion, Respuesta };

@@ -348,23 +348,6 @@ export default function Formularios() {
   <i className="bi bi-bar-chart-line"></i>
 </button>
 
-
-                          {/* 🌍 Resolver (simulación admin) */}
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-success"
-                            title="Ir a resolver"
-                            onClick={() =>
-                              navigate(
-                                f.tipo === "Encuesta"
-                                  ? `/admin/encuestas/${f.codigo}/resolver`
-                                  : `/admin/cuestionarios/${f.codigo}/resolver`
-                              )
-                            }
-                          >
-                            <i className="bi bi-globe"></i>
-                          </button>
-
                           {/* 📱 Generar QR */}
 <button
   type="button"

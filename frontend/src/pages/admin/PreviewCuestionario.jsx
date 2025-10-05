@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Seccion from "../../components/cuestionario/Seccion";
 import MensajeFinal from "../../components/cuestionario/MensajeFinal";
-import "../../PreviewCuestionario.css";
+import "../../css/PreviewCuestionario.css";
 import { QRCodeCanvas } from "qrcode.react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -346,9 +346,14 @@ export default function PreviewCuestionario() {
           </div>
 
           <div className="toolbar-right">
-            <button className="btn btn-gradient" onClick={() => setFinalizado(true)}>
-              Terminar vista previa
-            </button>
+            <button
+  type="button"
+  className="btn btn-gradient"
+  onClick={() => navigate(-1)}   // o navigate("/admin/formularios") si prefieres ruta fija
+>
+  Terminar vista previa
+</button>
+
           </div>
         </div>
 

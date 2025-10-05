@@ -18,7 +18,6 @@ import EditarFormulario from "./pages/admin/EditarFormulario";
 import PreviewEncuesta from "./pages/admin/PreviewEncuesta";
 import ResolverEncuestaEmpleado from "./pages/empleado/ResolverEncuesta";
 import ResolverEncuestaSupervisor from "./pages/supervisor/ResolverEncuesta";
-import ResolverEncuestaAdmin from "./pages/admin/ResolverEncuestaAdmin";
 import RedirectResolver from "./pages/RedirectResolver";
 import GenerarQR from "./pages/admin/GenerarQR";
 import VerRespuestasEncuesta from "./pages/admin/VerRespuestasEncuesta";
@@ -30,7 +29,6 @@ import GestionSecciones from "./pages/admin/GestionSeccionesEncuesta/GestionSecc
 import PreviewCuestionario from "./pages/admin/PreviewCuestionario";
 import ResolverCuestionarioEmpleado from "./pages/empleado/ResolverCuestionario";
 import ResolverCuestionarioSupervisor from "./pages/supervisor/ResolverCuestionario";
-import ResolverCuestionarioAdmin from "./pages/admin/ResolverCuestionarioAdmin";
 import GestionSeccionesCuestionario from "./pages/admin/GestionSeccionesCuestionario";
 import GenerarQRCuestionario from "./pages/admin/GenerarQRCuestionario";
 
@@ -182,14 +180,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/admin/encuestas/:codigo/resolver"
-          element={
-            <PrivateRoute roles={["admin"]}>
-              <ResolverEncuestaAdmin />
-            </PrivateRoute>
-          }
-        />
+
         <Route
   path="/admin/encuestas/:codigo/respuestas"
   element={<VerRespuestasEncuesta />}
@@ -224,14 +215,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/admin/cuestionarios/:codigo/resolver"
-          element={
-            <PrivateRoute roles={["admin"]}>
-              <ResolverCuestionarioAdmin />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/admin/cuestionarios/:codigo/secciones"
           element={

@@ -1,0 +1,85 @@
+/* Reuse all visuals from Cuestionario */
+@import "./PreviewCuestionario.css";
+
+/* ------------------------------------------------------------------
+   Ajustes específicos de ENCUESTAS
+   ------------------------------------------------------------------ */
+
+/* 1) La portada de Encuesta usa "text-white-imp" en el título/subtítulo.
+   Como ahora la portada es clara, forzamos texto oscuro (sin tocar JSX). */
+.preview-hero .text-white-imp,
+.preview-hero .display-6,
+.preview-hero .title {
+  color: #1e1b4b !important;
+  -webkit-text-fill-color: #1e1b4b !important;
+}
+.preview-hero .lead {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+}
+
+/* 2) La vista de secciones en Encuesta usa "preview-toolbar"
+   (en Cuestionario usamos "toolbar"). La estilamos igual. */
+.preview-toolbar{
+  position: sticky;
+  top: .75rem;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .9rem;
+
+  background: #fff;
+  border: 1px solid var(--bord);
+  border-radius: 14px;
+  padding: .6rem .8rem;
+  box-shadow: var(--shadow-md);
+}
+
+.preview-toolbar .toolbar-left,
+.preview-toolbar .toolbar-center,
+.preview-toolbar .toolbar-right{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.preview-toolbar .title-main{
+  font-weight: 800;
+  max-width: 40vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-toolbar .meta-chips{
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: .1rem;
+}
+.preview-toolbar .toolbar-center{ padding: 0 .2rem; }
+.preview-toolbar .progress{ width: 100%; margin: 0; }
+.preview-toolbar .progress-bar-gradient{
+  background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+}
+
+/* separador visual bajo el header fijo */
+.preview-toolbar-spacer{ height: .75rem; }
+
+/* Responsivo */
+@media (max-width: 992px){
+  .preview-toolbar{
+    grid-template-columns: 1fr auto;   /* izquierda | botón */
+    row-gap: .6rem;
+  }
+  .preview-toolbar .toolbar-center{
+    grid-column: 1 / -1;
+    order: 3;
+  }
+  .preview-toolbar .title-main{ max-width: 60vw; }
+}
+
+/* Selección de texto legible (igual que cuestionario) */
+::selection { background: rgba(99,102,241,.25); color:#111827; }
+::-moz-selection { background: rgba(99,102,241,.25); color:#111827; }

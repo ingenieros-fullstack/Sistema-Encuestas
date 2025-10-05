@@ -29,6 +29,9 @@ import empleadoCuestionariosRoutes from "./routes/empleadoCuestionarios.routes.j
 import asignacionRoutes from "./routes/asignacionRoutes.js";  
 import adminRespuestasRoutes from "./routes/adminRespuestas.routes.js";  
   
+// 🆕 IMPORTAR ASOCIACIONES DE SEQUELIZE  
+import "./models/associations.js";  
+  
 // Seeder  
 import { seedAdminYUsuario } from "./controllers/seeder.js";  
   

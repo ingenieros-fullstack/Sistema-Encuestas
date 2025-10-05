@@ -80,11 +80,11 @@ export async function getRespuestasPorUsuario(req, res) {
         .json({ error: "No hay respuestas para este usuario" });
     }
 
-    const respuestas = await Respuesta.findAll({
-      where: { id_asignacion: asignacion.id_asignacion },
-      include: [{ model: Pregunta }],
-      order: [[{ model: Pregunta }, "id_pregunta", "ASC"]],
-    });
+const respuestas = await Respuesta.findAll({  
+  where: { id_asignacion: asignacion.id_asignacion },  
+  include: [{ model: Pregunta, as: "Pregunta" }],  
+  order: [[{ model: Pregunta, as: "Pregunta" }, "id_pregunta", "ASC"]],  
+});
 
     console.log(
       `📋 Respuestas encontradas para usuario ${usuario}:`,

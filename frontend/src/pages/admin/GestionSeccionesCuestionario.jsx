@@ -315,22 +315,26 @@ export default function GestionSeccionesCuestionario() {
   const token = useMemo(() => localStorage.getItem("token"), []);
 
   // ======== Data ========
-  const fetchPreview = useCallback(async () => {
-    const res = await fetch(`${API}/admin/cuestionarios/${codigo}/preview`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      setData(json);
-      if (!seccionSeleccionada && json.Secciones?.length) {
-        setSeccionSeleccionada(String(json.Secciones[0].id_seccion));
-      }
-    }
-  }, [codigo, token, seccionSeleccionada]);
+const fetchPreview = useCallback(async () => {
+  const res = await fetch(`${API}/admin/cuestionarios/${codigo}/preview`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.ok) {
+    const json = await res.json();
+    setData(json);
+  }
+}, [codigo, token]);
 
-  useEffect(() => {
-    fetchPreview();
-  }, [fetchPreview]);
+useEffect(() => {
+  fetchPreview();
+}, [fetchPreview]);
+
+useEffect(() => {
+  if (!seccionSeleccionada && data?.Secciones?.length) {
+    setSeccionSeleccionada(String(data.Secciones[0].id_seccion));
+  }
+}, [data, seccionSeleccionada]);
+
 
   const selectedSection = data?.Secciones?.find(
     (s) => String(s.id_seccion) === String(seccionSeleccionada)
@@ -348,24 +352,38 @@ export default function GestionSeccionesCuestionario() {
     ) || 0;
 
   // ======== Acciones Sección ========
-  const crearSeccion = async () => {
-    if (!secNombre.trim()) return alert("Ingrese nombre de la sección");
-    const res = await fetch(`${API}/admin/cuestionarios/secciones`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        codigo_formulario: codigo,
-        nombre_seccion: secNombre,
-      }),
-    });
-    if (res.ok) {
-      setSecNombre("");
-      await fetchPreview();
-    }
-  };
+const crearSeccion = async () => {
+  if (!secNombre.trim()) return alert("Ingrese nombre de la sección");
+
+  const res = await fetch(`${API}/admin/cuestionarios/secciones`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      codigo_formulario: codigo,
+      nombre_seccion: secNombre,
+    }),
+  });
+
+  if (!res.ok) return;
+
+  let created = null;
+  try { created = await res.json(); } catch {}
+
+  setSecNombre("");
+  await fetchPreview();
+
+  if (created?.id_seccion) {
+    setSeccionSeleccionada(String(created.id_seccion));
+  } else if (data?.Secciones?.length) {
+    const all = [...(data.Secciones || [])];
+    const last = all.sort((a, b) => b.id_seccion - a.id_seccion)[0];
+    if (last) setSeccionSeleccionada(String(last.id_seccion));
+  }
+};
+
 
   const eliminarSeccion = async (id) => {
     if (!confirm("¿Eliminar sección y sus preguntas?")) return;
@@ -557,50 +575,63 @@ export default function GestionSeccionesCuestionario() {
                 const active =
                   String(s.id_seccion) === String(seccionSeleccionada);
                 return (
-                  <li
-                    key={s.id_seccion}
-                    className={"gs2-list-item " + (active ? "active" : "")}
-                  >
-                    <div
-                      className="gs2-list-text"
-                      onClick={() => {
-                        setSeccionSeleccionada(String(s.id_seccion));
-                        setMobileTab("preguntas");
-                      }}
-                    >
-                      <div className="gs2-list-title">{s.nombre_seccion}</div>
-                      <div className="gs2-list-sub">
-                        {s.Preguntas?.length || 0} pregunta(s)
-                      </div>
-                    </div>
-                    <div className="gs2-inline">
-                      <button
-                        className="gs2-icon"
-                        title="Editar sección"
-                        onClick={() =>
-                          setEditSeccion({
-                            id_seccion: s.id_seccion,
-                            nombre_seccion: s.nombre_seccion || "",
-                          })
-                        }
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 20h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                      <button
-                        className="gs2-icon danger"
-                        title="Eliminar"
-                        onClick={() => eliminarSeccion(s.id_seccion)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M3 6h18M9 6v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                        </svg>
-                      </button>
-                    </div>
-                  </li>
+<li
+  key={s.id_seccion}
+  className={"gs2-list-item " + (active ? "active" : "")}
+  onClick={() => {
+    setSeccionSeleccionada(String(s.id_seccion));
+    setMobileTab("preguntas");
+  }}
+>
+  <div className="gs2-list-text">
+    <div className="gs2-list-title">{s.nombre_seccion}</div>
+    <div className="gs2-list-sub">
+      {s.Preguntas?.length || 0} pregunta(s)
+    </div>
+  </div>
+
+<div className="gs2-inline">
+  <button
+    type="button"
+    className="gs2-icon"
+    title="Editar sección"
+    onClick={(e) => {
+      e.stopPropagation();
+      setEditSeccion({
+        id_seccion: s.id_seccion,
+        nombre_seccion: s.nombre_seccion || "",
+      });
+    }}
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 20h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+            stroke="currentColor" strokeWidth="1.6"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    className="gs2-icon danger"
+    title="Eliminar"
+    onClick={(e) => {
+      e.stopPropagation();
+      eliminarSeccion(s.id_seccion);
+    }}
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 6h18M9 6v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+            stroke="currentColor" strokeWidth="1.6"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 11v6M14 11v6"
+            stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  </button>
+</div>
+
+</li>
+
                 );
               })}
               {!data.Secciones?.length && (
