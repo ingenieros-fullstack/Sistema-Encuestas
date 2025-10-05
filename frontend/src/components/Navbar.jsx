@@ -1,7 +1,22 @@
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "../css/Navbar.css";
 
-export default function Navbar({ rol, nombre }) {
+export default function Navbar({ rol = "empleado", nombre = "Usuario" }) {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const rolPretty = useMemo(() => {
+    const r = (rol || "").toString();
+    return r.charAt(0).toUpperCase() + r.slice(1);
+  }, [rol]);
+
+  const initials = useMemo(() => {
+    const parts = (nombre || "U").trim().split(/\s+/);
+    const a = (parts[0]?.[0] || "").toUpperCase();
+    const b = (parts[1]?.[0] || "").toUpperCase();
+    return (a + (b || "")).slice(0, 2) || "U";
+  }, [nombre]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -9,46 +24,50 @@ export default function Navbar({ rol, nombre }) {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-custom px-4 py-3">
-      <div className="container-fluid d-flex justify-content-between align-items-center">
-        {/* IZQUIERDA: Logo + Título */}
-        <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-shield-fill-exclamation fs-4 text-logo"></i>
-          <span className="fw-bold fs-5 text-white">
-            Panel {rol.toUpperCase()}
-          </span>
-        </div>
-
-        {/* CENTRO: Nombre del usuario */}
-        <div className="d-none d-md-flex align-items-center gap-2">
-          <i className="bi bi-person-circle fs-5 text-custom"></i>
-          <strong className="fs-6 text-white">{nombre}</strong>
-        </div>
-
-        {/* DERECHA: Botones */}
-        <div className="d-flex align-items-center gap-3">
-          {/* Botón Dashboard */}
-          <Link
-            to={`/${rol}/dashboard`}
-            className="btn btn-sm fw-bold text-dark"
-            style={{
-              backgroundColor: "#7aa77dff",
-              border: "none",
-            }}
-          >
-            <i className="bi bi-layout-text-window me-1"></i> Inicio
+    <header className="nbx-wrap">
+      <nav className="nbx-bar">
+        <div className="nbx-inner">
+          {/* Marca */}
+          <Link to={`/${rol}/dashboard`} className="nbx-brand" aria-label="Inicio">
+            <div className="nbx-logo">
+              <i className="bi bi-shield-fill-exclamation" />
+            </div>
+            <div className="nbx-brandText">
+              <span className="nbx-app">Panel</span>{" "}
+              <span className="nbx-role">{rolPretty}</span>
+            </div>
           </Link>
 
-          {/* Botón Logout */}
+          {/* Burger */}
           <button
-            onClick={handleLogout}
-            className="btn btn-sm fw-bold text-danger border border-danger"
-            style={{ backgroundColor: "transparent" }}
+            className="nbx-burger"
+            aria-label="Abrir menú"
+            onClick={() => setOpen((v) => !v)}
           >
-            <i className="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+            <span /><span /><span />
           </button>
+
+          {/* Contenido derecho */}
+          <div className={`nbx-right ${open ? "is-open" : ""}`}>
+            <div className="nbx-user">
+              <div className="nbx-avatar" aria-hidden="true">{initials}</div>
+              <div className="nbx-userMeta">
+                <div className="nbx-name" title={nombre}>{nombre}</div>
+                <span className={`nbx-chip nbx-chip--${rol}`}>{rolPretty}</span>
+              </div>
+            </div>
+
+            <div className="nbx-actions">
+              <Link to={`/${rol}/dashboard`} className="nbx-btn nbx-btn--primary">
+                <i className="bi bi-layout-text-window me-1" /> Inicio
+              </Link>
+              <button onClick={handleLogout} className="nbx-btn nbx-btn--outlineDanger">
+                <i className="bi bi-box-arrow-right me-1" /> Cerrar sesión
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

@@ -1,387 +1,406 @@
-import { useEffect, useState } from "react";  
-import { useParams, useNavigate } from "react-router-dom";  
-import Navbar from "../../components/Navbar";  
-  
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";  
-  
-export default function ResolverCuestionarioEmpleado() {  
-  const { codigo } = useParams();  
-  const navigate = useNavigate();  
-  const token = localStorage.getItem("token");  
-  
-  const [cuestionario, setCuestionario] = useState(null);  
-  const [respuestas, setRespuestas] = useState({});  
-  const [loading, setLoading] = useState(true);  
-  const [indiceSeccion, setIndiceSeccion] = useState(0);  
-  const [resultado, setResultado] = useState(null);  
-  
-  const rol = localStorage.getItem("rol") || "empleado";  
-  const nombre = localStorage.getItem("nombre") || "Empleado";  
-  
-  // Fetch cuestionario con manejo de errores mejorado  
-  useEffect(() => {  
-    fetch(`${API_URL}/empleado/cuestionarios/${codigo}`, {  
-      headers: { Authorization: `Bearer ${token}` },  
-    })  
-      .then((res) => {  
-        if (!res.ok) {  
-          if (res.status === 403) {  
-            return res.json().then(data => {  
-              if (data.completado) {  
-                alert("Este cuestionario ya fue completado");  
-                navigate("/empleado/dashboard");  
-              }  
-              throw new Error(data.error || "No tienes acceso a este cuestionario");  
-            });  
-          }  
-          throw new Error("Error al cargar cuestionario");  
-        }  
-        return res.json();  
-      })  
-      .then((data) => {  
-        setCuestionario(data);  
-        setLoading(false);  
-      })  
-      .catch((err) => {  
-        console.error("Error cargando cuestionario:", err);  
-        alert(err.message);  
-        navigate("/empleado/dashboard");  
-      });  
-  }, [codigo, token, navigate]);  
-  
-  const setValor = (id_pregunta, valor) => {  
-    setRespuestas((prev) => ({ ...prev, [id_pregunta]: valor }));  
-  };  
-  
-  const enviarRespuestas = async () => {  
-    // Normalizar respuestas antes de enviar  
-    const respuestasNormalizadas = Object.entries(respuestas).map(([id_pregunta, valor]) => {  
-      let valorNormalizado = valor;  
-        
-      // Normalizar según el tipo de valor  
-      if (typeof valor === 'string') {  
-        valorNormalizado = valor.toLowerCase().trim();  
-      } else if (Array.isArray(valor)) {  
-        // Para opciones múltiples, ordenar y normalizar  
-        valorNormalizado = valor  
-          .map(v => v.toLowerCase().trim())  
-          .sort()  
-          .join(";");  
-      } else if (typeof valor === 'number') {  
-        valorNormalizado = String(valor);  
-      }  
-  
-      return {  
-        id_pregunta: parseInt(id_pregunta),  
-        respuesta: valorNormalizado,  
-      };  
-    });  
-  
-    try {  
-      const res = await fetch(`${API_URL}/empleado/cuestionarios/${codigo}/respuestas`, {  
-        method: "POST",  
-        headers: {  
-          "Content-Type": "application/json",  
-          Authorization: `Bearer ${token}`,  
-        },  
-        body: JSON.stringify({ respuestas: respuestasNormalizadas }),  
-      });  
-  
-      if (!res.ok) {  
-        const errorData = await res.json();  
-        throw new Error(errorData.error || "Error al enviar respuestas");  
-      }  
-  
-      const data = await res.json();  
-      setResultado({  
-        puntajeTotal: data.puntajeTotal,  
-        respuestasDetalle: data.respuestas || [],  
-      });  
-    } catch (err) {  
-      console.error("Error enviando respuestas:", err);  
-      alert(err.message);  
-    }  
-  };  
-  
-  if (loading) return <p className="p-6">⏳ Cargando cuestionario...</p>;  
-  if (!cuestionario) return <p className="p-6">❌ No se pudo cargar el cuestionario</p>;  
-  
-  // Pantalla de resultados  
-  if (resultado) {  
-    const puntajeMaximo = (cuestionario.Secciones || [])  
-      .flatMap((s) => s.Preguntas || [])  
-      .reduce((acc, p) => acc + (p.puntaje || 0), 0);  
-      
-    const porcentaje = puntajeMaximo > 0 ? (resultado.puntajeTotal / puntajeMaximo) * 100 : 0;  
-    const aprobado = porcentaje >= (cuestionario.umbral_aprobacion || 0);  
-  
-    return (  
-      <div>  
-        <Navbar nombre={nombre} rol={rol} />  
-        <div className="container py-5">  
-          <div className="card shadow-lg border-0">  
-            <div className="card-body p-5">  
-              {/* Encabezado con estado */}  
-              <div className="text-center mb-4">  
-                <div className={`badge ${aprobado ? 'bg-success' : 'bg-danger'} fs-5 mb-3`}>  
-                  {aprobado ? '✓ APROBADO' : '✗ NO APROBADO'}  
-                </div>  
-                <h2 className="h3 mb-3">{cuestionario.titulo}</h2>  
-                <div className="d-flex justify-content-center gap-4 mb-3">  
-                  <div>  
-                    <div className="text-muted small">Puntaje obtenido</div>  
-                    <div className="h4 mb-0">{resultado.puntajeTotal} / {puntajeMaximo}</div>  
-                  </div>  
-                  <div>  
-                    <div className="text-muted small">Porcentaje</div>  
-                    <div className="h4 mb-0">{porcentaje.toFixed(1)}%</div>  
-                  </div>  
-                  <div>  
-                    <div className="text-muted small">Umbral requerido</div>  
-                    <div className="h4 mb-0">{cuestionario.umbral_aprobacion}%</div>  
-                  </div>  
-                </div>  
-              </div>  
-  
-              {/* Mostrar respuestas correctas si está habilitado */}  
-              {cuestionario.mostrar_respuestas && resultado.respuestasDetalle && (  
-                <div className="mt-4">  
-                  <h5 className="mb-3">Revisión de respuestas</h5>  
-                  {resultado.respuestasDetalle.map((detalle, idx) => (  
-                    <div   
-                      key={idx}   
-                      className={`p-3 mb-2 rounded ${detalle.es_correcta ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10'}`}  
-                    >  
-                      <p className="mb-1 fw-semibold">{detalle.pregunta}</p>  
-                      <p className="mb-1">  
-                        <span className="text-muted">Tu respuesta:</span> {detalle.respuesta}  
-                      </p>  
-                      {detalle.respuesta_correcta && (  
-                        <p className="mb-1">  
-                          <span className="text-muted">Respuesta correcta:</span> {detalle.respuesta_correcta}  
-                        </p>  
-                      )}  
-                      <p className={detalle.es_correcta ? 'text-success' : 'text-danger'}>  
-                        {detalle.es_correcta ? '✓' : '✗'}{' '}  
-                        {detalle.es_correcta ? 'Correcta' : 'Incorrecta'} -{' '}  
-                        {detalle.puntaje_obtenido} / {detalle.puntaje_total} pts  
-                      </p>  
-                    </div>  
-                  ))}  
-                </div>  
-              )}  
-  
-              <div className="mt-4">  
-                <button  
-                  onClick={() => navigate("/empleado/dashboard")}  
-                  className="btn btn-primary"  
-                >  
-                  Volver al Dashboard  
-                </button>  
-              </div>  
-  
-              <div className="mt-4 p-4 bg-blue-50 rounded">  
-                <p className="text-sm text-gray-700">  
-                  ℹ️ Este cuestionario ha sido completado y guardado. No es posible volver a responderlo.  
-                </p>  
-              </div>  
-            </div>  
-          </div>  
-        </div>  
-      </div>  
-    );  
-  }  
-  
-  // Filtrar secciones visibles  
-  const seccionesVisibles = (cuestionario?.Secciones || []).filter(  
-    (sec) =>  
-      !sec.condicion_pregunta_id ||  
-      respuestas[sec.condicion_pregunta_id] === sec.condicion_valor  
-  );  
-  
-  if (seccionesVisibles.length === 0) {  
-    return <p className="p-6">⚠️ No hay más secciones disponibles.</p>;  
-  }  
-  
-  const seccionActual = seccionesVisibles[indiceSeccion];  
-  const esUltimaSeccion = indiceSeccion === seccionesVisibles.length - 1;  
-  
-  const avanzarSeccion = () => {  
-    if (esUltimaSeccion) {  
-      enviarRespuestas();  
-    } else {  
-      setIndiceSeccion((prev) => prev + 1);  
-    }  
-  };  
-  
-  const retrocederSeccion = () => {  
-    if (indiceSeccion > 0) setIndiceSeccion((prev) => prev - 1);  
-  };  
-  
-  return (  
-    <div>  
-      <Navbar nombre={nombre} rol={rol} />  
-      <div className="container py-5">  
-        <div className="card shadow">  
-          <div className="card-body">  
-            <h2 className="h4 mb-3">{cuestionario.titulo}</h2>  
-            <p className="text-muted mb-4">  
-              Sección {indiceSeccion + 1} de {seccionesVisibles.length}  
-            </p>  
-  
-            <h3 className="h5 mb-3">{seccionActual.nombre_seccion}</h3>  
-  
-            {(seccionActual.Preguntas || []).map((pregunta) => (  
-              <PreguntaInput  
-                key={pregunta.id_pregunta}  
-                pregunta={pregunta}  
-                valor={respuestas[pregunta.id_pregunta]}  
-                setValor={setValor}  
-              />  
-            ))}  
-  
-            <div className="d-flex justify-content-between mt-4">  
-              {cuestionario.navegacion_preguntas && indiceSeccion > 0 && (  
-                <button className="btn btn-secondary" onClick={retrocederSeccion}>  
-                  ← Anterior  
-                </button>  
-              )}  
-              <button className="btn btn-primary ms-auto" onClick={avanzarSeccion}>  
-                {esUltimaSeccion ? "Finalizar" : "Siguiente →"}  
-              </button>  
-            </div>  
-          </div>  
-        </div>  
-      </div>  
-    </div>  
-  );  
-}  
-  
-function PreguntaInput({ pregunta, valor, setValor }) {  
-  const opciones = pregunta.Opciones || [];  
-  
-  switch (pregunta.tipo_pregunta) {  
-    case "respuesta_corta":  
-      return (  
-        <div className="mb-3">  
-          <label className="font-medium">{pregunta.enunciado}</label>  
-          {pregunta.puntaje && (  
-            <span className="ml-2 text-sm text-gray-500">({pregunta.puntaje} pts)</span>  
-          )}  
-          <input  
-            type="text"  
-            className="form-control mt-2"  
-            value={valor || ""}  
-            onChange={(e) => setValor(pregunta.id_pregunta, e.target.value)}  
-          />  
-        </div>  
-      );  
-  
-    case "opcion_multiple":  
-      return (  
-        <div className="mb-3">  
-          <label className="font-medium">{pregunta.enunciado}</label>  
-          {pregunta.puntaje && (  
-            <span className="ml-2 text-sm text-gray-500">({pregunta.puntaje} pts)</span>  
-          )}  
-          <div className="mt-2">  
-            {opciones.map((opt) => (  
-              <div key={opt.id_opcion} className="mb-1">  
-                <input  
-                  type="checkbox"  
-                  checked={valor?.includes(opt.texto) || false}  
-                  onChange={(e) => {  
-                    let arr = Array.isArray(valor) ? [...valor] : [];  
-                    if (e.target.checked) arr.push(opt.texto);  
-                    else arr = arr.filter((v) => v !== opt.texto);  
-                    setValor(pregunta.id_pregunta, arr);  
-                  }}  
-                />  
-                <span className="ml-2">{opt.texto}</span>  
-              </div>  
-            ))}  
-          </div>  
-        </div>  
-      );  
-  
-    case "seleccion_unica":  
-      return (  
-        <div className="mb-3">  
-          <label className="font-medium">{pregunta.enunciado}</label>  
-          {pregunta.puntaje && (  
-            <span className="ml-2 text-sm text-gray-500">({pregunta.puntaje} pts)</span>  
-          )}  
-          <div className="mt-2">  
-            {opciones.map((opt) => (  
-              <div key={opt.id_opcion} className="mb-1">  
-                <input  
-                  type="radio"  
-                  name={`p-${pregunta.id_pregunta}`}  
-                  checked={valor === opt.texto}  
-                  onChange={() => setValor(pregunta.id_pregunta, opt.texto)}  
-                />  
-                <span className="ml-2">{opt.texto}</span>  
-              </div>  
-            ))}  
-          </div>  
-        </div>  
-      );  
-  
-    case "si_no":  
-      return (  
-        <div className="mb-3">  
-          <label className="font-medium">{pregunta.enunciado}</label>  
-          {pregunta.puntaje && (  
-            <span className="ml-2 text-sm text-gray-500">({pregunta.puntaje} pts)</span>  
-          )}  
-          <div className="mt-2">  
-            <label className="me-3">  
-              <input  
-                type="radio"  
-                name={`p-${pregunta.id_pregunta}`}  
-                value="si"  
-                checked={valor === "si"}  
-                onChange={() => setValor(pregunta.id_pregunta, "si")}  
-              />{" "}  
-              Sí  
-            </label>  
-            <label>  
-              <input  
-                type="radio"  
-                name={`p-${pregunta.id_pregunta}`}  
-                value="no"  
-                checked={valor === "no"}  
-                onChange={() => setValor(pregunta.id_pregunta, "no")}  
-              />{" "}  
-              No  
-            </label>  
-          </div>  
-        </div>  
-      );  
+// src/pages/empleado/ResolverCuestionario.jsx
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+// Reutilizamos los estilos gf-* de la encuesta
+import "../../css/ResolverEncuestaEmpleado.css";
 
-      case "escala_1_5":  
-  return (  
-    <div className="mb-3">  
-      <label className="font-medium">{pregunta.enunciado}</label>  
-      {pregunta.puntaje && (  
-        <span className="ml-2 text-sm text-gray-500">({pregunta.puntaje} pts)</span>  
-      )}  
-      <div className="flex gap-2 mt-2">  
-        {[1, 2, 3, 4, 5].map((n) => (  
-          <label key={n}>  
-            <input  
-              type="radio"  
-              name={`p-${pregunta.id_pregunta}`}  
-              checked={valor === n}  
-              onChange={() => setValor(pregunta.id_pregunta, n)}  
-            />  
-            {n}  
-          </label>  
-        ))}  
-      </div>  
-    </div>  
-  );  
-  
-default:  
-  return <p className="text-gray-500 italic">Tipo no soportado</p>;
-}}
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+export default function ResolverCuestionario() {
+  const { codigo } = useParams();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  const [cuestionario, setCuestionario] = useState(null);
+  const [respuestas, setRespuestas] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [indiceSeccion, setIndiceSeccion] = useState(0);
+  const [resultado, setResultado] = useState(null);
+
+  const rol = localStorage.getItem("rol") || "empleado";
+  const nombre = localStorage.getItem("nombre") || "Empleado";
+
+  // ====== Fetch cuestionario (manejo de errores y completado)
+  useEffect(() => {
+    fetch(`${API_URL}/empleado/cuestionarios/${codigo}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          if (res.status === 403) {
+            const data = await res.json();
+            if (data.completado) {
+              alert("Este cuestionario ya fue completado");
+              navigate("/empleado/dashboard");
+              return Promise.reject();
+            }
+            throw new Error(data.error || "No tienes acceso a este cuestionario");
+          }
+          throw new Error("Error al cargar cuestionario");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setCuestionario(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err) {
+          console.error("Error cargando cuestionario:", err);
+          alert(err.message);
+          navigate("/empleado/dashboard");
+        }
+      });
+  }, [codigo, token, navigate]);
+
+  // ====== Helpers (sin hooks nuevos luego de returns)
+  const setValor = (id_pregunta, valor) =>
+    setRespuestas((prev) => ({ ...prev, [id_pregunta]: valor }));
+
+  // Secciones visibles por condición
+  const seccionesVisibles = (cuestionario?.Secciones || []).filter(
+    (sec) =>
+      !sec.condicion_pregunta_id ||
+      respuestas[sec.condicion_pregunta_id] === sec.condicion_valor
+  );
+
+  // Returns tempranos seguros
+  if (loading) return <div className="gf-screen-center">Cargando cuestionario…</div>;
+  if (!cuestionario) return <div className="gf-screen-center">No se pudo cargar el cuestionario.</div>;
+
+  // ====== Pantalla de resultados
+  if (resultado) {
+    const puntajeMaximo = (cuestionario.Secciones || [])
+      .flatMap((s) => s.Preguntas || [])
+      .reduce((acc, p) => acc + (p.puntaje || 0), 0);
+
+    const porcentaje = puntajeMaximo > 0 ? (resultado.puntajeTotal / puntajeMaximo) * 100 : 0;
+    const umbral = cuestionario.umbral_aprobacion || 0;
+    const aprobado = porcentaje >= umbral;
+
+    return (
+      <div className="gf-shell">
+        <Navbar nombre={nombre} rol={rol} />
+        <div className="gf-header" style={{ marginTop: 24 }}>
+          <div className="gf-section-card">
+            <div className="gf-section-head" style={{ textAlign: "center" }}>
+              <h2 className="gf-section-title" style={{ marginBottom: 8 }}>{cuestionario.titulo}</h2>
+              <div style={{ marginTop: 6 }}>
+                <span
+                  className="gf-result-badge"
+                  data-state={aprobado ? "ok" : "ko"}
+                >
+                  {aprobado ? "✓ APROBADO" : "✗ NO APROBADO"}
+                </span>
+              </div>
+
+              <div className="gf-result-grid">
+                <div className="gf-result-box">
+                  <div className="gf-result-label">Puntaje</div>
+                  <div className="gf-result-value">
+                    {resultado.puntajeTotal} / {puntajeMaximo}
+                  </div>
+                </div>
+                <div className="gf-result-box">
+                  <div className="gf-result-label">Porcentaje</div>
+                  <div className="gf-result-value">{porcentaje.toFixed(1)}%</div>
+                </div>
+                <div className="gf-result-box">
+                  <div className="gf-result-label">Umbral</div>
+                  <div className="gf-result-value">{umbral}%</div>
+                </div>
+              </div>
+            </div>
+
+            {cuestionario.mostrar_respuestas && resultado.respuestasDetalle?.length > 0 && (
+              <div className="gf-questions" style={{ paddingTop: 10 }}>
+                <h3 className="gf-section-title" style={{ fontSize: 18, marginBottom: 8 }}>
+                  Revisión de respuestas
+                </h3>
+                {resultado.respuestasDetalle.map((det, idx) => (
+                  <div
+                    key={idx}
+                    className={`gf-review ${det.es_correcta ? "is-ok" : "is-ko"}`}
+                  >
+                    <p className="gf-review-q">{det.pregunta}</p>
+                    <p className="gf-review-line">
+                      <span className="gf-review-tag">Tu respuesta:</span> {det.respuesta}
+                    </p>
+                    {det.respuesta_correcta && (
+                      <p className="gf-review-line">
+                        <span className="gf-review-tag">Respuesta correcta:</span>{" "}
+                        {det.respuesta_correcta}
+                      </p>
+                    )}
+                    <p className={`gf-review-score ${det.es_correcta ? "ok" : "ko"}`}>
+                      {det.es_correcta ? "✓ Correcta" : "✗ Incorrecta"} — {det.puntaje_obtenido} / {det.puntaje_total} pts
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="gf-nav" style={{ padding: 16 }}>
+              <div className="gf-nav-right" style={{ marginLeft: "auto" }}>
+                <button
+                  className="gf-btn gf-btn-primary"
+                  onClick={() => navigate("/empleado/dashboard")}
+                >
+                  Volver al panel
+                </button>
+              </div>
+            </div>
+
+            <div className="gf-review-info">
+              ℹ️ Este cuestionario ha sido completado y guardado. No es posible volver a responderlo.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== Flujo normal (resolución)
+  if (seccionesVisibles.length === 0) {
+    return <div className="gf-screen-center">No hay secciones disponibles.</div>;
+  }
+
+  const seccionActual = seccionesVisibles[indiceSeccion];
+  const esUltimaSeccion = indiceSeccion === seccionesVisibles.length - 1;
+
+  const avanzarSeccion = () => {
+    if (esUltimaSeccion) enviarRespuestas();
+    else setIndiceSeccion((prev) => prev + 1);
+  };
+  const retrocederSeccion = () => {
+    if (indiceSeccion > 0) setIndiceSeccion((prev) => prev - 1);
+  };
+
+  const enviarRespuestas = async () => {
+    // Normaliza respuestas (igual que tu versión)
+    const respuestasNormalizadas = Object.entries(respuestas).map(
+      ([id_pregunta, valor]) => {
+        let valorNormalizado = valor;
+        if (typeof valor === "string") {
+          valorNormalizado = valor.toLowerCase().trim();
+        } else if (Array.isArray(valor)) {
+          valorNormalizado = valor.map((v) => v.toLowerCase().trim()).sort().join(";");
+        } else if (typeof valor === "number") {
+          valorNormalizado = String(valor);
+        }
+        return { id_pregunta: parseInt(id_pregunta), respuesta: valorNormalizado };
+      }
+    );
+
+    try {
+      const res = await fetch(`${API_URL}/empleado/cuestionarios/${codigo}/respuestas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ respuestas: respuestasNormalizadas }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Error al enviar respuestas");
+      }
+
+      const data = await res.json();
+      setResultado({
+        puntajeTotal: data.puntajeTotal,
+        respuestasDetalle: data.respuestas || [],
+      });
+    } catch (err) {
+      console.error("Error enviando respuestas:", err);
+      alert(err.message);
+    }
+  };
+
+  // Progreso simple (secciones)
+  const pctSeccion = Math.round(((indiceSeccion + 1) / seccionesVisibles.length) * 100);
+
+  return (
+    <div className="gf-shell">
+      <Navbar nombre={nombre} rol={rol} />
+
+      {/* Header tipo Forms */}
+      <header className="gf-header">
+        <div className="gf-header-card">
+          <h1 className="gf-title">{cuestionario.titulo}</h1>
+          {cuestionario.descripcion ? (
+            <p className="gf-subtitle">{cuestionario.descripcion}</p>
+          ) : null}
+          <div className="gf-progress">
+            <div className="gf-progress-bar" style={{ width: `${pctSeccion}%` }} />
+          </div>
+          <span className="gf-progress-text">
+            {indiceSeccion + 1} / {seccionesVisibles.length}
+          </span>
+        </div>
+      </header>
+
+      {/* Card de sección */}
+      <main className="gf-main">
+        <section className="gf-section-card">
+          <div className="gf-section-head">
+            <h2 className="gf-section-title">{seccionActual.nombre_seccion}</h2>
+            {seccionActual.descripcion ? (
+              <p className="gf-section-desc">{seccionActual.descripcion}</p>
+            ) : null}
+          </div>
+
+          <div className="gf-questions">
+            {(seccionActual.Preguntas || []).map((pregunta, idx) => (
+              <PreguntaInput
+                key={pregunta.id_pregunta}
+                index={idx + 1}
+                pregunta={pregunta}
+                valor={respuestas[pregunta.id_pregunta]}
+                setValor={setValor}
+              />
+            ))}
+          </div>
+
+          <div className="gf-nav" style={{ paddingTop: 4 }}>
+            {cuestionario.navegacion_preguntas && indiceSeccion > 0 ? (
+              <button className="gf-btn gf-btn-text" onClick={retrocederSeccion}>
+                ← Anterior
+              </button>
+            ) : <span />}
+
+            <div className="gf-nav-right">
+              <button className="gf-btn gf-btn-primary" onClick={avanzarSeccion}>
+                {esUltimaSeccion ? "Finalizar" : "Siguiente →"}
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+/* ========= UI de pregunta estilo Forms ========= */
+function PreguntaInput({ index, pregunta, valor, setValor }) {
+  const opciones = pregunta.Opciones || [];
+
+  const Etiqueta = () => (
+    <div className="gf-q-label">
+      <span className="gf-q-index">{index}</span>
+      <span className="gf-q-text">{pregunta.enunciado}</span>
+      {pregunta.puntaje ? (
+        <span className="gf-q-score">({pregunta.puntaje} pts)</span>
+      ) : null}
+    </div>
+  );
+
+  switch (pregunta.tipo_pregunta) {
+    case "respuesta_corta":
+      return (
+        <div className="gf-q">
+          <Etiqueta />
+          <input
+            type="text"
+            className="gf-input"
+            value={valor || ""}
+            onChange={(e) => setValor(pregunta.id_pregunta, e.target.value)}
+            placeholder="Tu respuesta"
+          />
+        </div>
+      );
+
+    case "opcion_multiple":
+      return (
+        <div className="gf-q">
+          <Etiqueta />
+          <div className="gf-options">
+            {opciones.map((opt) => {
+              const checked = Array.isArray(valor) && valor.includes(opt.texto);
+              return (
+                <label key={opt.id_opcion} className={`gf-opt ${checked ? "is-checked" : ""}`}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      let arr = Array.isArray(valor) ? [...valor] : [];
+                      if (e.target.checked) arr.push(opt.texto);
+                      else arr = arr.filter((v) => v !== opt.texto);
+                      setValor(pregunta.id_pregunta, arr);
+                    }}
+                  />
+                  <span>{opt.texto}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+    case "seleccion_unica":
+      return (
+        <div className="gf-q">
+          <Etiqueta />
+          <div className="gf-options">
+            {opciones.map((opt) => (
+              <label key={opt.id_opcion} className={`gf-opt ${valor === opt.texto ? "is-checked" : ""}`}>
+                <input
+                  type="radio"
+                  name={`p-${pregunta.id_pregunta}`}
+                  checked={valor === opt.texto}
+                  onChange={() => setValor(pregunta.id_pregunta, opt.texto)}
+                />
+                <span>{opt.texto}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "si_no":
+      return (
+        <div className="gf-q">
+          <Etiqueta />
+          <div className="gf-options">
+            {["si", "no"].map((v) => (
+              <label key={v} className={`gf-opt ${valor === v ? "is-checked" : ""}`}>
+                <input
+                  type="radio"
+                  name={`p-${pregunta.id_pregunta}`}
+                  value={v}
+                  checked={valor === v}
+                  onChange={() => setValor(pregunta.id_pregunta, v)}
+                />
+                <span>{v === "si" ? "Sí" : "No"}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "escala_1_5":
+      return (
+        <div className="gf-q">
+          <Etiqueta />
+          <div className="gf-scale">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <label key={n} className={`gf-chip ${valor === n ? "is-checked" : ""}`}>
+                <input
+                  type="radio"
+                  name={`p-${pregunta.id_pregunta}`}
+                  checked={valor === n}
+                  onChange={() => setValor(pregunta.id_pregunta, n)}
+                />
+                <span>{n}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+
+    default:
+      return <div className="gf-q"><Etiqueta /><p className="gf-muted">Tipo no soportado</p></div>;
+  }
+}

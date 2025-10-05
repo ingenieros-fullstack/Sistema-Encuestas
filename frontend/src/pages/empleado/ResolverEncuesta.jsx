@@ -1,10 +1,12 @@
+// src/pages/empleado/ResolverEncuesta.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import "../../css/ResolverEncuestaEmpleado.css"; // estilos gf-*
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-export default function ResolverEncuestaEmpleado() {
+export default function ResolverEncuesta() {
   const { codigo } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -12,12 +14,13 @@ export default function ResolverEncuestaEmpleado() {
   const [encuesta, setEncuesta] = useState(null);
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(true);
-  const [indiceSeccion, setIndiceSeccion] = useState(0); // 🆕 control de secciones paso a paso
+  const [indiceSeccion, setIndiceSeccion] = useState(0);
+  const [finalizado, setFinalizado] = useState(false); // ✅ pantalla de gracias
 
   const rol = localStorage.getItem("rol") || "empleado";
   const nombre = localStorage.getItem("nombre") || "Empleado";
 
-  // Fetch encuesta
+  // ====== Fetch
   useEffect(() => {
     fetch(`${API_URL}/empleado/encuestas/${codigo}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -30,12 +33,27 @@ export default function ResolverEncuestaEmpleado() {
       .catch((err) => console.error("Error cargando encuesta:", err));
   }, [codigo, token]);
 
+  // ====== Helpers
   const setValor = (id_pregunta, valor) =>
     setRespuestas((prev) => ({ ...prev, [id_pregunta]: valor }));
 
+  // Secciones visibles por condición (sin hooks nuevos)
+  const seccionesVisibles = (encuesta?.Secciones || []).filter(
+    (sec) =>
+      !sec.condicion_pregunta_id ||
+      respuestas[sec.condicion_pregunta_id] === sec.condicion_valor
+  );
+  const total = seccionesVisibles.length || 1;
+  const actual = Math.min(indiceSeccion, total - 1);
+  const seccionActual = seccionesVisibles[actual];
+  const pct = Math.round(((actual + 1) / total) * 100);
+
+  const avanzar = () => actual < total - 1 && setIndiceSeccion((i) => i + 1);
+  const retroceder = () => actual > 0 && setIndiceSeccion((i) => i - 1);
+
   const enviar = (finalizar) => {
     const lista = [];
-    encuesta.Secciones.forEach((sec) =>
+    (encuesta?.Secciones || []).forEach((sec) =>
       (sec.Preguntas || []).forEach((p) => {
         const v = respuestas[p.id_pregunta];
         if (v !== undefined) lista.push({ id_pregunta: p.id_pregunta, valor: v });
@@ -52,199 +70,232 @@ export default function ResolverEncuestaEmpleado() {
     })
       .then((res) => res.json())
       .then(() => {
-        if (finalizar) navigate("/empleado/dashboard");
-        else alert("Avance guardado ✅");
+        if (finalizar) {
+          // ✅ Mostrar interfaz de agradecimiento
+          setFinalizado(true);
+        }
       })
       .catch((err) => console.error("Error enviando respuestas:", err));
   };
 
-  if (loading) return <p className="p-4">Cargando encuesta...</p>;
-  if (!encuesta) return <p className="p-4">Encuesta no encontrada.</p>;
+  if (loading) return <div className="gf-screen-center">Cargando encuesta…</div>;
+  if (!encuesta) return <div className="gf-screen-center">Encuesta no encontrada.</div>;
 
-  // 🧩 Filtrar secciones visibles por condiciones
-  const seccionesVisibles = encuesta.Secciones.filter(
-    (sec) =>
-      !sec.condicion_pregunta_id ||
-      respuestas[sec.condicion_pregunta_id] === sec.condicion_valor
-  );
+  // ====== Pantalla de “Gracias”
+  if (finalizado) {
+    return (
+      <div className="gf-shell">
+        <Navbar rol={rol} nombre={nombre} />
+        <div className="gf-thanks-wrap">
+          <div className="gf-thanks-card">
+            <div className="gf-thanks-emoji">🎉</div>
+            <h2 className="gf-thanks-title">¡Gracias por participar!</h2>
+            <p className="gf-thanks-text">
+              Tus respuestas han sido registradas correctamente. Apreciamos el tiempo que
+              dedicaste a completar esta encuesta.
+            </p>
 
-  const seccionActual = seccionesVisibles[indiceSeccion];
+            <div className="gf-thanks-actions">
+              <button
+                className="gf-btn gf-btn-primary"
+                onClick={() => navigate("/empleado/dashboard")}
+              >
+                Volver al panel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const avanzar = () => {
-    if (indiceSeccion < seccionesVisibles.length - 1)
-      setIndiceSeccion((i) => i + 1);
-  };
-  const retroceder = () => {
-    if (indiceSeccion > 0) setIndiceSeccion((i) => i - 1);
-  };
-
+  // ====== Pantalla normal
   return (
-    <div>
+    <div className="gf-shell">
       <Navbar rol={rol} nombre={nombre} />
 
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-indigo-700 mb-4">
-          {encuesta.titulo}
-        </h1>
-
-        {/* Sección actual */}
-        {seccionActual ? (
-          <div className="mb-6 border-b pb-4">
-            <h2 className="text-lg font-semibold mb-3">
-              {seccionActual.nombre_seccion}
-            </h2>
-            {seccionActual.Preguntas.map((p) => (
-              <PreguntaInput
-                key={p.id_pregunta}
-                pregunta={p}
-                valor={respuestas[p.id_pregunta]}
-                setValor={setValor}
-              />
-            ))}
+      {/* Header tipo Forms */}
+      <header className="gf-header">
+        <div className="gf-header-card">
+          <h1 className="gf-title">{encuesta.titulo}</h1>
+          {encuesta.descripcion ? (
+            <p className="gf-subtitle">{encuesta.descripcion}</p>
+          ) : null}
+          <div className="gf-progress">
+            <div className="gf-progress-bar" style={{ width: `${pct}%` }} />
           </div>
-        ) : (
-          <p>No hay más secciones disponibles.</p>
+          <span className="gf-progress-text">
+            {actual + 1} / {total}
+          </span>
+        </div>
+      </header>
+
+      {/* Sección actual */}
+      <main className="gf-main">
+        {seccionActual && (
+          <section className="gf-section-card">
+            <div className="gf-section-head">
+              <h2 className="gf-section-title">{seccionActual.nombre_seccion}</h2>
+              {seccionActual.descripcion ? (
+                <p className="gf-section-desc">{seccionActual.descripcion}</p>
+              ) : null}
+            </div>
+
+            <div className="gf-questions">
+              {seccionActual.Preguntas.map((p, idx) => (
+                <PreguntaInput
+                  key={p.id_pregunta}
+                  index={idx + 1}
+                  pregunta={p}
+                  valor={respuestas[p.id_pregunta]}
+                  setValor={setValor}
+                />
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Navegación de secciones */}
-        <div className="flex justify-between mt-4">
-          <button
-            disabled={indiceSeccion === 0}
-            onClick={retroceder}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          >
+        {/* Navegación */}
+        <div className="gf-nav">
+          <button className="gf-btn gf-btn-text" disabled={actual === 0} onClick={retroceder}>
             ← Anterior
           </button>
 
-          {indiceSeccion < seccionesVisibles.length - 1 ? (
-            <button
-              onClick={avanzar}
-              className="px-4 py-2 bg-indigo-500 text-white rounded"
-            >
-              Siguiente →
-            </button>
-          ) : (
-            <div className="flex gap-2">
-              <button
-                onClick={() => enviar(false)}
-                className="px-4 py-2 bg-gray-200 rounded"
-              >
-                Guardar avance
+          {actual < total - 1 ? (
+            <div className="gf-nav-right">
+              <button className="gf-btn gf-btn-outlined" onClick={() => enviar(false)}>
+                Guardar
               </button>
-              <button
-                onClick={() => enviar(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded"
-              >
-                Enviar encuesta
+              <button className="gf-btn gf-btn-primary" onClick={avanzar}>
+                Siguiente →
+              </button>
+            </div>
+          ) : (
+            <div className="gf-nav-right">
+              <button className="gf-btn gf-btn-outlined" onClick={() => enviar(false)}>
+                Guardar
+              </button>
+              <button className="gf-btn gf-btn-primary" onClick={() => enviar(true)}>
+                Enviar
               </button>
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
 
-// 🔹 Render dinámico de preguntas (con condicional incluida)
-function PreguntaInput({ pregunta, valor, setValor }) {
+/* ===== UI preguntas ===== */
+function PreguntaInput({ index, pregunta, valor, setValor }) {
+  const etiqueta = (
+    <div className="gf-q-label">
+      <span className="gf-q-index">{index}</span>
+      <span className="gf-q-text">{pregunta.enunciado}</span>
+    </div>
+  );
+
   switch (pregunta.tipo_pregunta) {
     case "respuesta_corta":
       return (
-        <div className="mb-3">
-          <label>{pregunta.enunciado}</label>
+        <div className="gf-q">
+          {etiqueta}
           <input
             type="text"
+            className="gf-input"
             value={valor || ""}
             onChange={(e) => setValor(pregunta.id_pregunta, e.target.value)}
-            className="border p-2 w-full rounded"
+            placeholder="Tu respuesta"
           />
         </div>
       );
 
     case "opcion_multiple":
       return (
-        <div className="mb-3">
-          <label>{pregunta.enunciado}</label>
-          {pregunta.Opciones.map((opt) => (
-            <div key={opt.id_opcion}>
-              <input
-                type="checkbox"
-                checked={valor?.includes(opt.texto) || false}
-                onChange={(e) => {
-                  let arr = Array.isArray(valor) ? [...valor] : [];
-                  if (e.target.checked) arr.push(opt.texto);
-                  else arr = arr.filter((v) => v !== opt.texto);
-                  setValor(pregunta.id_pregunta, arr);
-                }}
-              />
-              <span className="ml-2">{opt.texto}</span>
-            </div>
-          ))}
+        <div className="gf-q">
+          {etiqueta}
+          <div className="gf-options">
+            {pregunta.Opciones.map((opt) => {
+              const checked = Array.isArray(valor) && valor.includes(opt.texto);
+              return (
+                <label key={opt.id_opcion} className={`gf-opt ${checked ? "is-checked" : ""}`}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      let arr = Array.isArray(valor) ? [...valor] : [];
+                      if (e.target.checked) arr.push(opt.texto);
+                      else arr = arr.filter((v) => v !== opt.texto);
+                      setValor(pregunta.id_pregunta, arr);
+                    }}
+                  />
+                  <span>{opt.texto}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
       );
 
     case "seleccion_unica":
       return (
-        <div className="mb-3">
-          <label>{pregunta.enunciado}</label>
-          {pregunta.Opciones.map((opt) => (
-            <div key={opt.id_opcion}>
-              <input
-                type="radio"
-                name={`p-${pregunta.id_pregunta}`}
-                checked={valor === opt.texto}
-                onChange={() => setValor(pregunta.id_pregunta, opt.texto)}
-              />
-              <span className="ml-2">{opt.texto}</span>
-            </div>
-          ))}
+        <div className="gf-q">
+          {etiqueta}
+          <div className="gf-options">
+            {pregunta.Opciones.map((opt) => (
+              <label
+                key={opt.id_opcion}
+                className={`gf-opt ${valor === opt.texto ? "is-checked" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name={`p-${pregunta.id_pregunta}`}
+                  checked={valor === opt.texto}
+                  onChange={() => setValor(pregunta.id_pregunta, opt.texto)}
+                />
+                <span>{opt.texto}</span>
+              </label>
+            ))}
+          </div>
         </div>
       );
 
     case "si_no":
-    case "condicional": // 🆕 se comporta igual que si_no
+    case "condicional":
       return (
-        <div className="mb-3">
-          <label>{pregunta.enunciado}</label>
-          <div>
-            <label className="mr-4">
-              <input
-                type="radio"
-                name={`p-${pregunta.id_pregunta}`}
-                value="si"
-                checked={valor === "si"}
-                onChange={() => setValor(pregunta.id_pregunta, "si")}
-              />{" "}
-              Sí
-            </label>
-            <label>
-              <input
-                type="radio"
-                name={`p-${pregunta.id_pregunta}`}
-                value="no"
-                checked={valor === "no"}
-                onChange={() => setValor(pregunta.id_pregunta, "no")}
-              />{" "}
-              No
-            </label>
+        <div className="gf-q">
+          {etiqueta}
+          <div className="gf-options">
+            {["si", "no"].map((v) => (
+              <label key={v} className={`gf-opt ${valor === v ? "is-checked" : ""}`}>
+                <input
+                  type="radio"
+                  name={`p-${pregunta.id_pregunta}`}
+                  value={v}
+                  checked={valor === v}
+                  onChange={() => setValor(pregunta.id_pregunta, v)}
+                />
+                <span>{v === "si" ? "Sí" : "No"}</span>
+              </label>
+            ))}
           </div>
         </div>
       );
 
     case "escala_1_5":
       return (
-        <div className="mb-3">
-          <label>{pregunta.enunciado}</label>
-          <div className="flex gap-2">
+        <div className="gf-q">
+          {etiqueta}
+          <div className="gf-scale">
             {[1, 2, 3, 4, 5].map((n) => (
-              <label key={n}>
+              <label key={n} className={`gf-chip ${valor === n ? "is-checked" : ""}`}>
                 <input
                   type="radio"
                   name={`p-${pregunta.id_pregunta}`}
                   checked={valor === n}
                   onChange={() => setValor(pregunta.id_pregunta, n)}
                 />
-                {n}
+                <span>{n}</span>
               </label>
             ))}
           </div>
@@ -252,6 +303,11 @@ function PreguntaInput({ pregunta, valor, setValor }) {
       );
 
     default:
-      return <p className="text-gray-500 italic">Tipo no soportado</p>;
+      return (
+        <div className="gf-q">
+          {etiqueta}
+          <p className="gf-muted">Tipo no soportado</p>
+        </div>
+      );
   }
 }
