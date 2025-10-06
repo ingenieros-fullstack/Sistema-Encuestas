@@ -164,5 +164,3 @@ app.listen(PORT, "0.0.0.0", async () => {
 
 
 
-git add .
-git commit -m "release(v1.9.0): bugs corregidos y dataempleado integrado."
