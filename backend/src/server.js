@@ -1,11 +1,10 @@
-import express from "express";  
-import dotenv from "dotenv";  
-import cors from "cors";  
-import path from "path";  
-import fs from "fs";  
-import { fileURLToPath } from "url";  
-import sequelize from "./config/db.js";  
-  
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import sequelize from "./config/db.js";
 // ==========================  
 // Rutas  
 // ==========================  
@@ -59,6 +58,7 @@ app.use(express.json());
 // ==========================  
 const __filename = fileURLToPath(import.meta.url);  
 const __dirname = path.dirname(__filename);  
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
   
 const UPLOADS_DIR = path.join(__dirname, "uploads");  
 if (!fs.existsSync(UPLOADS_DIR)) {  
@@ -93,7 +93,9 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);  
 app.use("/empleado", empleadoRoutes);  
 app.use("/supervisor", supervisorRoutes);  
-app.use("/usuarios", usuariosRoutes);  
+
+// ✅ Ajuste: usuarios dentro del namespace admin
+app.use("/admin/usuarios", usuariosRoutes);  
   
 // 🔹 Rutas de encuestas  
 app.use("/admin/encuestas", adminEncuestasRoutes);  
@@ -159,3 +161,8 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectWithRetry();  
   console.log(`🚀 Backend escuchando en http://0.0.0.0:${PORT}`);  
 });
+
+
+
+git add .
+git commit -m "release(v1.9.0): bugs corregidos y dataempleado integrado."

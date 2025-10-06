@@ -5,30 +5,40 @@ import Usuario from "../models/Usuario.js";
 import DataEmpleado from "../models/DataEmpleado.js";
 
 const ALLOWED_ROLES = ["admin", "supervisor", "empleado"];
-
-// Listar usuarios para la tabla (con filtro opcional ?q=)
+// ======================================================
+// 🔹 Listar solo correo, rol y acciones
+// ======================================================
 export async function listarUsuarios(req, res) {
   try {
     const q = (req.query.q || "").trim().toLowerCase();
 
+    // Solo traemos lo necesario
     const usuarios = await Usuario.findAll({
-      include: [{ model: DataEmpleado, as: "empleado", attributes: ["nombre"] }],
-      attributes: ["id_usuario", "correo_electronico", "rol"]
+      attributes: ["id_usuario", "correo_electronico", "rol"],
+      order: [["id_usuario", "ASC"]],
+      raw: true,
     });
 
     const salida = usuarios
-      .map(u => ({
-        id: u.id_usuario,
-        nombre: u.empleado?.nombre || "(sin nombre)",
-        correo: u.correo_electronico,
+      .filter(
+        (u) =>
+          !q ||
+          u.correo_electronico.toLowerCase().includes(q) ||
+          u.rol.toLowerCase().includes(q)
+      )
+      .map((u) => ({
+        id_usuario: u.id_usuario,
+        correo_electronico: u.correo_electronico,
         rol: u.rol,
-        passwordMasked: "********" // nunca enviar hash
-      }))
-      .filter(u => u.nombre.toLowerCase().includes(q));
+      }));
 
-    res.json(salida);
+    res.json({ success: true, usuarios: salida });
   } catch (err) {
-    res.status(500).json({ error: "Error al listar usuarios", detail: err.message });
+    console.error("❌ Error listarUsuarios:", err);
+    res.status(500).json({
+      error: "Error al listar usuarios",
+      detail: err.message,
+    });
   }
 }
 

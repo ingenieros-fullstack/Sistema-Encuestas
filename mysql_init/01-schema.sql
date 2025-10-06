@@ -38,36 +38,46 @@ CREATE TABLE empresas (
   
 CREATE INDEX idx_empresas_nombre ON empresas (nombre);  
   
--- =========================================  
--- TABLA: data_empleados  
--- =========================================  
-DROP TABLE IF EXISTS data_empleados;  
-CREATE TABLE data_empleados (  
-  id_data INT AUTO_INCREMENT PRIMARY KEY,  
-  id_empresa INT NOT NULL,  
-  numero_empleado VARCHAR(20) NOT NULL UNIQUE,  
-  nombre VARCHAR(100) NOT NULL,  
-  apellido_paterno VARCHAR(100),  
-  apellido_materno VARCHAR(100),  
-  sexo ENUM('M','F','O'),  
-  fecha_nacimiento DATE,  
-  fecha_ingreso DATE,  
-  centro_trabajo VARCHAR(100),  
-  departamento VARCHAR(100),  
-  grado_estudios VARCHAR(50),  
-  turno VARCHAR(20),  
-  supervisor VARCHAR(100),  
-  telefono VARCHAR(20),  
-  foto VARCHAR(200),  
-  correo_electronico VARCHAR(100) NOT NULL,  
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
-  FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE  
-) ENGINE=InnoDB;  
+-- =========================================
+-- TABLA: data_empleados
+-- =========================================
+DROP TABLE IF EXISTS data_empleados;
+
+CREATE TABLE data_empleados (
+  id_data INT AUTO_INCREMENT PRIMARY KEY,
+  id_empresa INT NOT NULL,                              -- 🔗 FK a empresas
+  numero_empleado VARCHAR(20) NOT NULL UNIQUE,           -- Código / empleado
+  nombre VARCHAR(100) NOT NULL,                          -- Nombre
+  apellido_paterno VARCHAR(100),                         -- Paterno
+  apellido_materno VARCHAR(100),                         -- Materno
+  sexo ENUM('M','F','O'),                                -- Sexo
+  fecha_nacimiento DATE,                                 -- Nacimiento
+  fecha_ingreso DATE,                                    -- Ingreso
+  correo_electronico VARCHAR(100) NOT NULL,              -- Email
+  centro_trabajo VARCHAR(100),                           -- Centro_Trab
+  cc VARCHAR(50),                                        -- 🆕 CC (código de centro de costo)
+  cc_descrip VARCHAR(150),                               -- 🆕 Descripción del centro de costo
+  departamento VARCHAR(100),                             -- Depto
+  depto_descrip VARCHAR(150),                            -- 🆕 Descripción del departamento
+  antiguedad INT,                                        -- 🆕 Antigüedad (en años)
+  grado_estudios VARCHAR(50),                            -- Estudios
+  turno VARCHAR(20),                                     -- Turno
+  supervisor VARCHAR(100),                               -- Supervisor
+  edad INT,                                              -- 🆕 Edad actual (puede calcularse por app)
+  telefono VARCHAR(20),
+  foto VARCHAR(200),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
-CREATE INDEX idx_data_empleados_empresa ON data_empleados (id_empresa);  
-CREATE INDEX idx_data_empleados_numero ON data_empleados (numero_empleado);  
-CREATE INDEX idx_data_empleados_correo ON data_empleados (correo_electronico);  
-  
+  FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Índices recomendados
+CREATE INDEX idx_data_empleados_empresa ON data_empleados (id_empresa);
+CREATE INDEX idx_data_empleados_numero ON data_empleados (numero_empleado);
+CREATE INDEX idx_data_empleados_correo ON data_empleados (correo_electronico);
+CREATE INDEX idx_data_empleados_cc ON data_empleados (cc);
+CREATE INDEX idx_data_empleados_depto ON data_empleados (departamento);
+
 -- =========================================  
 -- TABLA: usuarios  
 -- =========================================  

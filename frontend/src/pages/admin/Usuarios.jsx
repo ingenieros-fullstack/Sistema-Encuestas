@@ -1,9 +1,9 @@
-// src/pages/admin/Usuarios.jsx
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import ImportarUsuariosModal from "../../components/modals/ImportarUsuariosModal";
 import GestionUsuariosModal from "../../components/modals/GestionUsuariosModal";
 import AsignarFormulariosModal from "../../components/modals/AsignarFormulariosModal";
+import VerEmpleadosModal from "../../components/modals/VerEmpleadosModal";
 import "../../Usuarios.css";
 
 export default function Usuarios() {
@@ -22,10 +22,8 @@ export default function Usuarios() {
         <h1 className="usuarios-title">Gestión de Usuarios</h1>
 
         <div className="user-card-container">
-          <div
-            className="user-card importar"
-            onClick={() => abrirModal("importar")}
-          >
+          {/* Importar Usuarios */}
+          <div className="user-card importar" onClick={() => abrirModal("importar")}>
             <div className="icon-box">
               <i className="bi bi-cloud-arrow-up icon"></i>
             </div>
@@ -33,10 +31,8 @@ export default function Usuarios() {
             <p>Carga masiva de usuarios desde un archivo Excel o CSV.</p>
           </div>
 
-          <div
-            className="user-card gestion"
-            onClick={() => abrirModal("gestion")}
-          >
+          {/* Gestión de Usuarios */}
+          <div className="user-card gestion" onClick={() => abrirModal("gestion")}>
             <div className="icon-box">
               <i className="bi bi-people-fill icon"></i>
             </div>
@@ -44,19 +40,26 @@ export default function Usuarios() {
             <p>Crear, editar o eliminar usuarios de manera individual.</p>
           </div>
 
-          <div
-            className="user-card asignar"
-            onClick={() => abrirModal("asignar")}
-          >
+          {/* Asignar Formularios */}
+          <div className="user-card asignar" onClick={() => abrirModal("asignar")}>
             <div className="icon-box">
               <i className="bi bi-clipboard-check icon"></i>
             </div>
             <h5>Asignar Formularios</h5>
             <p>Asigna formularios a empleados o supervisores.</p>
           </div>
+
+          {/* 🔹 Nueva tarjeta: Ver Empleados */}
+          <div className="user-card ver-empleados" onClick={() => abrirModal("empleados")}>
+            <div className="icon-box">
+              <i className="bi bi-person-lines-fill icon"></i>
+            </div>
+            <h5>Ver Empleados</h5>
+            <p>Consulta la lista completa de empleados registrados.</p>
+          </div>
         </div>
 
-        {/* Un solo contenedor de modales */}
+        {/* Modales */}
         {modal && (
           <>
             {modal === "importar" && (
@@ -67,6 +70,9 @@ export default function Usuarios() {
             )}
             {modal === "asignar" && (
               <AsignarFormulariosModal key="asignar" onClose={cerrarModal} />
+            )}
+            {modal === "empleados" && (
+              <VerEmpleadosModal key="empleados" onClose={cerrarModal} />
             )}
           </>
         )}

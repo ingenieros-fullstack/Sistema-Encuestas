@@ -10,7 +10,7 @@ import Empresa from "../models/Empresa.js";
 import DataEmpleado from "../models/DataEmpleado.js";
 import sequelize from "../config/db.js";
 
-// === Multer en memoria (no guarda archivos) ===
+// === Multer en memoria ===
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -18,10 +18,56 @@ const upload = multer({
     const ext = file.originalname.toLowerCase();
     allowed.some((t) => ext.includes(t))
       ? cb(null, true)
-      : cb(new Error("Solo se permiten archivos CSV y Excel"), false);
+      : cb(new Error("Solo se permiten archivos CSV o Excel"), false);
   },
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// === Normalizar nombres de columnas ===
+const normalizeKeys = (row) => {
+  const map = {
+    "compania": "empresa",
+    "empresa": "empresa",
+    "codigo": "numero_empleado",
+    "código": "numero_empleado",
+    "nombre": "nombre",
+    "paterno": "apellido_paterno",
+    "materno": "apellido_materno",
+    "sexo": "sexo",
+    "nacimiento": "fecha_nacimiento",
+    "ingreso": "fecha_ingreso",
+    "email": "correo_electronico",
+    "correo": "correo_electronico",
+    "centro_trab": "centro_trabajo",
+    "centrotrabajo": "centro_trabajo",
+    "cc": "cc",
+    "cc_descrip": "cc_descrip",
+    "depto": "departamento",
+    "depto_descrip": "depto_descrip",
+    "antiguedad": "antiguedad",
+    "estudios": "grado_estudios",
+    "turno": "turno",
+    "supervisor": "supervisor",
+    "edad": "edad",
+    "telefono": "telefono",
+  };
+
+  const normalize = (str) =>
+    str
+      .toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9_]/g, "")
+      .toLowerCase();
+
+  const newRow = {};
+  for (const [key, value] of Object.entries(row)) {
+    const cleanKey = normalize(key);
+    const mapped = map[cleanKey] || cleanKey;
+    newRow[mapped] = value;
+  }
+  return newRow;
+};
 
 // === Detectar separador CSV ===
 const detectSeparator = (firstLine) => {
@@ -30,30 +76,22 @@ const detectSeparator = (firstLine) => {
   return semicolons > commas ? ";" : ",";
 };
 
-// === Validar datos de empleado ===
+// === Validar datos mínimos ===
 const validateUserData = (userData, lineNumber) => {
   const errors = [];
   if (!userData.numero_empleado)
-    errors.push(`Línea ${lineNumber}: Número de empleado es requerido`);
+    errors.push(`Línea ${lineNumber}: Falta el campo "Código".`);
   if (!userData.nombre)
-    errors.push(`Línea ${lineNumber}: Nombre es requerido`);
+    errors.push(`Línea ${lineNumber}: Falta el campo "Nombre".`);
   if (!userData.correo_electronico)
-    errors.push(`Línea ${lineNumber}: Correo electrónico es requerido`);
+    errors.push(`Línea ${lineNumber}: Falta el campo "Email".`);
   if (userData.sexo && !["M", "F", "O"].includes(userData.sexo)) {
-    errors.push(`Línea ${lineNumber}: Sexo debe ser M, F o O`);
-  }
-  if (
-    userData.rol &&
-    !["supervisor", "empleado"].includes(userData.rol) // 🚫 "admin" no se permite
-  ) {
-    errors.push(
-      `Línea ${lineNumber}: Rol inválido. Solo se permite supervisor o empleado`
-    );
+    errors.push(`Línea ${lineNumber}: Sexo inválido (M, F u O).`);
   }
   return errors;
 };
 
-// === Parsear CSV desde buffer ===
+// === Parsear CSV ===
 const parseCSV = (buffer) => {
   return new Promise((resolve, reject) => {
     try {
@@ -61,13 +99,12 @@ const parseCSV = (buffer) => {
       const text = iconv.decode(buffer, enc);
       const [firstLine = ""] = text.split(/\r?\n/);
       const separator = detectSeparator(firstLine);
-
       const utf8Stream = Readable.from(iconv.encode(text, "UTF-8"));
       const results = [];
 
       utf8Stream
         .pipe(csv({ separator }))
-        .on("data", (row) => results.push(row))
+        .on("data", (row) => results.push(normalizeKeys(row)))
         .on("end", () => resolve(results))
         .on("error", reject);
     } catch (err) {
@@ -76,12 +113,22 @@ const parseCSV = (buffer) => {
   });
 };
 
-// === Parsear Excel desde buffer ===
+// === Parsear Excel ===
 const parseExcel = (buffer) => {
   const workbook = xlsx.read(buffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
-  return xlsx.utils.sheet_to_json(worksheet);
+  const raw = xlsx.utils.sheet_to_json(worksheet);
+  return raw.map(normalizeKeys);
+};
+
+// === Extraer edad ===
+const parseEdad = (value) => {
+  if (!value) return null;
+  const match = String(value).match(/(\d{1,3})\s*A/);
+  if (match) return parseInt(match[1], 10);
+  const onlyNum = parseInt(String(value).replace(/\D/g, ""), 10);
+  return isNaN(onlyNum) ? null : onlyNum;
 };
 
 // === Importar usuarios ===
@@ -89,9 +136,10 @@ export const importUsers = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No se ha subido ningún archivo" });
+      return res.status(400).json({
+        success: false,
+        message: "No se ha subido ningún archivo",
+      });
     }
 
     const isCSV = req.file.originalname.toLowerCase().includes(".csv");
@@ -102,25 +150,35 @@ export const importUsers = async (req, res) => {
     if (!userData || userData.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "El archivo está vacío o no tiene el formato correcto",
+        message: "El archivo está vacío o tiene formato incorrecto.",
       });
     }
 
-    const defaultEmpresa = await Empresa.findByPk(1);
+    const filteredData = userData.filter((u) => Object.keys(u).length > 0);
+    filteredData.forEach((u) => {
+      u.edad = parseEdad(u.edad);
+      if (u.antiguedad) {
+        const match = String(u.antiguedad).match(/(\d{1,3})/);
+        u.antiguedad = match ? parseInt(match[1], 10) : null;
+      }
+    });
+
+    // Asegurar empresa demo
+    let defaultEmpresa = await Empresa.findByPk(1);
     if (!defaultEmpresa) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No se encontró empresa por defecto" });
+      defaultEmpresa = await Empresa.create({
+        nombre: "Empresa Demo",
+        correo_electronico: "demo@empresa.com",
+      });
     }
 
     const validationErrors = [];
     const usersImported = [];
 
-    for (let i = 0; i < userData.length; i++) {
-      const user = userData[i];
+    for (let i = 0; i < filteredData.length; i++) {
+      const user = filteredData[i];
       const lineNumber = i + 2;
 
-      // Validar campos obligatorios
       const errors = validateUserData(user, lineNumber);
       if (errors.length) {
         validationErrors.push(...errors);
@@ -128,88 +186,66 @@ export const importUsers = async (req, res) => {
       }
 
       try {
-        // Verificar duplicados antes de insertar
-        const existsEmpleado = await DataEmpleado.findOne({
-          where: { numero_empleado: user.numero_empleado },
-        });
-        if (existsEmpleado) {
-          validationErrors.push(
-            `Línea ${lineNumber}: El número de empleado ${user.numero_empleado} ya existe (omitido)`
-          );
+        const numero = user.numero_empleado;
+        const correo = user.correo_electronico?.trim().toLowerCase();
+
+        const existsEmpleado = await DataEmpleado.findOne({ where: { numero_empleado: numero } });
+        const existsUsuario = await Usuario.findOne({ where: { correo_electronico: correo } });
+
+        // Si ya existe, lo omitimos sin marcar error
+        if (existsEmpleado && existsUsuario) {
+          console.log(`⚠️ Línea ${lineNumber}: empleado ya existe, omitido.`);
           continue;
         }
 
-        const existsUsuario = await Usuario.findOne({
-          where: { correo_electronico: user.correo_electronico },
-        });
-        if (existsUsuario) {
-          validationErrors.push(
-            `Línea ${lineNumber}: El correo ${user.correo_electronico} ya existe (omitido)`
+        const empleado = existsEmpleado
+          ? existsEmpleado
+          : await DataEmpleado.create(
+              { id_empresa: defaultEmpresa.id_empresa, ...user, correo_electronico: correo },
+              { transaction }
+            );
+
+        if (!existsUsuario) {
+          const hash = await bcrypt.hash("Empleado2025", 10);
+          await Usuario.create(
+            {
+              id_data: empleado.id_data,
+              correo_electronico: correo,
+              password: hash,
+              rol: "empleado",
+              estatus: 1,
+              must_change_password: true,
+            },
+            { transaction }
           );
-          continue;
         }
-
-        // === Crear empleado (trigger creará usuario automáticamente con SHA2)
-        const empleado = await DataEmpleado.create(
-          {
-            id_empresa: defaultEmpresa.id_empresa,
-            numero_empleado: user.numero_empleado,
-            nombre: user.nombre,
-            apellido_paterno: user.apellido_paterno || null,
-            apellido_materno: user.apellido_materno || null,
-            sexo: user.sexo || null,
-            fecha_nacimiento: user.fecha_nacimiento
-              ? new Date(user.fecha_nacimiento)
-              : null,
-            fecha_ingreso: user.fecha_ingreso
-              ? new Date(user.fecha_ingreso)
-              : null,
-            correo_electronico: user.correo_electronico,
-            centro_trabajo: user.centro_trabajo || null,
-            departamento: user.departamento || null,
-            grado_estudios: user.grado_estudios || null,
-            turno: user.turno || null,
-            supervisor: user.supervisor || null,
-            telefono: user.telefono || null,
-            foto: null,
-          },
-          { transaction }
-        );
-
-        // === Backend sobrescribe la contraseña y fuerza rol válido ===
-        const hash = await bcrypt.hash("Empleado2025", 10);
-
-        // rol permitido (supervisor o empleado). Si es admin → empleado
-        const finalRol =
-          user.rol && user.rol === "supervisor" ? "supervisor" : "empleado";
-
-        await Usuario.update(
-  {
-    password: hash,
-    rol: "empleado", // ✅ Siempre empleado, ignoramos lo que venga en el CSV
-  },
-  { where: { id_data: empleado.id_data }, transaction }
-);
 
         usersImported.push({
-          numero_empleado: user.numero_empleado,
+          numero_empleado: numero,
           nombre: user.nombre,
-          correo_electronico: user.correo_electronico,
-          rol: finalRol,
+          correo_electronico: correo,
         });
       } catch (err) {
-        console.error(`❌ Error en línea ${lineNumber}:`, err);
-        validationErrors.push(
-          `Línea ${lineNumber}: Error inesperado → ${err.message}`
-        );
+        // si es duplicado o validación, no lo marcamos como error crítico
+        if (err?.name?.includes("Unique") || err?.name?.includes("Validation")) {
+          console.warn(`⚠️ Línea ${lineNumber}: duplicado omitido (${err.message})`);
+          continue;
+        }
+        console.error(`❌ Error en línea ${lineNumber}:`, err.message);
+        validationErrors.push(`Línea ${lineNumber}: Error inesperado (${err.message})`);
       }
     }
 
     await transaction.commit();
 
+    const msg =
+      usersImported.length > 0
+        ? `✅ ${usersImported.length} empleados importados correctamente. ${validationErrors.length} registros omitidos.`
+        : "⚠️ Todos los registros ya existían o fueron omitidos.";
+
     res.json({
       success: true,
-      message: `${usersImported.length} usuarios importados exitosamente. ${validationErrors.length} registros fueron omitidos.`,
+      message: msg,
       importedCount: usersImported.length,
       skippedCount: validationErrors.length,
       skipped: validationErrors,
@@ -217,7 +253,7 @@ export const importUsers = async (req, res) => {
     });
   } catch (error) {
     await transaction.rollback();
-    console.error("❌ Error importing users:", error);
+    console.error("❌ Error importando usuarios:", error);
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",

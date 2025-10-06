@@ -13,6 +13,7 @@ import {
   listarAsignaciones,
   eliminarAsignacion,
 } from "../controllers/asignacion.controller.js";
+import { listarEmpleados } from "../controllers/empleados.controller.js";
 import Usuario from "../models/Usuario.js";
 import Empresa from "../models/Empresa.js";
 import bcrypt from "bcryptjs";
@@ -20,7 +21,9 @@ import jwt from "jsonwebtoken";
 
 const router = Router();
 
-// ===== DASHBOARD ADMIN =====
+// ======================================================
+// 🔹 DASHBOARD ADMIN
+// ======================================================
 router.get("/dashboard", authMiddleware(["admin"]), (req, res) => {
   res.json({
     message: "Bienvenido al dashboard de ADMIN 🚀",
@@ -28,7 +31,11 @@ router.get("/dashboard", authMiddleware(["admin"]), (req, res) => {
   });
 });
 
-// ===== RUTAS DE USUARIOS =====
+// ======================================================
+// 🔹 RUTAS DE USUARIOS
+// ======================================================
+
+// Carga masiva
 router.post(
   "/usuarios/import",
   authMiddleware(["admin"]),
@@ -36,6 +43,7 @@ router.post(
   importUsers
 );
 
+// Gestión básica
 router.get("/usuarios", authMiddleware(["admin"]), async (req, res) => {
   try {
     const usuarios = await Usuario.findAll({
@@ -52,27 +60,36 @@ router.get("/usuarios", authMiddleware(["admin"]), async (req, res) => {
   }
 });
 
-// ===== RUTAS DE FORMULARIOS =====
+// ======================================================
+// 🔹 RUTA PARA LISTAR EMPLEADOS
+// ======================================================
+router.get("/empleados", authMiddleware(["admin"]), listarEmpleados);
+
+// ======================================================
+// 🔹 RUTAS DE FORMULARIOS
+// ======================================================
 router.post("/formularios", authMiddleware(["admin"]), crearFormulario);
 router.get("/formularios", authMiddleware(["admin"]), listarFormularios);
 router.get("/formularios/:codigo", authMiddleware(["admin"]), obtenerFormulario);
 router.put("/formularios/:codigo", authMiddleware(["admin"]), actualizarFormulario);
 router.delete("/formularios/:codigo", authMiddleware(["admin"]), eliminarFormulario);
 
-// ===== RUTAS DE ASIGNACIONES =====
+// ======================================================
+// 🔹 RUTAS DE ASIGNACIONES
+// ======================================================
 router.post("/asignaciones", authMiddleware(["admin"]), crearAsignaciones);
 router.get("/asignaciones", authMiddleware(["admin"]), listarAsignaciones);
 router.delete("/asignaciones/:id", authMiddleware(["admin"]), eliminarAsignacion);
 
-// ===== LOGIN ENDPOINT =====
+// ======================================================
+// 🔹 LOGIN
+// ======================================================
 router.post("/login", async (req, res) => {
   try {
     const { correo, password } = req.body;
 
     if (!correo || !password) {
-      return res.status(400).json({
-        message: "Correo y contraseña son requeridos",
-      });
+      return res.status(400).json({ message: "Correo y contraseña son requeridos" });
     }
 
     const user = await Usuario.findOne({
@@ -80,16 +97,12 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({
-        message: "Usuario no encontrado",
-      });
+      return res.status(401).json({ message: "Usuario no encontrado" });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({
-        message: "Contraseña incorrecta",
-      });
+      return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
     if (user.must_change_password) {
