@@ -1,12 +1,15 @@
-// src/components/modals/ImportarUsuariosModal.jsx
 import { useState } from "react";
 
 export default function ImportarUsuariosModal({ onClose, onSuccess }) {
+  const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
+  // ============================
+  // 📁 Manejo de archivo
+  // ============================
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -30,6 +33,9 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     }
   };
 
+  // ============================
+  // 🚀 Enviar archivo al backend
+  // ============================
   const handleSubmit = async () => {
     if (!file) {
       setError("Por favor selecciona un archivo");
@@ -44,46 +50,54 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:4000/admin/usuarios/import",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_URL}/admin/usuarios/import`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (data.success) {
+      if (response.ok && data.success) {
         setResult(data);
         if (onSuccess) onSuccess(data);
       } else {
-        setError(data.message || "Error al importar usuarios");
-        if (data.errors) {
-          setError(data.errors.join("\n"));
-        }
+        const msg = data.message || "Error al importar usuarios";
+        const details = data.errors ? data.errors.join("\n") : "";
+        setError(`${msg}\n${details}`);
       }
-    } catch (error) {
-      setError("Error de conexión: " + error.message);
+    } catch (err) {
+      console.error("❌ Error de conexión:", err);
+      setError("Error de conexión con el servidor.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBackdropClick = (e) => {
-    if (e.target.classList.contains("modal-backdrop")) {
-      setTimeout(() => onClose(), 0); // 👈 evita desmontaje en medio de render
-    }
-  };
-
+  // ============================
+  // 📥 Descargar plantilla CSV
+  // ============================
   const downloadTemplate = () => {
     const a = document.createElement("a");
-    a.href = "http://localhost:4000/uploads/plantilla_usuarios.csv";
+    a.href = `${API_URL}/uploads/plantilla_usuarios.csv`;
     a.download = "plantilla_usuarios.csv";
     a.click();
   };
 
+  // ============================
+  // ❌ Cerrar al hacer clic fuera
+  // ============================
+  const handleBackdropClick = (e) => {
+    if (e.target.classList.contains("modal-backdrop")) {
+      setTimeout(() => onClose(), 0);
+    }
+  };
+
+  // ============================
+  // 🧱 Render modal
+  // ============================
   return (
     <div
       className="modal-backdrop"
@@ -115,7 +129,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
           maxHeight: "90vh",
           overflowY: "auto",
         }}
-        onClick={(e) => e.stopPropagation()} // 👈 evita cierre por clic interno
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -166,24 +180,26 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                   <i className="bi bi-download me-1"></i> Descargar plantilla CSV
                 </button>
               </div>
+
               <input
                 type="file"
                 className="form-control"
                 accept=".csv,.xlsx,.xls"
                 onChange={handleFileChange}
               />
+
               {file && (
                 <div
                   className="alert alert-success mt-2"
                   style={{ fontSize: "0.9rem" }}
                 >
-                  <i className="bi bi-check-circle me-1"></i> Archivo
-                  seleccionado: {file.name}
+                  <i className="bi bi-check-circle me-1"></i> Archivo seleccionado:{" "}
+                  {file.name}
                 </div>
               )}
 
               {error && (
-                <div className="alert alert-danger" role="alert">
+                <div className="alert alert-danger mt-3" role="alert">
                   <pre
                     className="mb-0"
                     style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem" }}
@@ -200,7 +216,6 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
               </h6>
               <p className="mb-3">{result.message}</p>
 
-              {/* Usuarios creados */}
               {result.users && result.users.length > 0 && (
                 <div className="mt-3">
                   <p className="fw-bold mb-2">
@@ -216,15 +231,14 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                           border: "1px solid rgba(255, 255, 255, 0.2)",
                         }}
                       >
-                        <div
-                          className="card-body p-2"
-                          style={{ fontSize: "0.9rem" }}
-                        >
+                        <div className="card-body p-2" style={{ fontSize: "0.9rem" }}>
                           <strong>{user.numero_empleado}</strong> - {user.nombre}{" "}
                           ({user.correo_electronico})
                           <br />
-                          {/* 👇 contenedor estable con key única */}
-                          <div key={`pass-${user.correo_electronico}`} className="mt-1">
+                          <div
+                            key={`pass-${user.correo_electronico}`}
+                            className="mt-1"
+                          >
                             <span className="text-danger">
                               Contraseña por defecto: Empleado2025
                             </span>
@@ -236,21 +250,19 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                 </div>
               )}
 
-              {/* Registros omitidos */}
               {result.skippedCount > 0 && (
                 <div className="alert alert-warning mt-3" role="alert">
                   <h6 className="alert-heading mb-2">
-                    <i className="bi bi-exclamation-triangle me-1"></i>{" "}
-                    Registros omitidos
+                    <i className="bi bi-exclamation-triangle me-1"></i> Registros
+                    omitidos
                   </h6>
                   <p className="mb-2">
                     {result.skippedCount} registros fueron omitidos.{" "}
-                    {result.skippedRanges &&
-                      result.skippedRanges.length > 0 && (
-                        <>Filas: {result.skippedRanges.join(", ")}.</>
-                      )}
+                    {result.skippedRanges?.length > 0 && (
+                      <>Filas: {result.skippedRanges.join(", ")}.</>
+                    )}
                   </p>
-                  {result.skipped && result.skipped.length > 0 && (
+                  {result.skipped?.length > 0 && (
                     <div
                       style={{
                         maxHeight: "150px",
@@ -313,3 +325,4 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     </div>
   );
 }
+

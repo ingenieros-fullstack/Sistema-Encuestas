@@ -9,7 +9,8 @@ import SupervisorDashboard from "./pages/SupervisorDashboard";
 
 // =================== Admin ===================
 import Usuarios from "./pages/admin/Usuarios";
-import CrearFormulario from "./pages/admin/CrearFormulario";
+import CrearFormulario from "./pages/admin/crearFormulario/CrearFormulario";
+
 import Formularios from "./pages/admin/Formularios";
 import Reportes from "./pages/admin/Reportes";
 import EditarFormulario from "./pages/admin/EditarFormulario";
@@ -105,14 +106,15 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/admin/formulario/crear"
-          element={
-            <PrivateRoute roles={["admin"]}>
-              <CrearFormulario />
-            </PrivateRoute>
-          }
-        />
+       <Route
+  path="/admin/formulario/crear"
+  element={
+    <PrivateRoute roles={["admin"]}>
+      <CrearFormulario />
+    </PrivateRoute>
+  }
+/>
+
         <Route
           path="/admin/formularios"
           element={

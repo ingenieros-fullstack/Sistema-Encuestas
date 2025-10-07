@@ -9,26 +9,39 @@ import "../AdminPrincipal.css";
 export default function AdminDashboard() {
   const nombre = localStorage.getItem("nombre") || "Administrador";
   const rol = localStorage.getItem("rol") || "admin";
+  const token = localStorage.getItem("token");
 
   const [mustChangePassword, setMustChangePassword] = useState(false);
   const [correo, setCorreo] = useState("");
 
+  // ✅ Base API URL (desde .env)
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:4000/auth/me", {
+    // ✅ Fetch dinámico para entorno local o producción
+    fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.text();
+          console.error("❌ Error en /auth/me:", err);
+          return;
+        }
+        return res.json();
+      })
       .then((data) => {
-        if (data.mustChangePassword) {
+        if (data?.mustChangePassword) {
           setMustChangePassword(true);
           setCorreo(data.correo);
         }
       })
-      .catch(() => {});
-  }, []);
+      .catch((err) => {
+        console.error("⚠️ Error al verificar el usuario:", err);
+      });
+  }, [token, API_URL]);
 
   return (
     <div className="dashboard-wrapper">

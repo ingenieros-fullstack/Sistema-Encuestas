@@ -11,22 +11,25 @@ export default function Formularios() {
   const [filtro, setFiltro] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("todos");
 
-  // Paginación
+  // 🔹 Configuración de paginación
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
+  const [pageSize] = useState(10);
   const navigate = useNavigate();
+
+  // ✅ URL del backend (desde .env)
+  const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
 
   useEffect(() => {
     obtenerFormularios();
   }, []);
 
+  // 🔹 Obtener formularios desde el backend
   const obtenerFormularios = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:4000/admin/formularios", {
+      const response = await fetch(`${API_URL}/admin/formularios`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -36,35 +39,34 @@ export default function Formularios() {
       if (response.ok) {
         const data = await response.json();
         setFormularios(data.formularios || []);
+        setError("");
       } else {
+        const text = await response.text();
+        console.error("Error en formularios:", text);
         setError("Error al cargar formularios");
       }
     } catch (err) {
-      console.error(err);
-      setError("Error de conexión");
+      console.error("⚠️ Error de conexión:", err);
+      setError("Error de conexión con el servidor");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (codigo) => {
-    navigate(`/admin/formularios/editar/${codigo}`);
-  };
-
+  // 🔹 Eliminar formulario
   const eliminarFormulario = async (codigo) => {
     if (!window.confirm("¿Estás seguro de eliminar este formulario?")) return;
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:4000/admin/formularios/${codigo}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/admin/formularios/${codigo}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
       if (response.ok) {
         setFormularios((prev) => prev.filter((f) => f.codigo !== codigo));
       } else {
@@ -72,10 +74,16 @@ export default function Formularios() {
       }
     } catch (err) {
       console.error(err);
-      setError("Error de conexión");
+      setError("Error de conexión con el servidor");
     }
   };
 
+  // 🔹 Redirigir a edición
+  const handleEdit = (codigo) => {
+    navigate(`/admin/formularios/editar/${codigo}`);
+  };
+
+  // 🔹 Formatear fechas
   const formatearFecha = (fecha) => {
     if (!fecha) return "No definida";
     try {
@@ -85,7 +93,7 @@ export default function Formularios() {
     }
   };
 
-  // ---------- FILTRO ----------
+  // ---------- FILTROS ----------
   const formulariosFiltrados = useMemo(() => {
     const text = filtro.trim().toLowerCase();
     return (formularios || []).filter((f) => {
@@ -98,9 +106,7 @@ export default function Formularios() {
     });
   }, [formularios, filtro, tipoFiltro]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [filtro, tipoFiltro]);
+  useEffect(() => setPage(1), [filtro, tipoFiltro]);
 
   // ---------- PAGINACIÓN ----------
   const total = formulariosFiltrados.length;
@@ -111,14 +117,10 @@ export default function Formularios() {
   const pageItems = formulariosFiltrados.slice(startIndex, endIndex);
 
   const goto = (p) => setPage(Math.min(Math.max(1, p), totalPages));
-
   const buildPages = () => {
     const pages = [];
     const maxButtons = 5;
-    if (totalPages <= maxButtons) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-      return pages;
-    }
+    if (totalPages <= maxButtons) return Array.from({ length: totalPages }, (_, i) => i + 1);
     const half = Math.floor(maxButtons / 2);
     let start = Math.max(1, safePage - half);
     let end = Math.min(totalPages, start + maxButtons - 1);
@@ -127,7 +129,7 @@ export default function Formularios() {
     return pages;
   };
 
-  // ---------- BADGES ----------
+  // ---------- ESTILOS DE BADGES ----------
   const badgeTipo = (tipo) =>
     tipo === "Encuesta"
       ? "badge rounded-pill text-bg-primary"
@@ -203,13 +205,10 @@ export default function Formularios() {
       </header>
 
       <main className="flex-grow-1 container-xxl py-4">
-        {/* Contenido */}
         {loading ? (
-          <section className="section-card">
-            <div className="d-flex align-items-center gap-3">
-              <div className="spinner-border text-primary" role="status" />
-              <div className="text-body-secondary">Cargando formularios…</div>
-            </div>
+          <section className="section-card text-center">
+            <div className="spinner-border text-primary" role="status"></div>
+            <p className="mt-2 text-body-secondary">Cargando formularios…</p>
           </section>
         ) : error ? (
           <section className="section-card">
@@ -333,37 +332,36 @@ export default function Formularios() {
                           </button>
 
                           {/* 📊 Respuestas */}
-<button
-  type="button"
-  className="btn btn-sm btn-outline-info"
-  title="Ver respuestas"
-  onClick={() =>
-    navigate(
-      f.tipo === "Encuesta"
-        ? `/admin/encuestas/${f.codigo}/respuestas`
-        : `/admin/cuestionarios/${f.codigo}/respuestas`
-    )
-  }
->
-  <i className="bi bi-bar-chart-line"></i>
-</button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-info"
+                            title="Ver respuestas"
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/respuestas`
+                                  : `/admin/cuestionarios/${f.codigo}/respuestas`
+                              )
+                            }
+                          >
+                            <i className="bi bi-bar-chart-line"></i>
+                          </button>
 
                           {/* 📱 Generar QR */}
-<button
-  type="button"
-  className="btn btn-sm btn-outline-secondary"
-  title="Generar QR"
-  onClick={() =>
-    navigate(
-      f.tipo === "Encuesta"
-        ? `/admin/encuestas/${f.codigo}/qr`
-        : `/admin/cuestionarios/${f.codigo}/qr`
-    )
-  }
->
-  <i className="bi bi-qr-code"></i>
-</button>
-
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            title="Generar QR"
+                            onClick={() =>
+                              navigate(
+                                f.tipo === "Encuesta"
+                                  ? `/admin/encuestas/${f.codigo}/qr`
+                                  : `/admin/cuestionarios/${f.codigo}/qr`
+                              )
+                            }
+                          >
+                            <i className="bi bi-qr-code"></i>
+                          </button>
 
                           {/* 🗑️ Eliminar */}
                           <button
@@ -382,12 +380,11 @@ export default function Formularios() {
               </table>
             </div>
 
-            {/* Footer de paginación */}
+            {/* Footer paginación */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-3">
               <div className="small text-body-secondary">
-                Mostrando{" "}
-                <strong>{total === 0 ? 0 : startIndex + 1}</strong>–
-                <strong>{endIndex}</strong> de <strong>{total}</strong> resultados
+                Mostrando <strong>{startIndex + 1}</strong>–<strong>{endIndex}</strong> de{" "}
+                <strong>{total}</strong> resultados
               </div>
 
               <nav aria-label="Paginación de formularios">
@@ -404,10 +401,7 @@ export default function Formularios() {
                   </li>
 
                   {buildPages().map((p) => (
-                    <li
-                      key={p}
-                      className={`page-item ${p === safePage ? "active" : ""}`}
-                    >
+                    <li key={p} className={`page-item ${p === safePage ? "active" : ""}`}>
                       <button className="page-link" onClick={() => goto(p)}>
                         {p}
                       </button>
