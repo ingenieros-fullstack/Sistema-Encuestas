@@ -2,7 +2,6 @@ import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import ImportarUsuariosModal from "../../components/modals/ImportarUsuariosModal";
 import GestionUsuariosModal from "../../components/modals/GestionUsuariosModal";
-import AsignarFormulariosModal from "../../components/modals/AsignarFormulariosModal";
 import VerEmpleadosModal from "../../components/modals/VerEmpleadosModal";
 import "../../Usuarios.css";
 
@@ -40,16 +39,7 @@ export default function Usuarios() {
             <p>Crear, editar o eliminar usuarios de manera individual.</p>
           </div>
 
-          {/* Asignar Formularios */}
-          <div className="user-card asignar" onClick={() => abrirModal("asignar")}>
-            <div className="icon-box">
-              <i className="bi bi-clipboard-check icon"></i>
-            </div>
-            <h5>Asignar Formularios</h5>
-            <p>Asigna formularios a empleados o supervisores.</p>
-          </div>
-
-          {/* 🔹 Nueva tarjeta: Ver Empleados */}
+          {/* Ver Empleados */}
           <div className="user-card ver-empleados" onClick={() => abrirModal("empleados")}>
             <div className="icon-box">
               <i className="bi bi-person-lines-fill icon"></i>
@@ -68,9 +58,6 @@ export default function Usuarios() {
             {modal === "gestion" && (
               <GestionUsuariosModal key="gestion" onClose={cerrarModal} />
             )}
-            {modal === "asignar" && (
-              <AsignarFormulariosModal key="asignar" onClose={cerrarModal} />
-            )}
             {modal === "empleados" && (
               <VerEmpleadosModal key="empleados" onClose={cerrarModal} />
             )}
@@ -80,3 +67,5 @@ export default function Usuarios() {
     </>
   );
 }
+
+

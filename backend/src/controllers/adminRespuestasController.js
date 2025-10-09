@@ -33,7 +33,6 @@ export async function getRespuestasPorUsuario(req, res) {
 
       console.log("🔍 Asignaciones encontradas:", asignaciones.length);
 
-      // Si no hay asignaciones
       if (!asignaciones || asignaciones.length === 0) {
         return res.json({
           codigo,
@@ -80,11 +79,12 @@ export async function getRespuestasPorUsuario(req, res) {
         .json({ error: "No hay respuestas para este usuario" });
     }
 
-const respuestas = await Respuesta.findAll({  
-  where: { id_asignacion: asignacion.id_asignacion },  
-  include: [{ model: Pregunta, as: "Pregunta" }],  
-  order: [[{ model: Pregunta, as: "Pregunta" }, "id_pregunta", "ASC"]],  
-});
+    // ✅ Traer respuestas con la relación correcta a Pregunta
+    const respuestas = await Respuesta.findAll({
+      where: { id_asignacion: asignacion.id_asignacion },
+      include: [{ model: Pregunta, as: "Pregunta" }],
+      order: [[{ model: Pregunta, as: "Pregunta" }, "id_pregunta", "ASC"]],
+    });
 
     console.log(
       `📋 Respuestas encontradas para usuario ${usuario}:`,
@@ -104,7 +104,7 @@ const respuestas = await Respuesta.findAll({
       },
       respuestas: respuestas.map((r) => ({
         id_pregunta: r.id_pregunta,
-        pregunta: r.Preguntum?.enunciado || "Pregunta eliminada",
+        pregunta: r.Pregunta?.enunciado || "(Sin enunciado)",
         respuesta: parseRespuesta(r.respuesta),
       })),
     };

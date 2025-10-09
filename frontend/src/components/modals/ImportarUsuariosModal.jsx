@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export default function ImportarUsuariosModal({ onClose, onSuccess }) {
-  const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

@@ -10,10 +10,10 @@ import SupervisorDashboard from "./pages/SupervisorDashboard";
 // =================== Admin ===================
 import Usuarios from "./pages/admin/Usuarios";
 import CrearFormulario from "./pages/admin/crearFormulario/CrearFormulario";
-
 import Formularios from "./pages/admin/Formularios";
 import Reportes from "./pages/admin/Reportes";
 import EditarFormulario from "./pages/admin/EditarFormulario";
+import AsignarFormulariosModal from "./pages/admin/AsignarFormulariosModal"; // 🆕 agregado aquí
 
 // =================== Encuestas ===================
 import PreviewEncuesta from "./pages/admin/PreviewEncuesta";
@@ -23,7 +23,6 @@ import RedirectResolver from "./pages/RedirectResolver";
 import GenerarQR from "./pages/admin/GenerarQR";
 import VerRespuestasEncuesta from "./pages/admin/VerRespuestasEncuesta";
 import VerRespuestasCuestionario from "./pages/admin/VerRespuestasCuestionario";
-// 🆕 Nueva ruta modularizada
 import GestionSecciones from "./pages/admin/GestionSeccionesEncuesta/GestionSecciones";
 
 // =================== Cuestionarios ===================
@@ -106,15 +105,14 @@ function App() {
             </PrivateRoute>
           }
         />
-       <Route
-  path="/admin/formulario/crear"
-  element={
-    <PrivateRoute roles={["admin"]}>
-      <CrearFormulario />
-    </PrivateRoute>
-  }
-/>
-
+        <Route
+          path="/admin/formulario/crear"
+          element={
+            <PrivateRoute roles={["admin"]}>
+              <CrearFormulario />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/admin/formularios"
           element={
@@ -140,6 +138,16 @@ function App() {
           }
         />
 
+        {/* 🆕 RUTA NUEVA: ASIGNAR FORMULARIOS */}
+        <Route
+          path="/admin/asignar-formularios"
+          element={
+            <PrivateRoute roles={["admin"]}>
+              <AsignarFormulariosModal />
+            </PrivateRoute>
+          }
+        />
+
         {/* ========== ENCUESTAS ========== */}
         <Route
           path="/admin/encuestas/:codigo/preview"
@@ -149,7 +157,10 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/empleado/encuestas/:codigo" element={<ResolverEncuestaEmpleado />} />
+        <Route
+          path="/empleado/encuestas/:codigo"
+          element={<ResolverEncuestaEmpleado />}
+        />
         <Route
           path="/supervisor/encuestas/:codigo"
           element={
@@ -184,13 +195,13 @@ function App() {
         />
 
         <Route
-  path="/admin/encuestas/:codigo/respuestas"
-  element={<VerRespuestasEncuesta />}
-/>
-<Route
-  path="/admin/cuestionarios/:codigo/respuestas"
-  element={<VerRespuestasCuestionario />}
-/>
+          path="/admin/encuestas/:codigo/respuestas"
+          element={<VerRespuestasEncuesta />}
+        />
+        <Route
+          path="/admin/cuestionarios/:codigo/respuestas"
+          element={<VerRespuestasCuestionario />}
+        />
 
         {/* ========== CUESTIONARIOS ========== */}
         <Route
@@ -217,7 +228,6 @@ function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/admin/cuestionarios/:codigo/secciones"
           element={
