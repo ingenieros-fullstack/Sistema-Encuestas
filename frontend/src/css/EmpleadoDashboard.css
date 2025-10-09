@@ -323,3 +323,58 @@
   .paginator{ gap:4px; }
   .paginator .page-btn{ min-width:34px; height:34px; border-radius:8px; }
 }
+
+
+/* ===== Términos en modal (FINAL) ===== */
+.emp-terms-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.emp-terms-scroll {
+  max-height: 300px;      /* ↑ más alto para mejor lectura */
+  overflow: auto;
+  padding: 10px;          /* ↑ un poco más de aire */
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.emp-terms-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 1rem;        /* ↑ antes 0.92rem */
+  line-height: 1.5rem;    /* ↑ antes 1.35rem */
+  color: #111827;
+}
+
+.emp-terms-accept input[type="checkbox"] {
+  margin-top: 3px;
+}
+
+/* Tema oscuro si usas .emp-shell.dark */
+.emp-shell.dark .emp-terms-box {
+  background: #0f172a;
+  border-color: #1f2937;
+}
+.emp-shell.dark .emp-terms-scroll {
+  background: #0b1220;
+  border-color: #1f2937;
+}
+.emp-shell.dark .emp-terms-pre {
+  color: #e5e7eb;
+}
+
+/* --- Modal un poco más grande --- */
+.emp-modal-lg .modal-dialog {
+  max-width: 740px;       /* ancho ligeramente mayor */
+}
+
+@media (max-width: 768px) {
+  .emp-modal-lg .modal-dialog {
+    max-width: 92vw;      /* responsivo en móviles */
+    margin: 0 auto;
+  }
+}

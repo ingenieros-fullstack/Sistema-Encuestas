@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "../../EditarFormulario.css";
 
 export default function EditarFormulario() {
   const { codigo } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
   const [formulario, setFormulario] = useState({
     titulo: "",
@@ -32,21 +35,47 @@ export default function EditarFormulario() {
   const isCuestionario = useMemo(() => formulario.tipo === "Cuestionario", [formulario.tipo]);
   const isEncuesta = useMemo(() => formulario.tipo === "Encuesta", [formulario.tipo]);
 
-  useEffect(() => {
-    fetchFormulario();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [codigo]);
+  // ===== Helpers de redirección por auth =====
+  const goLogin = useCallback(() => {
+    localStorage.removeItem("token");
+    navigate("/login", { replace: true, state: { nextPath: location.pathname } });
+  }, [navigate, location.pathname]);
 
-  const fetchFormulario = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
+  // ===== GET /admin/formularios/:codigo =====
+  const fetchFormulario = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      goLogin();
+      return;
+    }
 
-      if (response.ok) {
-        const data = await response.json();
+    const ac = new AbortController();
+    setLoading(true);
+    setError("");
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/admin/formularios/${codigo}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+          signal: ac.signal,
+        });
+
+        // Manejo de auth
+        if (res.status === 401 || res.status === 403) {
+          goLogin();
+          return;
+        }
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          setError(errData.message || "Error al cargar el formulario");
+          // regreso suave al listado
+          setTimeout(() => navigate("/admin/formularios"), 1500);
+          return;
+        }
+
+        const data = await res.json();
         const f = data.formulario || data;
 
         setFormulario({
@@ -61,30 +90,32 @@ export default function EditarFormulario() {
           umbral_aprobacion: typeof f.umbral_aprobacion === "number" ? f.umbral_aprobacion : 70,
           tiempo_limite: typeof f.tiempo_limite === "number" ? f.tiempo_limite : 45,
           navegacion_preguntas: f.navegacion_preguntas ?? true,
-          // 🔒 Si es Encuesta, siempre false:
-          mostrar_respuestas: (f.tipo === "Encuesta") ? false : (f.mostrar_respuestas ?? true),
+          // 🔒 Si es Encuesta, siempre false
+          mostrar_respuestas: f.tipo === "Encuesta" ? false : (f.mostrar_respuestas ?? true),
         });
-      } else {
-        setError("Error al cargar el formulario");
-        setTimeout(() => navigate("/admin/formularios"), 1500);
+      } catch (e) {
+        if (e.name !== "AbortError") {
+          console.error(e);
+          setError("Error de conexión al cargar el formulario");
+          setTimeout(() => navigate("/admin/formularios"), 1500);
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      setError("Error de conexión al cargar el formulario");
-      setTimeout(() => navigate("/admin/formularios"), 1500);
-    } finally {
-      setLoading(false);
-    }
-  };
+    })();
+
+    // cleanup
+    return () => ac.abort();
+  }, [API_URL, codigo, goLogin, navigate]);
+
+  useEffect(() => {
+    const cleanup = fetchFormulario();
+    return cleanup;
+  }, [fetchFormulario]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    // 🔒 Bloquea cambios al toggle cuando es Encuesta
-    if (name === "mostrar_respuestas" && isEncuesta) {
-      return;
-    }
-
+    if (name === "mostrar_respuestas" && isEncuesta) return; // bloquea en Encuesta
     setFormulario((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
@@ -99,26 +130,40 @@ export default function EditarFormulario() {
     setSaving(true);
     setError("");
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      goLogin();
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-
       // 🛡️ Payload seguro: en Encuesta, forzar mostrar_respuestas = false
-      const payload = formulario.tipo === "Encuesta"
-        ? { ...formulario, mostrar_respuestas: false }
-        : formulario;
+      const payload =
+        formulario.tipo === "Encuesta"
+          ? { ...formulario, mostrar_respuestas: false }
+          : formulario;
 
-      const response = await fetch(`http://localhost:4000/admin/formularios/${codigo}`, {
+      const res = await fetch(`${API_URL}/admin/formularios/${codigo}`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        navigate("/admin/formularios");
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.message || "Error al actualizar el formulario");
+      if (res.status === 401 || res.status === 403) {
+        goLogin();
+        return;
       }
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        setError(errorData.message || "Error al actualizar el formulario");
+        return;
+      }
+
+      navigate("/admin/formularios");
     } catch (err) {
       console.error(err);
       setError("Error de conexión al actualizar el formulario");
@@ -507,7 +552,6 @@ export default function EditarFormulario() {
                         type="checkbox"
                         id="mostrarResp"
                         name="mostrar_respuestas"
-                        // 🔒 si NO es Cuestionario, se muestra apagado y bloqueado
                         checked={isCuestionario ? !!formulario.mostrar_respuestas : false}
                         onChange={handleChange}
                         disabled={!isCuestionario}

@@ -19,7 +19,10 @@ export default function EmpleadoDashboard() {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("recientes");
   const [density, setDensity] = useState("comfortable");
-  const [selectedForm, setSelectedForm] = useState(null); // ✅ antes no existía
+
+  // Modal
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [acceptedTC, setAcceptedTC] = useState(false);
 
   // Paginación
   const [page, setPage] = useState(1);
@@ -28,7 +31,7 @@ export default function EmpleadoDashboard() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-  // Helpers
+  // ===== Helpers
   const toDateStr = (d) => (d ? new Date(d).toLocaleDateString() : "N/A");
   const minutesLabel = (m) => (m ? `${m} min` : "Sin límite");
   const timeLeft = (fin) => {
@@ -57,7 +60,7 @@ export default function EmpleadoDashboard() {
     return { text: estado || "—", className: "chip" };
   };
 
-  // Abrir formulario
+  // Navegar según tipo
   const handleOpenForm = (formulario) => {
     const ruta =
       formulario.Formulario?.tipo === "Encuesta"
@@ -65,6 +68,21 @@ export default function EmpleadoDashboard() {
         : `/empleado/cuestionarios/${formulario.codigo_formulario}`;
     navigate(ruta);
   };
+
+  // Si ya aceptó T&C para este código, abre directo. Si no, abre modal.
+  const openWithTerms = (formulario) => {
+    const key = `tc_accept_${formulario.codigo_formulario}`;
+    if (localStorage.getItem(key) === "1") {
+      handleOpenForm(formulario);
+    } else {
+      setSelectedForm(formulario);
+    }
+  };
+
+  // Reset del check cuando cambias de formulario en el modal
+  useEffect(() => {
+    setAcceptedTC(false);
+  }, [selectedForm]);
 
   // Auth/me
   useEffect(() => {
@@ -136,6 +154,24 @@ export default function EmpleadoDashboard() {
       if (gridRef.current) gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
+
+  // ===== Texto de Términos (resumen del documento que nos compartiste)
+  const TERMS_NOM035 = `
+Antes de continuar es importante leas y aceptes de conformidad el siguiente acuerdo de participación.
+
+ACUERDO DE PARTICIPACIÓN — Identificación de Riesgos Psicosociales (NOM-035-STPS-2018)
+
+I. Definición del programa
+La Empresa implementa el programa “Identificación de Riesgos Psicosociales”, en el marco de la NOM-035-STPS-2018, con la finalidad de identificar factores de riesgo psicosocial en el trabajo y promover un entorno organizacional favorable.
+
+II. Autorizaciones y confidencialidad
+Autorizo a la Empresa a acceder y tratar mi información relacionada con riesgos psicosociales para los fines del programa, obtenida a través de encuestas, estadísticas de RH u otras fuentes relacionadas con la NOM-035, bajo la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y su Reglamento. La Empresa ha adoptado medidas técnicas, físicas y administrativas para garantizar la seguridad de los datos personales y evitar su alteración, pérdida, tratamiento o acceso no autorizado.
+
+La información (por ejemplo: nombre, género, fecha de nacimiento, número de colaborador, respuestas de las guías NOM-035 y su estadística) será resguardada por la Empresa con el objetivo de prevenir riesgos psicosociales y promover un entorno organizacional favorable.
+
+III. Participación voluntaria
+Manifiesto mi voluntad de participar activamente en el programa dentro de los términos señalados. Reconozco que el programa no constituye un derecho o prestación laboral. Acepto que mis datos se usarán únicamente para los fines establecidos por la NOM-035 y las disposiciones aplicables.
+  `.trim();
 
   return (
     <div className="emp-shell light vivid plus">
@@ -296,7 +332,7 @@ export default function EmpleadoDashboard() {
                       {f.estado !== "completado" ? (
                         <button
                           className="btn primary"
-                          onClick={() => setSelectedForm(f)} // ✅ abre modal
+                          onClick={() => openWithTerms(f)}
                           aria-label={`Resolver ${f.Formulario?.titulo || ""}`}
                         >
                           Resolver
@@ -325,27 +361,58 @@ export default function EmpleadoDashboard() {
         )}
       </main>
 
-      {/* Modal confirmación */}
+      {/* Modal términos + confirmación */}
       {selectedForm && (
-        <div className="modal fade show d-block" tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content p-3">
+  <div className="modal fade show d-block emp-modal-lg" tabIndex="-1" role="dialog" aria-modal="true">
+    <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div className="modal-content p-3">
               <h5 className="modal-title">⚠️ Confirmación</h5>
-              <p>
-                Estás a punto de resolver el formulario{" "}
-                <strong>{selectedForm.Formulario?.titulo}</strong>.<br />
-                ¿Deseas abrirlo ahora?
+
+              <p className="mb-2">
+                Estás a punto de resolver el formulario <strong>{selectedForm.Formulario?.titulo}</strong>.
               </p>
-              <div className="d-flex justify-content-end gap-2">
-                <button className="btn btn-secondary" onClick={() => setSelectedForm(null)}>
+
+              <div className="emp-terms-box" role="group" aria-label="Términos y condiciones">
+                <div className="emp-terms-scroll" id="terms-scroll" tabIndex={0} aria-label="Contenido de términos">
+                  <pre className="emp-terms-pre">{TERMS_NOM035}</pre>
+                </div>
+                <label className="emp-terms-accept d-flex align-items-start gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTC}
+                    onChange={(e) => setAcceptedTC(e.target.checked)}
+                    aria-checked={acceptedTC}
+                    aria-label="Aceptar términos y condiciones"
+                  />
+                  <span>
+                    He leído y acepto los <strong>Términos y Condiciones</strong> para el tratamiento de mis datos de
+                    acuerdo con la NOM-035.
+                  </span>
+                </label>
+              </div>
+
+              <div className="d-flex justify-content-end gap-2 mt-2">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setSelectedForm(null);
+                  }}
+                >
                   Cancelar
                 </button>
+
                 <button
                   className="btn btn-primary"
+                  disabled={!acceptedTC}
                   onClick={() => {
+                    // Guardar aceptación por código de formulario
+                    try {
+                      localStorage.setItem(`tc_accept_${selectedForm.codigo_formulario}`, "1");
+                    } catch {}
                     handleOpenForm(selectedForm);
                     setSelectedForm(null);
                   }}
+                  aria-disabled={!acceptedTC}
                 >
                   Abrir
                 </button>
