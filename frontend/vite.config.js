@@ -3,15 +3,20 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
-  // 🧩 Cargar variables de entorno desde la carpeta actual del frontend
-  const env = loadEnv(mode, path.resolve(__dirname, "."));
+  // 🧩 Cargar variables de entorno
+  const env = loadEnv(mode, process.cwd());
 
-  // ✅ Forzar el valor de la API en caso de que Vite no lea el .env.production
+  // 🔗 API del backend (siempre apunta al subpath /encuestas)
   process.env.VITE_API_URL = env.VITE_API_URL || "https://corehr.mx/encuestas";
 
+  // 🌐 Debe ser raíz absoluta, no relativa
+  const base = "/";
+
   console.log("🌍 API base configurada para build:", process.env.VITE_API_URL);
+  console.log("📁 Ruta base configurada:", base);
 
   return {
+    base, // ✅ Usa "/" para que los assets apunten a https://corehr.mx/assets/
     plugins: [react()],
     server: {
       host: "0.0.0.0",
@@ -26,6 +31,15 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       sourcemap: false,
+      chunkSizeWarningLimit: 1000,
+      assetsDir: "assets",
+      emptyOutDir: true,
+      manifest: true,
+    },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+      },
     },
   };
 });

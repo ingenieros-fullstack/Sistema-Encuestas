@@ -88,14 +88,19 @@ export default function EmpleadoDashboard() {
   useEffect(() => {
     if (!token) return;
     fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.mustChangePassword) {
-          setMustChangePassword(true);
-          setCorreo(data?.correo || "");
-        }
-      })
-      .catch(() => {});
+  .then((res) => res.json())
+  .then((data) => {
+    // ⚙️ Abrir modal solo si el backend dice que DEBE cambiar contraseña (true real)
+    if (data?.mustChangePassword === true) {
+      setMustChangePassword(true);
+      setCorreo(data?.correo || "");
+    } else {
+      setMustChangePassword(false);
+    }
+  })
+  .catch(() => {});
+
+
   }, [token, API_URL]);
 
   // Asignaciones

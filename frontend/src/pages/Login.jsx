@@ -25,15 +25,14 @@ export default function Login() {
     setLoading(true);
 
     try {
-     // URL base dinámica: local o producción
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+      // ✅ API dinámico según entorno (local o producción)
+      const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
 
-const res = await fetch(`${API_URL}/auth/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ correo, password }),
-});
-
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo, password }),
+      });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -41,27 +40,44 @@ const res = await fetch(`${API_URL}/auth/login`, {
         return;
       }
 
+      // ✅ Guardar datos esenciales
       localStorage.setItem("token", data.token);
       localStorage.setItem("rol", data.rol || "");
       localStorage.setItem("nombre", data.nombre || "");
       localStorage.setItem("mustChangePassword", data.mustChangePassword || "false");
 
+      // ✅ Forzar cambio de contraseña si aplica
       if (data.mustChangePassword && (data.rol === "empleado" || data.rol === "supervisor")) {
         navigate("/change-password", { replace: true });
         return;
       }
 
+      // ✅ Determinar ruta según rol
       let target = data.nextPath || "/";
       if (!data.nextPath) {
         switch (data.rol) {
-          case "admin": target = "/admin/dashboard"; break;
-          case "empleado": target = "/empleado/dashboard"; break;
-          case "supervisor": target = "/supervisor/dashboard"; break;
-          default: target = "/";
+          case "admin":
+            target = "/admin/dashboard";
+            break;
+          case "empleado":
+            target = "/empleado/dashboard";
+            break;
+          case "supervisor":
+            target = "/supervisor/dashboard";
+            break;
+          default:
+            target = "/";
         }
       }
-      navigate(target, { replace: true });
-    } catch {
+
+      // ✅ SOLUCIÓN AL PANTALLAZO BLANCO:
+      // Espera breve y luego redirige con recarga completa
+      setTimeout(() => {
+        window.location.href = target;
+      }, 150);
+
+    } catch (error) {
+      console.error("Error de conexión:", error);
       setMensaje("Error de conexión con el backend");
     } finally {
       setLoading(false);
@@ -107,7 +123,9 @@ const res = await fetch(`${API_URL}/auth/login`, {
         <main className="auth__panel">
           <div className="auth-card auth-card--border">
             <div className="auth-card__head">
-              <span className="auth-card__badge"><i className="bi bi-shield-lock" /> Acceso</span>
+              <span className="auth-card__badge">
+                <i className="bi bi-shield-lock" /> Acceso
+              </span>
               <h2>Iniciar sesión</h2>
               <p className="muted">Bienvenido de nuevo. Ingresa tus credenciales.</p>
             </div>
@@ -124,7 +142,7 @@ const res = await fetch(`${API_URL}/auth/login`, {
                   autoComplete="email"
                   required
                   className="fld__control"
-                  placeholder=" " /* necesario para floating label */
+                  placeholder=" "
                 />
                 <label htmlFor="correo" className="fld__label">Correo electrónico</label>
               </div>

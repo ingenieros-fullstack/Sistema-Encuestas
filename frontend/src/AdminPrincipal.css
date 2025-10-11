@@ -45,9 +45,25 @@
 
   /* === Animación al aparecer === */
   opacity: 0;
+  transform: translateY(20px);
   animation: fadeUp 0.6s ease forwards, float 5s ease-in-out infinite;
+  animation-delay: 0.1s;
+  animation-fill-mode: forwards;
 }
 
+/* Failsafe: si por alguna razón no se ejecuta la animación */
+@supports not (animation: name) {
+  .card-module {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Asegura visibilidad incluso si falla el render JS */
+.card-module:where(:not([style*="opacity"])) {
+  opacity: 1 !important;
+  transform: none !important;
+}
 
 .card-module:hover {
   transform: translateY(-8px);
@@ -69,8 +85,6 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-
-  /* === Movimiento sutil del ícono en hover === */
   transition: transform 0.3s ease;
 }
 
@@ -82,25 +96,31 @@
 .card-module.usuarios .card-icon {
   background-color: #e0f2f1;
   color: #00796b;
-  box-shadow: 0 4px 16px rgba(0, 121, 107, 0.3); /* sombra verde suave */
+  box-shadow: 0 4px 16px rgba(0, 121, 107, 0.3);
+}
+
+.card-module.asignar .card-icon {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  box-shadow: 0 4px 16px rgba(239, 108, 0, 0.3);
 }
 
 .card-module.crear .card-icon {
   background-color: #e3f2fd;
   color: #1976d2;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.3); /* sombra azul suave */
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.3);
 }
 
 .card-module.gestionar .card-icon {
   background-color: #ede7f6;
   color: #5e35b1;
-  box-shadow: 0 4px 16px rgba(94, 53, 177, 0.3); /* sombra morada suave */
+  box-shadow: 0 4px 16px rgba(94, 53, 177, 0.3);
 }
 
 .card-module.reportes .card-icon {
   background-color: #fce4ec;
   color: #c2185b;
-  box-shadow: 0 4px 16px rgba(194, 24, 91, 0.3); /* sombra rosa suave */
+  box-shadow: 0 4px 16px rgba(194, 24, 91, 0.3);
 }
 
 .card-title {
@@ -152,8 +172,6 @@
 
   .card-description {
     font-size: 0.85rem;
-
-    /* === Ocultar descripción en pantallas pequeñas === */
     display: none;
   }
 }
@@ -177,4 +195,10 @@
   50% {
     transform: translateY(-6px);
   }
+}
+
+/* === Garantía de visibilidad global (fallback extra) === */
+.card-module,
+.card-module * {
+  visibility: visible !important;
 }

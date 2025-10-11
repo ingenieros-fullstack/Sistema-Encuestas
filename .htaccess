@@ -1,0 +1,52 @@
+# ======================================================
+# 🌐 FRONTEND REACT + VITE (corehr.mx)
+# ======================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # =====================================
+  # 🚫 No reescribir peticiones al backend Node
+  # =====================================
+  RewriteCond %{REQUEST_URI} ^/encuestas(/.*)?$
+  RewriteRule ^ - [L]
+
+  # =====================================
+  # 🚫 No redirigir archivos estáticos (assets, imágenes, fuentes, etc.)
+  # =====================================
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|json|txt|map)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # =====================================
+  # ⚙️ React Router SPA: Redirigir rutas inexistentes a index.html
+  # =====================================
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# ======================================================
+# 🚀 CACHE CONTROL — Rendimiento + despliegues limpios
+# ======================================================
+
+<IfModule mod_headers.c>
+  # 🔹 Evitar cache en HTML
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # 🔹 Cache largo en assets con hash (Vite)
+  <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf|eot|json|map)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+
+  # ✅ Seguridad básica
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header always set Access-Control-Allow-Origin "https://corehr.mx"
+</IfModule>
+
+# ✅ Forzar UTF-8
+AddDefaultCharset UTF-8

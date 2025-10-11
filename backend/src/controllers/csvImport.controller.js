@@ -50,11 +50,20 @@ const normalizeKeys = (row) => {
     "supervisor": "supervisor",
     "edad": "edad",
     "telefono": "telefono",
+
+    // 🔐 RFC (agregar variantes)
+    "rfc": "rfc",
+    "r.f.c": "rfc",
+    "rfc_": "rfc",
+    "rfc\r": "rfc",
+    "rfc ": "rfc",
   };
 
   const normalize = (str) =>
     str
       .toString()
+      .replace(/\u00A0/g, " ") // ⚙️ elimina espacios no separables (Excel)
+      .trim()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-zA-Z0-9_]/g, "")
@@ -189,36 +198,38 @@ export const importUsers = async (req, res) => {
         const numero = user.numero_empleado;
         const correo = user.correo_electronico?.trim().toLowerCase();
 
-        const existsEmpleado = await DataEmpleado.findOne({ where: { numero_empleado: numero } });
+        // Verificar si el usuario ya existe
         const existsUsuario = await Usuario.findOne({ where: { correo_electronico: correo } });
-
-        // Si ya existe, lo omitimos sin marcar error
-        if (existsEmpleado && existsUsuario) {
-          console.log(`⚠️ Línea ${lineNumber}: empleado ya existe, omitido.`);
+        if (existsUsuario) {
+          console.log(`⚠️ Línea ${lineNumber}: usuario ya existe, omitido.`);
           continue;
         }
 
-        const empleado = existsEmpleado
-          ? existsEmpleado
-          : await DataEmpleado.create(
-              { id_empresa: defaultEmpresa.id_empresa, ...user, correo_electronico: correo },
-              { transaction }
-            );
-
-        if (!existsUsuario) {
-          const hash = await bcrypt.hash("Empleado2025", 10);
-          await Usuario.create(
-            {
-              id_data: empleado.id_data,
-              correo_electronico: correo,
-              password: hash,
-              rol: "empleado",
-              estatus: 1,
-              must_change_password: true,
-            },
+        // Crear o reutilizar empleado
+        let empleado = await DataEmpleado.findOne({ where: { numero_empleado: numero } });
+        if (!empleado) {
+          empleado = await DataEmpleado.create(
+            { id_empresa: defaultEmpresa.id_empresa, ...user, correo_electronico: correo },
             { transaction }
           );
         }
+
+        // Generar contraseña desde RFC o fallback
+        const plainPassword = user.rfc ? String(user.rfc).trim() : "Empleado2025";
+        const hash = await bcrypt.hash(plainPassword, 10);
+
+        // Crear usuario
+        await Usuario.create(
+          {
+            id_data: empleado.id_data,
+            correo_electronico: correo,
+            password: hash,
+            rol: "empleado",
+            estatus: 1,
+            must_change_password: false,
+          },
+          { transaction }
+        );
 
         usersImported.push({
           numero_empleado: numero,
@@ -226,7 +237,6 @@ export const importUsers = async (req, res) => {
           correo_electronico: correo,
         });
       } catch (err) {
-        // si es duplicado o validación, no lo marcamos como error crítico
         if (err?.name?.includes("Unique") || err?.name?.includes("Validation")) {
           console.warn(`⚠️ Línea ${lineNumber}: duplicado omitido (${err.message})`);
           continue;

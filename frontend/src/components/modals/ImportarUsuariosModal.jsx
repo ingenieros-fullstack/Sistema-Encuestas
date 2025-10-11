@@ -7,9 +7,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  // ============================
   // 📁 Manejo de archivo
-  // ============================
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -33,9 +31,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     }
   };
 
-  // ============================
   // 🚀 Enviar archivo al backend
-  // ============================
   const handleSubmit = async () => {
     if (!file) {
       setError("Por favor selecciona un archivo");
@@ -52,9 +48,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/admin/usuarios/import`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -76,9 +70,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     }
   };
 
-  // ============================
   // 📥 Descargar plantilla CSV
-  // ============================
   const downloadTemplate = () => {
     const a = document.createElement("a");
     a.href = `${API_URL}/uploads/plantilla_usuarios.csv`;
@@ -86,18 +78,13 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     a.click();
   };
 
-  // ============================
   // ❌ Cerrar al hacer clic fuera
-  // ============================
   const handleBackdropClick = (e) => {
     if (e.target.classList.contains("modal-backdrop")) {
       setTimeout(() => onClose(), 0);
     }
   };
 
-  // ============================
-  // 🧱 Render modal
-  // ============================
   return (
     <div
       className="modal-backdrop"
@@ -166,6 +153,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
         {/* Body */}
         <div style={{ padding: "1.5rem", fontSize: "0.95rem" }}>
           {!result ? (
+            // === FORMULARIO DE IMPORTACIÓN ===
             <div key="form">
               <p className="mb-3">
                 Sube un archivo <strong>.Excel</strong> o{" "}
@@ -210,6 +198,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
               )}
             </div>
           ) : (
+            // === RESULTADO DE IMPORTACIÓN ===
             <div key="success" className="alert alert-success" role="alert">
               <h6 className="alert-heading mb-2">
                 <i className="bi bi-check-circle me-1"></i> Importación exitosa
@@ -218,9 +207,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
 
               {result.users && result.users.length > 0 && (
                 <div className="mt-3">
-                  <p className="fw-bold mb-2">
-                    Usuarios creados con contraseña por defecto:
-                  </p>
+                  <p className="fw-bold mb-2">Usuarios creados correctamente:</p>
                   <div style={{ maxHeight: "200px", overflowY: "auto" }}>
                     {result.users.map((user) => (
                       <div
@@ -236,12 +223,10 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                           ({user.correo_electronico})
                           <br />
                           <div
-                            key={`pass-${user.correo_electronico}`}
-                            className="mt-1"
+                            key={`msg-${user.correo_electronico}`}
+                            className="mt-1 text-success"
                           >
-                            <span className="text-danger">
-                              Contraseña por defecto: Empleado2025
-                            </span>
+                            ✅ Usuario creado correctamente.
                           </div>
                         </div>
                       </div>
@@ -253,14 +238,10 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
               {result.skippedCount > 0 && (
                 <div className="alert alert-warning mt-3" role="alert">
                   <h6 className="alert-heading mb-2">
-                    <i className="bi bi-exclamation-triangle me-1"></i> Registros
-                    omitidos
+                    <i className="bi bi-exclamation-triangle me-1"></i> Registros omitidos
                   </h6>
                   <p className="mb-2">
-                    {result.skippedCount} registros fueron omitidos.{" "}
-                    {result.skippedRanges?.length > 0 && (
-                      <>Filas: {result.skippedRanges.join(", ")}.</>
-                    )}
+                    {result.skippedCount} registros fueron omitidos.
                   </p>
                   {result.skipped?.length > 0 && (
                     <div
@@ -272,8 +253,7 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
                     >
                       {result.skipped.map((err, idx) => (
                         <div key={`${idx}-${err}`} className="mb-1">
-                          <i className="bi bi-x-circle text-danger me-1"></i>{" "}
-                          {err}
+                          <i className="bi bi-x-circle text-danger me-1"></i> {err}
                         </div>
                       ))}
                     </div>
@@ -325,4 +305,6 @@ export default function ImportarUsuariosModal({ onClose, onSuccess }) {
     </div>
   );
 }
+
+
 
