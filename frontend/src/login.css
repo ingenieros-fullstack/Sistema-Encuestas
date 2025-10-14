@@ -360,3 +360,20 @@ body[data-theme="light"] .auth-card--border::before {
 }
 
 
+
+
+.auth__shape .logo-4front {
+  position: absolute;
+  top: 40%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  height: 85px;
+  width: auto;
+  opacity: 1; /* 👈 completamente visible */
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 10; /* 👈 logo sobre el fondo */
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)); /* leve sombra para contraste */
+}
+
+

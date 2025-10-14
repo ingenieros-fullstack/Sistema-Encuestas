@@ -213,3 +213,51 @@
     background: rgba(239,68,68,.15);
   }
 }
+
+/* === Logo centrado flotante === */
+.navbar-centered-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.95;
+  z-index: 10; /* 👈 asegura que esté sobre la barra */
+  pointer-events: none; /* no bloquea clics en botones */
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+}
+
+
+/* El nav sirve de referencia para posicionar el logo en escritorio */
+.nbx-bar {
+  position: relative;
+  min-height: 64px; /* o la altura real de tu barra */
+}
+
+/* Logo centrado en ESCRITORIO sin empujar layout */
+.navbar-centered-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 50px;          /* ajusta si lo quieres un pelín más grande/pequeño */
+  width: auto;
+  pointer-events: none;  /* no bloquea clics */
+  z-index: 5;            /* por encima del fondo, por debajo de menús si los abres */
+  opacity: 10;            /* se ve nítido */
+}
+
+/* === Ajuste fino del logo para móviles === */
+@media (max-width: 768px) {
+  .navbar-centered-logo {
+    position: absolute;
+    top: 48%;       /* 👈 un poco más arriba */
+    left: 63%;      /* 👈 lo mueve más a la derecha */
+    transform: translate(-50%, -50%);
+    height: 38px;   /* tamaño equilibrado en móvil */
+    width: auto;
+  }
+}
+

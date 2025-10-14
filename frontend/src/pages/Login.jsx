@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "/src/images/VelCodelogoOficial.png";
+import logo4front from "/src/images/Logo2.png";
+
 import "/src/login.css";
 
 export default function Login() {
@@ -110,10 +112,13 @@ export default function Login() {
         {/* PANEL IZQUIERDO */}
         <aside className="auth__aside">
           <div className="auth__brand">
-            <img src={logo} alt="VelCode" className="auth__logo-img" />
-            <h1>Sistema de Encuestas</h1>
-            <p>Diseña, gestiona y analiza encuestas con estilo moderno.</p>
-          </div>
+  <div className="auth__logos">
+    <img src={logo} alt="VelCode" className="auth__logo-img" />
+  </div>
+  <h1>Sistema de Encuestas</h1>
+  <p>Diseña, gestiona y analiza encuestas con estilo moderno.</p>
+</div>
+
 
           <ul className="auth__bullets">
             <li><i className="bi bi-shield-check" /> Seguridad y confiabilidad</li>
@@ -121,7 +126,9 @@ export default function Login() {
             <li><i className="bi bi-bar-chart-line" /> Reportes y métricas</li>
           </ul>
 
-          <div className="auth__shape" aria-hidden />
+          <div className="auth__shape" aria-hidden>
+  <img src={logo4front} alt="4Front" className="logo-4front" />
+</div>
         </aside>
 
         {/* PANEL DERECHO */}

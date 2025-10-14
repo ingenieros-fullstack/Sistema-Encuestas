@@ -160,7 +160,7 @@ export default function GestionUsuariosModal({ onClose }) {
       className="modal-backdrop"
       onClick={(e) => e.target.classList.contains("modal-backdrop") && onClose()}
     >
-      <div className="modal-container">
+      <div className="modal-container modal-large">
         {/* === Header === */}
         <div className="modal-header">
           <h5 className="modal-title">
@@ -189,6 +189,7 @@ export default function GestionUsuariosModal({ onClose }) {
               <table className="table table-bordered table-striped align-middle">
                 <thead className="table-primary">
                   <tr>
+                    <th>Número de empleado</th>
                     <th>Correo electrónico</th>
                     <th>Rol</th>
                     <th>Acciones</th>
@@ -197,6 +198,7 @@ export default function GestionUsuariosModal({ onClose }) {
                 <tbody>
                   {usuariosPaginados.map((u) => (
                     <tr key={u.id_usuario}>
+                      <td>{u.numero_empleado || "—"}</td>
                       <td>{u.correo_electronico}</td>
                       <td>
                         <span className={getBadgeClass(u.rol)}>{u.rol}</span>
@@ -219,7 +221,7 @@ export default function GestionUsuariosModal({ onClose }) {
                   ))}
                   {usuariosPaginados.length === 0 && (
                     <tr>
-                      <td colSpan="3" className="text-center text-muted">
+                      <td colSpan="4" className="text-center text-muted">
                         No hay usuarios para mostrar.
                       </td>
                     </tr>

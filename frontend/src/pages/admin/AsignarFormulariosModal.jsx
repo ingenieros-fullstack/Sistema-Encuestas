@@ -24,7 +24,7 @@ export default function AsignarFormulariosModal() {
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
   const [paginaFormularios, setPaginaFormularios] = useState(1);
   const [paginaAsignaciones, setPaginaAsignaciones] = useState(1);
-  const porPagina = 5; // cantidad de registros por página
+  const porPagina = 4; // cantidad de registros por página
 
   // ==============================
   // 🔹 Cargar datos iniciales
@@ -219,17 +219,39 @@ export default function AsignarFormulariosModal() {
           <div className="asignar-modal-body large-layout">
             {/* Usuarios */}
             <div className="panel">
-              <div className="panel-title">
-                <span>👤 Usuarios</span>
-              </div>
-              <div className="search-input">
-                <input
-                  type="text"
-                  placeholder="Buscar por correo…"
-                  value={busquedaUsuario}
-                  onChange={(e) => setBusquedaUsuario(e.target.value)}
-                />
-              </div>
+  <div className="panel-title">
+    <span>👤 Usuarios</span>
+
+    <label className="select-all">
+      <input
+        type="checkbox"
+        checked={
+          usuariosFiltrados.length > 0 &&
+          usuariosSeleccionados.length === usuariosFiltrados.length
+        }
+        onChange={(e) => {
+          if (e.target.checked) {
+            // Selecciona todos los usuarios filtrados
+            setUsuariosSeleccionados(usuariosFiltrados.map((u) => u.id_usuario));
+          } else {
+            // Deselecciona todos
+            setUsuariosSeleccionados([]);
+          }
+        }}
+      />
+      <span>Seleccionar todos los usuarios</span>
+    </label>
+  </div>
+
+  <div className="search-input">
+    <input
+      type="text"
+      placeholder="Buscar por correo…"
+      value={busquedaUsuario}
+      onChange={(e) => setBusquedaUsuario(e.target.value)}
+    />
+  </div>
+
 
               <div className="list-scroll">
                 {usuariosPaginados.length === 0 ? (

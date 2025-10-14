@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logo4front from "/src/images/Logo2.png"; // ajusta el nombre del archivo si cambió
 import "../css/Navbar.css";
 
 export default function Navbar({ rol = "empleado", nombre = "Usuario" }) {
@@ -67,6 +68,7 @@ export default function Navbar({ rol = "empleado", nombre = "Usuario" }) {
             </div>
           </div>
         </div>
+        <img src={logo4front} alt="4Front" className="navbar-centered-logo" />
       </nav>
     </header>
   );
