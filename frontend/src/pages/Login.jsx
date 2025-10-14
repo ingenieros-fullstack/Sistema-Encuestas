@@ -25,7 +25,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
       // 🧩 Detectar si el usuario ingresó correo o código
       const esCorreo = identificador.includes("@");

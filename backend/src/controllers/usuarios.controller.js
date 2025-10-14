@@ -173,4 +173,3 @@ export async function eliminarUsuario(req, res) {
   }
 }
 
-
