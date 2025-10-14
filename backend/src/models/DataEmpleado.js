@@ -9,18 +9,12 @@ const DataEmpleado = sequelize.define("DataEmpleado", {
     primaryKey: true 
   },
 
-  // 🔗 Relación con empresa
   id_empresa: { 
     type: DataTypes.INTEGER, 
     allowNull: false 
   },
 
-  // 📋 Identificación y datos personales
-  numero_empleado: { 
-    type: DataTypes.STRING(20), 
-    allowNull: false, 
-    unique: true 
-  },
+  // 📋 Datos personales
   nombre: { 
     type: DataTypes.STRING(100), 
     allowNull: false 
@@ -30,15 +24,15 @@ const DataEmpleado = sequelize.define("DataEmpleado", {
   sexo: { type: DataTypes.ENUM("M", "F", "O") },
   fecha_nacimiento: { type: DataTypes.DATE },
   fecha_ingreso: { type: DataTypes.DATE },
-  edad: { type: DataTypes.INTEGER },              // 🆕 Edad calculada o ingresada manualmente
-  antiguedad: { type: DataTypes.INTEGER },        // 🆕 Años de antigüedad
+  edad: { type: DataTypes.INTEGER },
+  antiguedad: { type: DataTypes.INTEGER },
 
   // 🏢 Información laboral
   centro_trabajo: { type: DataTypes.STRING(100) },
-  cc: { type: DataTypes.STRING(50) },             // 🆕 Centro de costo
-  cc_descrip: { type: DataTypes.STRING(150) },    // 🆕 Descripción del centro de costo
+  cc: { type: DataTypes.STRING(50) },
+  cc_descrip: { type: DataTypes.STRING(150) },
   departamento: { type: DataTypes.STRING(100) },
-  depto_descrip: { type: DataTypes.STRING(150) }, // 🆕 Descripción del departamento
+  depto_descrip: { type: DataTypes.STRING(150) },
   turno: { type: DataTypes.STRING(20) },
   supervisor: { type: DataTypes.STRING(100) },
 

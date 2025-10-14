@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "/src/images/VelCodelogoOficial.png"; // ✅ tu logo
+import logo from "/src/images/VelCodelogoOficial.png";
 import "/src/login.css";
 
 export default function Login() {
-  const [correo, setCorreo] = useState("");
+  const [identificador, setIdentificador] = useState(""); // correo o código
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  // === Tema (light/dark) con persistencia ===
+  // === Tema persistente ===
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -25,60 +25,66 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // ✅ API dinámico según entorno (local o producción)
       const API_URL = import.meta.env.VITE_API_URL || "https://corehr.mx/encuestas";
 
-      const res = await fetch(`${API_URL}/auth/login`, {
+      // 🧩 Detectar si el usuario ingresó correo o código
+      const esCorreo = identificador.includes("@");
+      const payload = esCorreo
+        ? { correo: identificador.trim(), password }
+        : { numero_empleado: identificador.trim(), password };
+
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, password }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setMensaje(data.message || "Error en login");
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        console.warn("⚠️ Error en login:", data);
+        setMensaje(data.message || "Credenciales incorrectas");
         return;
       }
 
-      // ✅ Guardar datos esenciales
+      // === Guardar datos esenciales ===
       localStorage.setItem("token", data.token);
       localStorage.setItem("rol", data.rol || "");
       localStorage.setItem("nombre", data.nombre || "");
+      localStorage.setItem("correo_electronico", data.correo_electronico || "");
+      localStorage.setItem("numero_empleado", data.numero_empleado || "");
       localStorage.setItem("mustChangePassword", data.mustChangePassword || "false");
 
-      // ✅ Forzar cambio de contraseña si aplica
-      if (data.mustChangePassword && (data.rol === "empleado" || data.rol === "supervisor")) {
+      // === Redirección si debe cambiar contraseña ===
+      if (data.mustChangePassword && ["empleado", "supervisor"].includes(data.rol)) {
         navigate("/change-password", { replace: true });
         return;
       }
 
-      // ✅ Determinar ruta según rol
-      let target = data.nextPath || "/";
-      if (!data.nextPath) {
-        switch (data.rol) {
-          case "admin":
-            target = "/admin/dashboard";
-            break;
-          case "empleado":
-            target = "/empleado/dashboard";
-            break;
-          case "supervisor":
-            target = "/supervisor/dashboard";
-            break;
-          default:
-            target = "/";
-        }
+      // === Determinar destino por rol ===
+      let destino = "/";
+      switch (data.rol) {
+        case "admin":
+          destino = "/admin/dashboard";
+          break;
+        case "supervisor":
+          destino = "/supervisor/dashboard";
+          break;
+        case "empleado":
+          destino = "/empleado/dashboard";
+          break;
+        default:
+          destino = "/";
       }
 
-      // ✅ SOLUCIÓN AL PANTALLAZO BLANCO:
-      // Espera breve y luego redirige con recarga completa
+      // === Redirección limpia ===
       setTimeout(() => {
-        window.location.href = target;
-      }, 150);
+        window.location.href = destino;
+      }, 200);
 
-    } catch (error) {
-      console.error("Error de conexión:", error);
-      setMensaje("Error de conexión con el backend");
+    } catch (err) {
+      console.error("❌ Error de conexión con el backend:", err);
+      setMensaje("Error de conexión con el servidor");
     } finally {
       setLoading(false);
     }
@@ -86,11 +92,11 @@ export default function Login() {
 
   return (
     <div className="auth auth--v2">
-      {/* decoraciones */}
+      {/* 🌌 decoraciones */}
       <div className="aurora" />
       <div className="stars" />
 
-      {/* Toggle de tema */}
+      {/* ☀️/🌙 toggle */}
       <button
         className="theme-toggle"
         type="button"
@@ -101,10 +107,9 @@ export default function Login() {
       </button>
 
       <div className="auth__surface">
-        {/* HERO IZQUIERDO */}
+        {/* PANEL IZQUIERDO */}
         <aside className="auth__aside">
           <div className="auth__brand">
-            {/* ✅ Logo Reemplazando el cuadro (sin fondo extra) */}
             <img src={logo} alt="VelCode" className="auth__logo-img" />
             <h1>Sistema de Encuestas</h1>
             <p>Diseña, gestiona y analiza encuestas con estilo moderno.</p>
@@ -127,27 +132,30 @@ export default function Login() {
                 <i className="bi bi-shield-lock" /> Acceso
               </span>
               <h2>Iniciar sesión</h2>
-              <p className="muted">Bienvenido de nuevo. Ingresa tus credenciales.</p>
+              <p className="muted">
+                Puedes ingresar con tu <b>correo</b> o tu <b>código de empleado</b>.
+              </p>
             </div>
 
             <form className="auth-form" onSubmit={handleLogin} noValidate>
-              {/* Correo */}
+              {/* Identificador (correo o código) */}
               <div className="fld">
-                <i className="bi bi-envelope fld__icon" />
+                <i className="bi bi-person-badge fld__icon" />
                 <input
-                  id="correo"
-                  type="email"
-                  value={correo}
-                  onChange={(e) => setCorreo(e.target.value)}
-                  autoComplete="email"
+                  id="identificador"
+                  type="text"
+                  value={identificador}
+                  onChange={(e) => setIdentificador(e.target.value)}
                   required
                   className="fld__control"
                   placeholder=" "
                 />
-                <label htmlFor="correo" className="fld__label">Correo electrónico</label>
+                <label htmlFor="identificador" className="fld__label">
+                  Correo o número de empleado
+                </label>
               </div>
 
-              {/* Password */}
+              {/* Contraseña */}
               <div className="fld">
                 <i className="bi bi-lock fld__icon" />
                 <input
@@ -171,6 +179,7 @@ export default function Login() {
                 </button>
               </div>
 
+              {/* Opciones */}
               <div className="form-row">
                 <label className="check">
                   <input type="checkbox" /> Recuérdame
@@ -180,6 +189,7 @@ export default function Login() {
                 </a>
               </div>
 
+              {/* Mensaje de error */}
               {!!mensaje && (
                 <div className="auth-alert">
                   <i className="bi bi-exclamation-triangle-fill" />

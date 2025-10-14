@@ -12,6 +12,14 @@ const Usuario = sequelize.define("Usuario", {
     type: DataTypes.INTEGER, 
     allowNull: false 
   },
+
+  // 🆕 Número de empleado (nuevo campo para login)
+  numero_empleado: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    unique: true
+  },
+
   correo_electronico: { 
     type: DataTypes.STRING(100), 
     allowNull: false, 
@@ -30,11 +38,11 @@ const Usuario = sequelize.define("Usuario", {
     type: DataTypes.TINYINT, 
     defaultValue: 1 
   },
-must_change_password: {   
-  type: DataTypes.BOOLEAN,   
-  defaultValue: true,   
-  allowNull: false   
-},
+  must_change_password: {   
+    type: DataTypes.BOOLEAN,   
+    defaultValue: true,   
+    allowNull: false   
+  },
   created_at: { 
     type: DataTypes.DATE, 
     defaultValue: DataTypes.NOW 
@@ -44,9 +52,7 @@ must_change_password: {
   timestamps: false
 });
 
-
-
-// ✅ Relación con DataEmpleado usando alias "empleado"
+// ✅ Relación con DataEmpleado
 Usuario.belongsTo(DataEmpleado, { foreignKey: "id_data", as: "empleado" });
 
 export default Usuario;

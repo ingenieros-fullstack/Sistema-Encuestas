@@ -13,7 +13,6 @@ export async function listarEmpleados(req, res) {
     const empleados = await DataEmpleado.findAll({
       attributes: [
         "id_data",
-        "numero_empleado",
         "nombre",
         "correo_electronico",
         "centro_trabajo",

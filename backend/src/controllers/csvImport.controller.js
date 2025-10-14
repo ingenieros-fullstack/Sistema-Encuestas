@@ -26,43 +26,50 @@ const upload = multer({
 // === Normalizar nombres de columnas ===
 const normalizeKeys = (row) => {
   const map = {
-    "compania": "empresa",
-    "empresa": "empresa",
-    "codigo": "numero_empleado",
-    "código": "numero_empleado",
-    "nombre": "nombre",
-    "paterno": "apellido_paterno",
-    "materno": "apellido_materno",
-    "sexo": "sexo",
-    "nacimiento": "fecha_nacimiento",
-    "ingreso": "fecha_ingreso",
-    "email": "correo_electronico",
-    "correo": "correo_electronico",
-    "centro_trab": "centro_trabajo",
-    "centrotrabajo": "centro_trabajo",
-    "cc": "cc",
-    "cc_descrip": "cc_descrip",
-    "depto": "departamento",
-    "depto_descrip": "depto_descrip",
-    "antiguedad": "antiguedad",
-    "estudios": "grado_estudios",
-    "turno": "turno",
-    "supervisor": "supervisor",
-    "edad": "edad",
-    "telefono": "telefono",
+    compania: "empresa",
+    empresa: "empresa",
 
-    // 🔐 RFC (agregar variantes)
-    "rfc": "rfc",
+    // 🧩 TODAS LAS VARIANTES DE "CÓDIGO / CODIGO"
+    codigo: "numero_empleado",
+    código: "numero_empleado",
+    Codigo: "numero_empleado",
+    Código: "numero_empleado",
+    CODIGO: "numero_empleado",
+    CODIGOEMPLEADO: "numero_empleado",
+    NoEmpleado: "numero_empleado",
+    numeroempleado: "numero_empleado",
+    numempleado: "numero_empleado",
+    idempleado: "numero_empleado",
+    empleadoid: "numero_empleado",
+
+    nombre: "nombre",
+    paterno: "apellido_paterno",
+    materno: "apellido_materno",
+    sexo: "sexo",
+    nacimiento: "fecha_nacimiento",
+    ingreso: "fecha_ingreso",
+    email: "correo_electronico",
+    correo: "correo_electronico",
+    centro_trab: "centro_trabajo",
+    centrotrabajo: "centro_trabajo",
+    cc: "cc",
+    cc_descrip: "cc_descrip",
+    depto: "departamento",
+    depto_descrip: "depto_descrip",
+    antiguedad: "antiguedad",
+    estudios: "grado_estudios",
+    turno: "turno",
+    supervisor: "supervisor",
+    edad: "edad",
+    telefono: "telefono",
+    rfc: "rfc",
     "r.f.c": "rfc",
-    "rfc_": "rfc",
-    "rfc\r": "rfc",
-    "rfc ": "rfc",
   };
 
   const normalize = (str) =>
     str
       .toString()
-      .replace(/\u00A0/g, " ") // ⚙️ elimina espacios no separables (Excel)
+      .replace(/\u00A0/g, " ")
       .trim()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -172,7 +179,7 @@ export const importUsers = async (req, res) => {
       }
     });
 
-    // Asegurar empresa demo
+    // Empresa por defecto
     let defaultEmpresa = await Empresa.findByPk(1);
     if (!defaultEmpresa) {
       defaultEmpresa = await Empresa.create({
@@ -188,6 +195,9 @@ export const importUsers = async (req, res) => {
       const user = filteredData[i];
       const lineNumber = i + 2;
 
+      // 🔍 Log de depuración (solo las primeras filas)
+      if (i < 5) console.log("🔍 Registro leído:", user);
+
       const errors = validateUserData(user, lineNumber);
       if (errors.length) {
         validationErrors.push(...errors);
@@ -195,33 +205,52 @@ export const importUsers = async (req, res) => {
       }
 
       try {
-        const numero = user.numero_empleado;
-        const correo = user.correo_electronico?.trim().toLowerCase();
+        // ✅ Conversión segura de tipos
+        const numero = user.numero_empleado != null
+          ? String(user.numero_empleado).trim()
+          : null;
 
-        // Verificar si el usuario ya existe
-        const existsUsuario = await Usuario.findOne({ where: { correo_electronico: correo } });
-        if (existsUsuario) {
-          console.log(`⚠️ Línea ${lineNumber}: usuario ya existe, omitido.`);
+        const correo = user.correo_electronico != null
+          ? String(user.correo_electronico).trim().toLowerCase()
+          : null;
+
+        if (!numero) {
+          validationErrors.push(`Línea ${lineNumber}: Falta número de empleado.`);
+          continue;
+        }
+        if (!correo) {
+          validationErrors.push(`Línea ${lineNumber}: Falta correo electrónico.`);
           continue;
         }
 
-        // Crear o reutilizar empleado
-        let empleado = await DataEmpleado.findOne({ where: { numero_empleado: numero } });
+        // 1️⃣ Verificar si el usuario ya existe por número
+        const existsUsuario = await Usuario.findOne({ where: { numero_empleado: numero } });
+        if (existsUsuario) {
+          console.log(`⚠️ Línea ${lineNumber}: usuario ya existe (${numero}), omitido.`);
+          continue;
+        }
+
+        // 2️⃣ Crear o reutilizar empleado por correo
+        let empleado = await DataEmpleado.findOne({ where: { correo_electronico: correo } });
         if (!empleado) {
           empleado = await DataEmpleado.create(
             { id_empresa: defaultEmpresa.id_empresa, ...user, correo_electronico: correo },
             { transaction }
           );
+          console.log(`👤 Empleado creado (${user.nombre})`);
+        } else {
+          console.log(`👤 Empleado existente reutilizado (${user.nombre})`);
         }
 
-        // Generar contraseña desde RFC o fallback
+        // 3️⃣ Generar contraseña base (RFC o por defecto)
         const plainPassword = user.rfc ? String(user.rfc).trim() : "Empleado2025";
         const hash = await bcrypt.hash(plainPassword, 10);
 
-        // Crear usuario
+        // 4️⃣ Crear usuario con número_empleado
         await Usuario.create(
           {
             id_data: empleado.id_data,
+            numero_empleado: numero,
             correo_electronico: correo,
             password: hash,
             rol: "empleado",
@@ -231,6 +260,7 @@ export const importUsers = async (req, res) => {
           { transaction }
         );
 
+        console.log(`✅ Usuario creado (${numero} - ${correo})`);
         usersImported.push({
           numero_empleado: numero,
           nombre: user.nombre,

@@ -5,6 +5,7 @@ import Usuario from "../models/Usuario.js";
 import DataEmpleado from "../models/DataEmpleado.js";
 
 const ALLOWED_ROLES = ["admin", "supervisor", "empleado"];
+
 // ======================================================
 // 🔹 Listar solo correo, rol y acciones
 // ======================================================
@@ -12,9 +13,8 @@ export async function listarUsuarios(req, res) {
   try {
     const q = (req.query.q || "").trim().toLowerCase();
 
-    // Solo traemos lo necesario
     const usuarios = await Usuario.findAll({
-      attributes: ["id_usuario", "correo_electronico", "rol"],
+      attributes: ["id_usuario", "numero_empleado", "correo_electronico", "rol"],
       order: [["id_usuario", "ASC"]],
       raw: true,
     });
@@ -23,11 +23,15 @@ export async function listarUsuarios(req, res) {
       .filter(
         (u) =>
           !q ||
-          u.correo_electronico.toLowerCase().includes(q) ||
+          (u.correo_electronico &&
+            u.correo_electronico.toLowerCase().includes(q)) ||
+          (u.numero_empleado &&
+            u.numero_empleado.toLowerCase().includes(q)) ||
           u.rol.toLowerCase().includes(q)
       )
       .map((u) => ({
         id_usuario: u.id_usuario,
+        numero_empleado: u.numero_empleado,
         correo_electronico: u.correo_electronico,
         rol: u.rol,
       }));
@@ -42,7 +46,9 @@ export async function listarUsuarios(req, res) {
   }
 }
 
-// Buscar un usuario por correo
+// ======================================================
+// 🔹 Buscar usuario por correo
+// ======================================================
 export async function obtenerPorCorreo(req, res) {
   try {
     const email = (req.query.email || "").trim();
@@ -50,31 +56,84 @@ export async function obtenerPorCorreo(req, res) {
 
     const usuario = await Usuario.findOne({
       where: { correo_electronico: email },
-      include: [{ model: DataEmpleado, as: "empleado", attributes: ["nombre"] }],
-      attributes: ["id_usuario", "correo_electronico", "rol"]
+      include: [
+        {
+          model: DataEmpleado,
+          as: "empleado",
+          attributes: ["nombre", "apellido_paterno", "apellido_materno"],
+        },
+      ],
+      attributes: ["id_usuario", "numero_empleado", "correo_electronico", "rol"],
     });
 
     if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
 
     res.json({
       id: usuario.id_usuario,
+      numero_empleado: usuario.numero_empleado,
       correo: usuario.correo_electronico,
       rol: usuario.rol,
-      nombre: usuario.empleado?.nombre || ""
+      nombre: usuario.empleado
+        ? `${usuario.empleado.nombre} ${usuario.empleado.apellido_paterno || ""} ${usuario.empleado.apellido_materno || ""}`.trim()
+        : "",
     });
   } catch (err) {
     res.status(500).json({ error: "Error al buscar usuario", detail: err.message });
   }
 }
 
-// Actualizar rol y/o contraseña
+// ======================================================
+// 🔹 Buscar usuario por número de empleado
+// ======================================================
+export async function obtenerPorNumeroEmpleado(req, res) {
+  try {
+    const numero = (req.query.numero || "").trim();
+    if (!numero) return res.status(400).json({ error: "numero_empleado requerido" });
+
+    const usuario = await Usuario.findOne({
+      where: { numero_empleado: numero },
+      include: [
+        {
+          model: DataEmpleado,
+          as: "empleado",
+          attributes: ["nombre", "apellido_paterno", "apellido_materno"],
+        },
+      ],
+      attributes: ["id_usuario", "numero_empleado", "correo_electronico", "rol"],
+    });
+
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.json({
+      id: usuario.id_usuario,
+      numero_empleado: usuario.numero_empleado,
+      correo: usuario.correo_electronico,
+      rol: usuario.rol,
+      nombre: usuario.empleado
+        ? `${usuario.empleado.nombre} ${usuario.empleado.apellido_paterno || ""} ${usuario.empleado.apellido_materno || ""}`.trim()
+        : "",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Error al buscar usuario", detail: err.message });
+  }
+}
+
+// ======================================================
+// 🔹 Actualizar rol y/o contraseña
+// ======================================================
 export async function actualizarUsuario(req, res) {
   try {
-    const { email, rol, password } = req.body;
+    const { email, numero_empleado, rol, password } = req.body;
 
-    if (!email) return res.status(400).json({ error: "email requerido" });
+    if (!email && !numero_empleado)
+      return res.status(400).json({ error: "email o numero_empleado requerido" });
 
-    const usuario = await Usuario.findOne({ where: { correo_electronico: email } });
+    const usuario = await Usuario.findOne({
+      where: {
+        [Op.or]: [{ correo_electronico: email || null }, { numero_empleado: numero_empleado || null }],
+      },
+    });
+
     if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
 
     // Rol
@@ -90,7 +149,7 @@ export async function actualizarUsuario(req, res) {
       const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
       const hash = await bcrypt.hash(password, rounds);
       usuario.password = hash;
-      usuario.must_change_password = 0; // o 1 si quieres obligar a cambio
+      usuario.must_change_password = 0;
     }
 
     await usuario.save();
@@ -100,7 +159,9 @@ export async function actualizarUsuario(req, res) {
   }
 }
 
-// Eliminar usuario
+// ======================================================
+// 🔹 Eliminar usuario
+// ======================================================
 export async function eliminarUsuario(req, res) {
   try {
     const { id } = req.params;
@@ -111,3 +172,5 @@ export async function eliminarUsuario(req, res) {
     res.status(500).json({ error: "Error al eliminar", detail: err.message });
   }
 }
+
+
