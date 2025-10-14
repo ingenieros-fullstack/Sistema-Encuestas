@@ -1,0 +1,6 @@
+/* En tu CSS global */
+.badge.text-bg-indigo{
+  color:#3b0764;
+  background-color:#ede9fe;
+  border:1px solid #ddd6fe;
+}

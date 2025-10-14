@@ -1,0 +1,338 @@
+:root{
+  --brand-start:#5b7cfa;
+  --brand-end:#9b5bfa;
+
+  /* altura de la cabecera cuando se hace sticky */
+  --sticky-top: .75rem;
+}
+
+/* ===== Fondo general ===== */
+.preview-shell{
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 800px at -10% -10%, #4f46e5 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% -20%, #06b6d4 0%, transparent 55%),
+    radial-gradient(1000px 700px at 50% 110%, #22c55e 0%, transparent 55%),
+    linear-gradient(180deg,#0b1020 0%, #0d1326 100%);
+  color:#f8fafc;
+}
+
+/* ===== Vidrio / tarjetas ===== */
+.glass{
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.2);
+  border-radius: 1.2rem;
+  padding: clamp(1rem, 2vw, 1.75rem);
+  backdrop-filter: blur(10px);
+}
+.glass-subtle{
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:.9rem;
+  padding:.75rem 1rem;
+  backdrop-filter: blur(8px);
+}
+
+/* ===== Hero (oscuro) ===== */
+.cover{
+  margin-top: 2.25rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  position: relative;
+  overflow: hidden;
+}
+.cover::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  background:
+    radial-gradient(800px 300px at 50% -10%, rgba(255,255,255,.25) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(91,124,250,.35), rgba(155,91,250,.35));
+  pointer-events:none;
+  mix-blend: screen;
+}
+.cover.glass{
+  background: linear-gradient(180deg, rgba(5,8,22,.86), rgba(10,12,28,.72));
+  border: 1px solid rgba(255,255,255,.10);
+}
+.cover.glass::after{
+  background:
+    radial-gradient(900px 360px at 50% -20%, rgba(255,255,255,.10) 0%, transparent 65%),
+    linear-gradient(135deg, rgba(91,124,250,.12), rgba(155,91,250,.12));
+  mix-blend: normal;
+}
+.cover--deep{
+  background: linear-gradient(180deg, rgba(0,0,0,.78), rgba(0,0,0,.62)) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+.cover h1, .cover .lead{ color:#e9edf8; }
+.cover .lead{ opacity:.75; }
+
+.cover-badges{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:.75rem;
+}
+
+/* Chips */
+.metric-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.35rem .65rem;
+  border-radius:999px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  font-size:.9rem;
+}
+
+/* Botones base */
+.link-back{
+  margin-top:1rem;
+  margin-bottom:.25rem;
+  background:none;
+  border:none;
+  color:#c7d2fe;
+  padding:0;
+  font-weight:500;
+}
+.link-back:hover{ text-decoration:underline; }
+
+.btn-ghost{
+  background: rgba(0,0,0,.25);
+  color: #dbeafe;
+  border:1px solid rgba(255,255,255,.18);
+}
+.btn-ghost:hover{ background: rgba(0,0,0,.35); }
+
+/* Botón principal */
+.btn-gradient{
+  color:#fff;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  border:none;
+  border-radius:.8rem;
+  box-shadow: 0 10px 22px rgba(91,124,250,.30), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+.btn-gradient:hover{ filter: brightness(1.05); }
+
+/* Tarjetas de detalle */
+.detail-card{ height:100%; border-radius:.9rem; padding:1rem 1.1rem; }
+.detail-ico{ font-size:1.35rem; line-height:1; opacity:.9; }
+.detail-title{ font-weight:600; margin-top:.4rem; }
+.detail-sub{ opacity:.85; }
+
+/* =========================================================
+   TOOLBAR (misma posición y tamaño) – solo CAMBIO DE COLOR
+   ========================================================= */
+.sticky-toolbar{
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 5;
+}
+
+.toolbar{
+  /* layout en 3 columnas: izquierda | centro | derecha */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .85rem;
+
+  padding: .65rem .8rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+
+  /* <<< ÚNICO cambio importante: fondo oscuro sólido >>> */
+  background: #0f1424;
+  backdrop-filter: none; /* opcional: sin blur para que sea sólido */
+}
+
+/* columnas internas siempre pueden encoger */
+.toolbar-left,
+.toolbar-center,
+.toolbar-right{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+/* título/chips no empujan al centro */
+.toolbar-title{ min-width:0; }
+.title-main{
+  font-weight:700;
+  letter-spacing:.2px;
+  line-height:1.1;
+  max-width: 32vw;           /* ajusta si quieres más */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.meta-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+  margin-top:.1rem;
+}
+
+/* CENTRO: progreso ocupa el ancho disponible, sin márgenes extra */
+.toolbar-center{ padding:0 .2rem; }
+.toolbar-center .progress{
+  width: 100%;
+  margin: 0;                /* <- quita márgenes laterales */
+  flex: none;               /* <- no intenta crecer/encoger como flex item */
+}
+
+/* DERECHA: evita salto de línea en el botón */
+.toolbar-right{ justify-self: end; }
+.toolbar-right .btn{ white-space: nowrap; }
+
+/* ===== Progreso ===== */
+.progress-slim{
+  height:14px;
+  border-radius:999px;
+  background: rgba(255,255,255,.12);
+  overflow:hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.25);
+}
+.progress{
+  background-color: rgba(255,255,255,.15);
+}
+.progress-bar{
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:600; font-size:.72rem;
+}
+.progress-bar-gradient{
+  background: linear-gradient(90deg, var(--brand-start), var(--brand-end));
+  line-height:14px;
+  letter-spacing:.2px;
+  border-radius:999px;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
+
+/* ===== Secciones ===== */
+.section-card{
+  border-radius:1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+}
+.section-pill{
+  display:inline-grid;
+  place-items:center;
+  width:1.75rem; height:1.75rem;
+  border-radius:50%;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  color:#fff; font-weight:700; font-size:.95rem;
+  margin-right:.5rem;
+}
+
+/* ===== QR ===== */
+.qr-frame{
+  display:inline-block;
+  padding:1rem;
+  border-radius:1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.95));
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
+}
+
+/* ===== Celebración final ===== */
+.celebrate{
+  border-radius:1.2rem;
+  background:
+    radial-gradient(1200px 500px at -10% -30%, rgba(34,197,94,.25) 0%, transparent 70%),
+    radial-gradient(900px 400px at 120% -40%, rgba(59,130,246,.25) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 992px){
+  .toolbar{
+    grid-template-columns: 1fr auto;   /* izquierda | botón */
+    grid-auto-rows: auto;
+    row-gap: .6rem;
+  }
+  .toolbar-center{
+    grid-column: 1 / -1;               /* barra ocupa todo el ancho */
+    order: 3;
+  }
+  .title-main{ max-width: 50vw; font-size: 1rem; }
+}
+@media (max-width: 576px){
+  .cover{ margin-top: 1.25rem; }
+  .meta-chips{ display: none; }
+}
+
+/* ==== INTRO: Forzar textos BLANCOS en preview-hero ==== */
+.preview-hero, .preview-hero *{
+  color:#fff !important;
+  opacity:1 !important;
+  -webkit-text-fill-color:#fff !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,.18);
+}
+.cover .preview-hero .lead,
+.cover .preview-hero p{
+  opacity:1 !important;
+  color:#fff !important;
+}
+.preview-hero .btn, .preview-hero .btn *{ color:#fff !important; }
+.preview-hero .btn-outline-light,
+.preview-hero .btn-outline-secondary,
+.preview-hero .btn-link,
+.preview-hero a.btn{
+  color:#fff !important;
+  border-color: rgba(255,255,255,.55) !important;
+  text-decoration: none !important;
+}
+.preview-hero .btn-outline-light:hover,
+.preview-hero .btn-outline-secondary:hover,
+.preview-hero .btn-link:hover{
+  background: rgba(255,255,255,.12) !important;
+  color:#fff !important;
+  border-color: rgba(255,255,255,.7) !important;
+}
+
+/* ====== Preguntas (preview) ====== */
+.q-card { border-radius: 12px; overflow: hidden; }
+.q-bullet {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #8b5cf6, #6366f1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+.q-typebadge { font-weight: 700; border: 1px solid rgba(2, 6, 23, .06); }
+.q-input { background: #f8fafc; }
+
+.q-options { margin: 0; padding: 0; }
+.q-option {
+  display: grid; grid-template-columns: 40px 1fr 24px; align-items: center;
+  border: 1px solid rgba(2,6,23,.08); border-radius: 10px;
+  padding: 8px 10px; margin-bottom: 10px;
+  background: linear-gradient(180deg,#fff 0%, #fafafa 100%);
+}
+.q-option.q-radio .form-check-input,
+.q-option.q-check .form-check-input { cursor: default; }
+.q-option-left { font-weight: 700; color: #64748b; text-align: center; }
+.q-option-mid .form-check-label { color: #0f172a; }
+.q-option.is-correct { border-color: #22c55e !important; box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
+
+.q-optionbtn, .q-scale { border-radius: 999px; }
+.q-correct { border-color: #22c55e !important; box-shadow: 0 2px 0 rgba(34,197,94,.15); }
+
+.q-correctbar {
+  border: 1px dashed rgba(16,185,129,.45);
+  background: rgba(16,185,129,.06);
+  color: #065f46;
+  border-radius: 12px; padding: 10px 12px;
+}
+.q-correct-title { font-weight: 700; margin-bottom: 6px; }
+.q-correct-values { display: flex; flex-wrap: wrap; gap: 6px; }
+.q-correct-chip {
+  background: #10b981; color: #fff; font-weight: 600;
+  padding: 4px 8px; border-radius: 999px; font-size: .85rem;
+}
+
+/* Espaciado último item preguntas */
+.q-item-wrapper:last-child { margin-bottom: 0 !important; }
+
+/* ===== Ajustes Bootstrap ===== */
+.modal-backdrop.show{ opacity:.5; }

@@ -1,0 +1,71 @@
+# =====================================================
+# 📦 DEPENDENCIAS
+# =====================================================
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# =====================================================
+# ⚙️ CONFIGURACIONES Y ENTORNOS (.env)
+# =====================================================
+# Ignorar todos los archivos de entorno
+.env
+.env.*
+.env.development
+.env.production
+frontend/.env
+frontend/.env.*
+frontend/.env.development
+frontend/.env.production
+backend/.env
+backend/.env.*
+backend/.env.development
+backend/.env.production
+
+# =====================================================
+# 💾 BASE DE DATOS Y VOLUMENES
+# =====================================================
+mysql_data/
+mysql_init/*.sql~
+*.sql.backup
+*.db
+*.sqlite
+
+# =====================================================
+# 🧩 BUILD Y COMPILADOS
+# =====================================================
+dist/
+build/
+frontend/dist/
+backend/dist/
+*.log
+*.tmp
+*.cache
+
+# =====================================================
+# 🖼️ ARCHIVOS DEL SISTEMA / EDITORES
+# =====================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# =====================================================
+# 🚀 DEPLOY Y TESTS
+# =====================================================
+cpanel-deploy/
+*.tar.gz
+*.zip
+coverage/
+test-results/
+
+# =====================================================
+# 🧾 EXPORTACIONES / REPORTES / TEMPORALES
+# =====================================================
+*.csv
+*.xlsx
+*.bak
+*.json.backup
+uploads/
+temp/

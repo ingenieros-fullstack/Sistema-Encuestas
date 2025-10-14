@@ -1,0 +1,175 @@
+/* === Usuarios.css === */
+
+/* Contenedor principal */
+.usuarios-wrapper {
+  padding: 2rem 1rem;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Título centrado */
+.usuarios-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111827; /* ← Negro elegante (Tailwind slate-900) */
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+
+/* Contenedor responsive de cards */
+.user-card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;        /* 🔹 Espaciado mínimo */
+  max-width: 750px;   /* 🔹 Compacta aún más el bloque */
+  margin: 0 auto;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+
+/* Card individual */
+.user-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 220px;              /* 🔹 Más angostas y pegadas */
+  min-height: 160px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+}
+
+
+
+
+.user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Íconos */
+.icon-box {
+  background-color: #eef2f3;
+  border-radius: 50%;
+  padding: 1rem;
+  display: inline-block;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.icon {
+  font-size: 2.4rem;
+}
+
+/* Colores por tipo */
+.user-card.importar .icon-box {
+  background-color: #fcf3dc;
+  color: #F77F00;
+}
+
+.user-card.gestion .icon-box {
+  background-color: #e0f4eb;
+  color: #3C6E71;
+}
+
+.user-card.asignar .icon-box {
+  background-color: #dce5ea;
+  color: #2F3E46;
+}
+
+/* Título de cada card */
+.user-card h5 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+/* Descripción */
+.user-card p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .user-card {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .user-card-container {
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .usuarios-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .usuarios-title {
+    font-size: 1.5rem;
+  }
+
+  .user-card {
+    padding: 1.5rem;
+  }
+
+  .icon {
+    font-size: 2rem;
+  }
+
+  .user-card h5 {
+    font-size: 1rem;
+  }
+
+  .user-card p {
+    font-size: 0.85rem;
+  }
+}
+/* ==== Estilos avanzados para los iconos (glow + animación hover) ==== */
+
+.icon-box {
+  background-color: #f4f4f5;
+  border-radius: 50%;
+  padding: 1.2rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 0 transparent;
+}
+
+/* Efecto de animación sutil al pasar el mouse */
+.user-card:hover .icon-box {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* === Estilos personalizados con brillo/glow por tipo === */
+.user-card.importar .icon-box {
+  background-color: #fff3cd;
+  color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+
+.user-card.gestion .icon-box {
+  background-color: #d1fae5;
+  color: #047857;
+  box-shadow: 0 0 12px rgba(4, 120, 87, 0.3);
+}
+
+.user-card.asignar .icon-box {
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  box-shadow: 0 0 12px rgba(30, 58, 138, 0.3);
+}

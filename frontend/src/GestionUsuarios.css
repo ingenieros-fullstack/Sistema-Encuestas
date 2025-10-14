@@ -1,0 +1,405 @@
+/* ====== Fondo del modal ====== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+/* ====== Contenedor del modal ====== */
+.modal-container {
+  background: #fff;
+  width: 95%;
+  max-width: 1100px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ====== Header ====== */
+.modal-header {
+  background: #1d4ed8;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  color: #ffcccc;
+}
+
+/* ====== Layout dos columnas ====== */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 65% 35%;
+  gap: 15px;
+  padding: 20px;
+}
+
+.left-panel,
+.right-panel {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+}
+
+.left-panel h6,
+.right-panel h6 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ====== Tabla de usuarios ====== */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 8px;
+  text-align: center;
+}
+
+.table td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+  background-color: #f9fafb;
+}
+
+/* ====== Acciones (editar/eliminar) ====== */
+.table td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table td:last-child .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0 3px;
+  border-radius: 6px;
+}
+
+.table td:last-child .btn i {
+  font-size: 14px;
+}
+
+/* ====== Paginación ====== */
+.pagination-controls {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.pagination-controls button {
+  margin: 0 8px;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.pagination-controls span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ====== Badges ====== */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.badge-blue {
+  background-color: #2563eb;
+}
+
+.badge-green {
+  background-color: #16a34a;
+}
+
+.badge-yellow {
+  background-color: #facc15;
+  color: #111827;
+}
+
+.badge-gray {
+  background-color: #6b7280;
+}
+
+/* ====== Botones ====== */
+.btn {
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #15803d;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+/* ====== Inputs y selects ====== */
+input.form-control,
+select.form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+input.form-control:focus,
+select.form-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ====== Compactar formulario ====== */
+.form-compact .mb-2 {
+  margin-bottom: 8px !important;
+}
+
+.form-compact label {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.form-compact input,
+.form-compact select {
+  font-size: 0.85rem;
+  padding: 6px 8px;
+}
+
+/* ====== Responsive ====== */
+
+/* 📱 Móviles y tablets */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;      /* Fullscreen en móviles */
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .modal-header {
+    border-radius: 0;
+    padding: 15px;
+  }
+
+  .two-column-layout {
+    grid-template-columns: 1fr; /* Apila tabla y formulario */
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .left-panel,
+  .right-panel {
+    padding: 12px;
+    border: none;
+    background: transparent;
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+  }
+}
+
+/* 📱 Botones compactos */
+@media (max-width: 500px) {
+  .table td:last-child .btn {
+    width: 28px;
+    height: 28px;
+    margin: 0 2px;
+  }
+
+  .form-compact input,
+  .form-compact select {
+    font-size: 0.8rem;
+    padding: 5px 7px;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+}
+
+/* ====== Animaciones ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== Modal: soporte scroll vertical ===== */
+.modal-container {
+  background: #fff;
+  width: 95%;
+  max-width: 1100px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contenido interno scrollable */
+.two-column-layout {
+  flex: 1;
+  overflow-y: auto;  /* 🔹 permite desplazarse hacia abajo */
+  overflow-x: hidden;
+}
+
+/* ===== Tabla scroll horizontal en móviles ===== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;            /* 🔹 activa scroll horizontal */
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  min-width: 700px;            /* 🔹 asegura que no se aplasten columnas */
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive móviles ===== */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;       /* 🔹 ocupa toda la pantalla */
+    max-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    border-radius: 0;
+    padding: 12px 16px;
+  }
+
+  .two-column-layout {
+    display: block;      /* 🔹 apila contenido */
+    padding: 10px;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    margin-bottom: 20px;
+    border: none;
+    background: transparent;
+    padding: 10px;
+  }
+
+  /* Asegura scroll vertical completo */
+  .modal-container {
+    overflow-y: auto;    /* 🔹 permite desplazar todo el modal */
+  }
+}
+

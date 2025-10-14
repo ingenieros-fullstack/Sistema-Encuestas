@@ -1,0 +1,362 @@
+/* =========================================================
+   LOGIN V2 — Aurora Glass + Floating Labels + Gradient Border
+   ========================================================= */
+:root{
+  --p:#4f46e5;            /* primary indigo */
+  --p2:#06b6d4;           /* cyan */
+  --acc:#a855f7;          /* purple accent */
+
+  --ink:#e5e7eb;          /* texto por defecto en dark */
+  --ink-strong:#ffffff;
+  --ink-2:#cbd5e1;
+  --muted:#94a3b8;
+
+  --ring:0 0 0 .28rem rgba(79,70,229,.18);
+  --shadow-lg:0 30px 90px rgba(2,6,23,.36);
+  --shadow-md:0 18px 48px rgba(2,6,23,.24);
+  --shadow-sm:0 10px 26px rgba(2,6,23,.14);
+  --r:20px;
+  --r-lg:26px;
+  --danger:#ef4444;
+  --danger-bg:#fee2e2;
+}
+
+.auth{ min-height:100vh; display:grid; place-items:center; padding:28px; position:relative; overflow:hidden; color:var(--ink); }
+.auth--v2{ background:#0a0f1d; }
+
+/* Aurora background */
+.aurora{
+  position:absolute; inset:-25% -10% -20% -10%;
+  background:
+    radial-gradient(1000px 600px at 20% 10%, rgba(168,85,247,.22), transparent 55%),
+    radial-gradient(1200px 700px at 80% 110%, rgba(6,182,212,.18), transparent 55%),
+    radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.22), transparent 45%);
+  filter: blur(40px); opacity:.9; pointer-events:none;
+}
+/* sutil patrón de estrellas */
+.stars{
+  position:absolute; inset:0;
+  background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%);
+  opacity:.25; pointer-events:none;
+}
+
+/* Toggle de tema */
+.theme-toggle{
+  position: fixed; top:18px; right:18px;
+  width:40px; height:40px; display:grid; place-items:center;
+  border:1px solid rgba(255,255,255,.2);
+  background: rgba(17,24,39,.6);
+  backdrop-filter: blur(6px);
+  border-radius:12px; color:#cbd5e1;
+  box-shadow: var(--shadow-sm);
+}
+.theme-toggle:hover{ filter: brightness(1.1); }
+
+/* Layout principal */
+.auth__surface{
+  width:min(1180px, 100%);
+  display:grid; grid-template-columns: 1.05fr .95fr;
+  gap:0; position:relative;
+  border-radius:var(--r-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow: 0 40px 110px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+  overflow:hidden;
+}
+.auth__surface::before{
+  content:""; position:absolute; inset:-120px -30% auto -30%; height:240px;
+  background:radial-gradient(900px 220px at 50% 100%, rgba(255,255,255,.22), transparent 60%);
+  filter: blur(18px); opacity:.6;
+}
+
+/* HERO IZQUIERDO */
+.auth__aside{
+  position:relative; padding:44px 46px 64px;
+  background: linear-gradient(180deg, rgba(16,24,40,.72), rgba(16,24,40,.55));
+  color:#e5e7eb;
+}
+.auth__brand{ display:flex; flex-direction:column; gap:.45rem; }
+
+/* ✅ Logo: imagen directa (sin cuadrado de fondo) */
+.auth__logo-img{
+  width:64px; height:64px; object-fit:cover; border-radius:16px;
+  display:block;
+  filter: drop-shadow(0 10px 22px rgba(14,165,233,.35));
+}
+
+.auth__brand h1{ margin:.25rem 0 0; font-size:1.6rem; letter-spacing:.2px; color:var(--ink-strong); }
+.auth__brand p{ margin:.2rem 0 0; color:#cbd5e1; }
+
+.auth__bullets{ list-style:none; padding:0; margin:18px 0 0; display:grid; gap:12px; }
+.auth__bullets li{ display:flex; align-items:center; gap:.6rem; color:#cbd5e1; }
+.auth__bullets i{ color:#a78bfa; filter: drop-shadow(0 2px 6px rgba(124,58,237,.3)); }
+
+.auth__shape{
+  position:absolute; inset:auto -74px -92px auto; width:410px; height:310px;
+  border-radius:36px;
+  background:
+    radial-gradient(140px 120px at 22% 42%, rgba(168,85,247,.22), transparent 60%),
+    radial-gradient(200px 160px at 74% 30%, rgba(14,165,233,.24), transparent 60%),
+    conic-gradient(from 210deg at 50% 50%, rgba(255,255,255,.7), rgba(243,244,255,.45));
+  box-shadow: var(--shadow-lg);
+  transform: rotate(-2deg);
+  animation: float 7s ease-in-out infinite;
+}
+@keyframes float{ 0%,100%{ transform:translateY(0) rotate(-2deg) } 50%{ transform:translateY(-10px) rotate(-1deg) } }
+
+/* PANEL FORMULARIO */
+.auth__panel{ padding:28px; display:grid; place-items:center; background: linear-gradient(180deg, rgba(2,6,23,.45), rgba(2,6,23,.35)); }
+
+.auth-card{
+  width:min(480px, 100%);
+  background: rgba(17,24,39,.72);
+  border-radius: var(--r);
+  padding:26px 22px 22px;
+  position:relative;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255,255,255,.06);
+  backdrop-filter: blur(12px);
+}
+/* borde degradado animado — azules */
+.auth-card--border{ position:relative; }
+.auth-card--border::before{
+  content:""; position:absolute; inset:-1px; border-radius: inherit; padding:1px;
+  background: linear-gradient(135deg, rgba(96,165,250,.75), rgba(34,211,238,.75), rgba(96,165,250,.75));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderMove 4s linear infinite;
+  pointer-events:none;
+}
+@keyframes borderMove{ 0%{ filter:hue-rotate(0deg) } 100%{ filter:hue-rotate(360deg) } }
+
+.auth-card__head{ text-align:center; margin-bottom:14px; color:#e5e7eb; }
+.auth-card__head h2{ margin:.35rem 0 .1rem; font-size:1.6rem; }
+.auth-card__badge{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.38rem .65rem; font-size:.8rem; font-weight:700;
+  background:linear-gradient(135deg, rgba(79,70,229,.18), rgba(167,139,250,.18));
+  border:1px solid rgba(167,139,250,.35);
+  color:#c7d2fe; border-radius:999px;
+  box-shadow: 0 8px 20px rgba(124,58,237,.18);
+}
+
+.muted{ color:#94a3b8; }
+
+/* ========= Floating fields ========= */
+.fld{ position:relative; margin:10px 0; }
+.fld__icon{
+  position:absolute; inset:0 auto 0 12px; display:grid; place-items:center;
+  color:#9aa4b2; pointer-events:none;
+}
+.fld__control{
+  width:100%; height:48px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(9,13,24,.66);
+  color:#e5e7eb; padding:0 44px 0 40px;
+  transition: box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.fld__control:hover{ background: rgba(14,20,35,.72); }
+.fld__control:focus{ outline:none; box-shadow: var(--ring); border-color: rgba(99,102,241,.45); }
+
+.fld__label{
+  position:absolute; left:40px; top:50%; transform: translateY(-50%);
+  color:#9aa4b2; pointer-events:none; transition: .18s ease;
+  background: transparent; padding:0 .25rem;
+}
+.fld__control:focus + .fld__label,
+.fld__control:not(:placeholder-shown) + .fld__label{
+  top:-8px; transform:none; font-size:.78rem; color:#c7d2fe;
+  background: rgba(17,24,39,.9);
+  border-radius:6px;
+}
+.fld .icon-btn{
+  position:absolute; right:8px; top:50%; transform: translateY(-50%);
+  border:none; background:transparent; padding:6px 8px; border-radius:8px; color:#9aa4b2;
+}
+.fld .icon-btn:hover{ background:#0f172a; }
+
+/* Estados */
+.is-invalid{ border-color: rgba(239,68,68,.65) !important; box-shadow:0 0 0 .2rem rgba(239,68,68,.18) !important; }
+
+/* fila remember/recover */
+.form-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:2px; }
+.check{ display:flex; align-items:center; gap:.5rem; color:#cbd5e1; }
+.check input{ width:16px; height:16px; accent-color:#60a5fa; }
+
+.link{ color:#93c5fd; text-decoration:none; font-weight:600; }
+.link:hover{ text-decoration:underline; }
+
+/* Alerta */
+.auth-alert{
+  margin-top:4px; display:flex; align-items:center; gap:.55rem;
+  background: rgba(127,29,29,.25); color:#fecaca; border:1px solid rgba(239,68,68,.5);
+  padding:.65rem .8rem; border-radius:12px; font-weight:600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* Botón principal */
+.auth-btn{
+  height:48px; width:100%;
+  border:none; border-radius:12px; color:#0b1220; font-weight:800; letter-spacing:.2px;
+  display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+  background-image: linear-gradient(90deg, #60a5fa, #22d3ee, #60a5fa);
+  background-size: 200% 100%;
+  box-shadow: 0 16px 36px rgba(34,211,238,.28);
+  transition: background-position .5s ease, transform .06s ease, filter .15s ease;
+}
+.auth-btn:hover{ background-position: 100% 0%; filter: brightness(1.08); }
+.auth-btn:active{ transform: translateY(1px); }
+.auth-btn:disabled{ opacity:.75; cursor:not-allowed; }
+
+.spinner{ width:16px; height:16px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin{ to{ transform: rotate(360deg) } }
+
+.auth-foot{ margin-top:10px; text-align:center; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1120px){
+  .auth__surface{ grid-template-columns: 1fr; }
+  .auth__surface::before{ display:none; }
+  .auth__panel{ padding:22px; }
+  .auth__aside{ display:none; }
+  .auth-card{ width:min(520px, 100%); }
+}
+
+/* =========================================================
+   TEMA CLARO (activado por data-theme="light")
+   ========================================================= */
+:root[data-theme="light"] .auth--v2{ background: #eef4ff; }
+:root[data-theme="light"] .stars{ opacity:.12; }
+:root[data-theme="light"]{
+  --ink:#0f172a;
+  --ink-strong:#0b1220;
+  --ink-2:#334155;
+  --muted:#64748b;
+}
+
+:root[data-theme="light"] .auth__surface{
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.65));
+  border:1px solid rgba(2,6,23,.08);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .auth__aside{
+  background: linear-gradient(180deg, rgba(248,250,255,.86), rgba(248,250,255,.7));
+  color:var(--ink);
+}
+:root[data-theme="light"] .auth__brand h1{ color:var(--ink-strong); }
+:root[data-theme="light"] .auth__brand p,
+:root[data-theme="light"] .auth__bullets li{ color:var(--ink-2); }
+:root[data-theme="light"] .auth__bullets i{ color:#6366f1; filter:none; }
+
+:root[data-theme="light"] .auth__panel{
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.35));
+}
+:root[data-theme="light"] .auth-card{
+  background:#ffffffd9; color:var(--ink); border-color:rgba(2,6,23,.08);
+}
+:root[data-theme="light"] .auth-card__head{ color:var(--ink); }
+:root[data-theme="light"] .muted{ color:var(--muted); }
+
+:root[data-theme="light"] .fld__control{
+  background:#fff; color:var(--ink); border-color:rgba(2,6,23,.12);
+}
+:root[data-theme="light"] .fld__control:hover{ background:#fff; }
+:root[data-theme="light"] .fld__label{ color:#94a3b8; }
+:root[data-theme="light"] .fld__control:focus + .fld__label,
+:root[data-theme="light"] .fld__control:not(:placeholder-shown) + .fld__label{
+  background:#fff; color:#4f46e5;
+}
+:root[data-theme="light"] .fld .icon-btn:hover{ background:#f1f5f9; }
+
+:root[data-theme="light"] .auth-alert{
+  background:var(--danger-bg); color:var(--danger); border-color: rgba(239,68,68,.45);
+}
+:root[data-theme="light"] .link{ color:#2563eb; }
+
+:root[data-theme="light"] .theme-toggle{
+  border-color: rgba(2,6,23,.1);
+  background:#ffffffc9; color:#0f172a;
+}
+
+/* Mantén el borde animado azul también en light */
+:root[data-theme="light"] .auth-card--border::before{
+  background: linear-gradient(135deg, rgba(96,165,250,.9), rgba(34,211,238,.9), rgba(96,165,250,.9));
+}
+
+/* ===============================
+   LIGHT THEME – contraste mejorado
+   =============================== */
+
+/* Cuando usas el toggle (body.theme--light) */
+.theme--light .auth-card__badge{
+  /* pastilla más marcada y texto oscuro */
+  background: linear-gradient(135deg, #c7d2fe, #bfdbfe);
+  border-color: #93c5fd;
+  color: #0f172a;
+  box-shadow: 0 8px 18px rgba(59,130,246,.25);
+}
+
+.theme--light .check{
+  color:#334155;       /* Recuérdame más legible */
+}
+
+/* Si no usas toggle y dependes del modo claro del sistema */
+@media (prefers-color-scheme: light){
+  .auth-card__badge{
+    background: linear-gradient(135deg, #c7d2fe, #bfdbfe);
+    border-color: #93c5fd;
+    color:#0f172a;
+    box-shadow: 0 8px 18px rgba(59,130,246,.25);
+  }
+
+  .check{
+    color:#334155;
+  }
+}
+
+/* Opcional: mantén el borde animado del panel
+   en una gama de azules también en modo claro  */
+.theme--light .auth-card--border::before{
+  background: linear-gradient(135deg,
+    rgba(59,130,246,.55), rgba(56,189,248,.55), rgba(37,99,235,.55));
+}
+@media (prefers-color-scheme: light){
+  .auth-card--border::before{
+    background: linear-gradient(135deg,
+      rgba(59,130,246,.55), rgba(56,189,248,.55), rgba(37,99,235,.55));
+  }
+}
+
+/* === Light mode: textos más oscuros en el chip y el label === */
+/* Soporta ambos toggles: body.theme--light o body[data-theme="light"] */
+
+body.theme--light .auth-card__badge,
+body[data-theme="light"] .auth-card__badge {
+  color: #0f172a !important; /* texto oscuro */
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important; /* pastilla más sólida */
+  border-color: #93c5fd !important;
+  box-shadow: 0 8px 18px rgba(59,130,246,.22) !important;
+}
+body.theme--light .auth-card__badge i,
+body[data-theme="light"] .auth-card__badge i {
+  color: #0f172a !important; /* icono del chip también oscuro */
+}
+
+/* “Recuérdame” (label.check) con mayor contraste en claro */
+body.theme--light .check,
+body[data-theme="light"] .check {
+  color: #334155 !important;
+}
+
+/* Si quieres que el borde animado del panel siga en azules en claro */
+body.theme--light .auth-card--border::before,
+body[data-theme="light"] .auth-card--border::before {
+  background: linear-gradient(135deg,
+    rgba(59,130,246,.55),
+    rgba(56,189,248,.55),
+    rgba(37,99,235,.55)) !important;
+}
+
+
